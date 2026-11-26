@@ -215,6 +215,7 @@
   .time-edit {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 8px;
     margin-top: 10px;
     padding: 10px;
@@ -224,7 +225,7 @@
   .time-edit[hidden] { display: none; }
   .time-edit label { font-size: 13px; color: var(--ink-soft); }
   .time-edit input {
-    flex: 1;
+    flex: 1 1 110px;
     min-width: 0;
     font: inherit;
     font-size: 16px;
@@ -234,6 +235,7 @@
     background: var(--card);
     color: var(--ink);
   }
+  .time-edit .btn { flex: 0 0 auto; }
 
   /* ---------- Links screen ---------- */
   .link-main {
@@ -1110,6 +1112,7 @@
       <label for="wakeInput">Woke at</label>
       <input type="time" id="wakeInput" />
       <button type="button" class="btn small" id="wakeSave">Save</button>
+      <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
     </div>
     <div class="hint" id="wakeLine"></div>
   </section>
@@ -1188,11 +1191,13 @@
       <label for="bedInput">Bed</label>
       <input type="time" id="bedInput" />
       <button type="button" class="btn small" id="bedSave">Save</button>
+      <button type="button" class="btn small" data-cancel-editor="#bedEdit">Cancel</button>
     </div>
     <div class="time-edit" id="windWakeEdit" hidden>
       <label for="windWakeInput">Wake</label>
       <input type="time" id="windWakeInput" />
       <button type="button" class="btn small" id="windWakeSave">Save</button>
+      <button type="button" class="btn small" data-cancel-editor="#windWakeEdit">Cancel</button>
     </div>
     <div class="hint" id="bedSummary"></div>
 
@@ -1370,7 +1375,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v29</div>
+  <div class="version" id="versionTag">v30</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1421,7 +1426,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v29";
+const VERSION = "v30";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2377,6 +2382,12 @@ function saveTimeEditor(rowSel, inputSel, field) {
   renderSleepBits();
   haptic(8);
 }
+function closeOpenEditors() {
+  ["#wakeEdit", "#bedEdit", "#windWakeEdit", "#myLinksForm", "#gentleForm"].forEach((sel) => {
+    const row = $(sel);
+    if (row) row.hidden = true;
+  });
+}
 
 /* A soft read-out at the top of Home: when sleep began last night. */
 function renderSleepBanner() {
@@ -3053,6 +3064,12 @@ function wire() {
   $("#bedSave").addEventListener("click", () => saveTimeEditor("#bedEdit", "#bedInput", "bedTime"));
   $("#logWake").addEventListener("click", () => openTimeEditor("#windWakeEdit", "#windWakeInput", "wakeTime"));
   $("#windWakeSave").addEventListener("click", () => saveTimeEditor("#windWakeEdit", "#windWakeInput", "wakeTime"));
+  $$("[data-cancel-editor]").forEach((b) => {
+    b.addEventListener("click", () => {
+      const row = $(b.getAttribute("data-cancel-editor"));
+      if (row) row.hidden = true;
+    });
+  });
 
   // mood
   $$("#moodRow .mood").forEach((b) => {
@@ -3128,7 +3145,15 @@ function wire() {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addGentleItem(); });
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && activeTab === "more") showTab("home");
+    if (e.key !== "Escape") return;
+    const open = [...document.querySelectorAll(".time-edit, .link-form")]
+      .some((row) => !row.hidden);
+    if (open) {
+      closeOpenEditors();
+      e.preventDefault();
+    } else if (activeTab === "more") {
+      showTab("home");
+    }
   });
 
   // export / import

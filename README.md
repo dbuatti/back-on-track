@@ -64,7 +64,7 @@ The bottom menu keeps each screen light:
   captions), a sleep-trend strip (21 clearly-labelled nights with an average and
   usual wake time), a short note on waking, and the soft-dot week. All log buttons
   open a small time picker, prefilled with *now* but editable, so a late log can
-  still record the real time.
+  still record the real time. Cancel (or Escape) closes it without saving.
 - **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
   onto its screen, and skips hidden sections on Sunday.
 - **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`); direct
