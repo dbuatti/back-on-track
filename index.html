@@ -50,9 +50,9 @@
     /* 4 / 8 / 12 / 16 / 24 / 32 only */
     --s1: 4px; --s2: 8px; --s3: 12px;
     --s4: 18px; --s5: 26px; --s6: 36px;
-    --radius-sm: 14px;
-    --radius: 20px;
-    --radius-lg: 24px;
+    --radius-sm: 16px;
+    --radius: 22px;
+    --radius-lg: 28px;
     --tap: 46px;
     --content: 580px;
     --t-cap: 12px;
@@ -147,7 +147,7 @@
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid var(--line);
-    border-radius: 24px;
+    border-radius: 999px;
     box-shadow: var(--shadow-nav);
   }
   .nav-btn {
@@ -1011,11 +1011,12 @@
     font: inherit;
     font-weight: 500;
     padding: var(--s3) var(--s4);
-    border-radius: var(--radius-sm);
+    border-radius: 999px;
     cursor: pointer;
     min-height: var(--tap);
-    transition: background 0.16s ease;
+    transition: background 0.16s ease, transform 0.1s ease;
   }
+  .btn:active { transform: scale(0.98); }
   .btn:active { background: var(--accent-soft); }
   @media (hover: hover) {
     .btn:hover { border-color: var(--accent); }
@@ -1935,7 +1936,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v47";
+const VERSION = "v48";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
