@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#e9dccd" />
+<meta name="theme-color" content="#ece0d2" />
+<script>
+  (function () {
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      m.setAttribute('content', '#201b18');
+    }
+  })();
+</script>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Back on Track" />
@@ -14,21 +22,45 @@
 <style>
   /* ---------- Design tokens: calm, warm, low-contrast ---------- */
   :root {
-    --bg: #e9dccd;          /* warm clay — colour, not white */
-    --card: #f3e8da;        /* soft oat, a shade lighter than the page */
-    --ink: #43372f;         /* deep warm brown, easier on the eyes */
-    --ink-soft: #6f6054;    /* muted text — dark enough to stay readable */
-    --line: #d9c5b1;        /* hairline dividers */
-    --accent: #6f8f76;      /* sage green — fills and dots */
-    --accent-deep: #48634e; /* darker sage — text, links and primary buttons */
-    --accent-soft: #dce7da; /* sage tint for done states */
-    --sun: #c48744;         /* warm ochre for sun/morning */
-    --sun-soft: #f3ddba;
-    --evening: #857aa6;     /* dusk lavender for bedtime */
-    --evening-soft: #e4dcee;
-    --radius: 18px;
-    --shadow: 0 1px 2px rgba(80,55,35,0.06), 0 6px 18px rgba(80,55,35,0.07);
-    --tap: 52px;            /* big tap targets */
+    color-scheme: light;
+    /* One warm surface, one ink hierarchy, one action colour. */
+    --bg: #ece0d2;
+    --card: #f7efe5;
+    --field: #fffaf3;
+    --ink: #3a302a;
+    --ink-soft: #67594e;
+    --line: #d7c7b6;
+    --control-line: #d7c7b6;
+    --accent: #6f8f76;
+    --accent-deep: #3f5f47;
+    --accent-soft: #e0e9dc;
+    --sun: #b97c3d;
+    --sun-soft: #f0ddc2;
+    --evening: #7a6f9b;
+    --evening-soft: #e6dfee;
+    --on-accent: #ffffff;
+    --glow: transparent;
+    --shadow: none;
+    --shadow-nav: none;
+    --snack-bg: #3a302a;
+    --snack-ink: #f7efe5;
+    --snack-accent: #ffd9a8;
+    --swipe-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7efe5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'/%3E%3C/svg%3E");
+
+    /* 4 / 8 / 12 / 16 / 24 / 32 only */
+    --s1: 4px; --s2: 8px; --s3: 12px;
+    --s4: 16px; --s5: 24px; --s6: 32px;
+    --radius-sm: 12px;
+    --radius: 16px;
+    --radius-lg: 20px;
+    --tap: 44px;
+    --content: 560px;
+    --t-cap: 12px;
+    --t-small: 13px;
+    --t-body: 16px;
+    --t-lead: 17px;
+    --t-card: 16px;
+    --t-title: 20px;
   }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -63,8 +95,6 @@
     margin: 0;
     padding: 0;
     background-color: var(--bg);
-    background-image: radial-gradient(ellipse 120% 55% at 50% -8%, rgba(255,255,255,0.34), transparent 62%);
-    background-repeat: no-repeat;
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 17px;
@@ -73,9 +103,9 @@
   }
 
   .wrap {
-    max-width: 640px;
+    max-width: var(--content);
     margin: 0 auto;
-    padding: 20px 16px calc(112px + env(safe-area-inset-bottom));
+    padding: var(--s4) var(--s4) calc(92px + env(safe-area-inset-bottom));
   }
 
   /* ---------- Screens + bottom menu ----------
@@ -87,17 +117,17 @@
     left: 50%; bottom: 0;
     transform: translateX(-50%);
     width: 100%;
-    max-width: 640px;
+    max-width: var(--content);
     z-index: 40;
     display: flex;
     justify-content: space-around;
-    gap: 2px;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    gap: var(--s1);
+    padding: var(--s2) var(--s2) calc(var(--s2) + env(safe-area-inset-bottom));
     background: var(--card);
-    border: 1px solid var(--line);
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
-    box-shadow: 0 -2px 14px rgba(60,55,45,0.06);
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: var(--shadow-nav);
   }
   .nav-btn {
     appearance: none;
@@ -105,20 +135,23 @@
     background: transparent;
     color: var(--ink-soft);
     font: inherit;
-    font-size: 11px;
-    line-height: 1.1;
+    font-size: var(--t-small);
+    line-height: 1.2;
     min-width: 58px;
-    min-height: 52px;
+    min-height: 48px;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
   }
-  .nav-btn .nav-icon { font-size: 19px; line-height: 1; }
-  .nav-btn.active { color: var(--accent-deep); background: var(--accent-soft); font-weight: 600; }
+  .nav-btn .nav-icon { display: none; }
+  .nav-btn.active {
+    color: var(--accent-deep);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
   .nav-btn:active { background: var(--accent-soft); }
   .nav-btn:focus-visible, .btn:focus-visible, .icon-btn:focus-visible,
   .check-toggle:focus-visible, .mood:focus-visible, .link-chip:focus-visible,
@@ -133,106 +166,100 @@
     .btn:not(.primary):hover { border-color: var(--accent); }
   }
 
-  /* ---------- Home: a lighter "today" strip ---------- */
-  .today-intro {
-    background: linear-gradient(180deg, var(--sun-soft), var(--card));
-  }
-  .today-top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 10px;
-  }
+  /* ---------- Home: one greeting, one quiet line, one invitation ---------- */
   .today-intro .greeting {
-    font-size: 20px;
+    font-size: var(--t-title);
     font-weight: 600;
-    margin: 0;
+    margin: 0 0 var(--s1);
   }
-  .day-count {
-    font-size: 13px;
-    color: var(--accent-deep);
-    background: var(--accent-soft);
-    border-radius: 999px;
-    padding: 4px 10px;
-    white-space: nowrap;
-    font-variant-numeric: tabular-nums;
-  }
-  .today-intro .rot-intention { margin: 0 0 14px; }
-  .progress-line {
-    font-size: 14px;
+  .today-intro .rot-intention {
+    margin: 0 0 var(--s4);
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 15px;
     color: var(--ink-soft);
-    margin-bottom: 8px;
-    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
   }
-  .progress-track {
-    height: 6px;
-    border-radius: 999px;
-    background: var(--line);
-    overflow: hidden;
+  .idea-entry { display: flex; align-items: center; gap: var(--s2); }
+  .idea-entry > .btn:first-child { flex: 1 1 auto; }
+  .btn.quiet {
+    min-height: var(--tap);
+    padding: var(--s2) var(--s3);
+    background: transparent;
+    border-color: transparent;
+    color: var(--ink-soft);
+    font-weight: 500;
   }
-  .progress-fill {
-    height: 100%;
-    width: 0;
-    border-radius: 999px;
-    background: var(--accent);
-    transition: width 0.3s ease;
+  .see-shelf {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--accent-deep);
+    font: inherit;
+    font-size: var(--t-small);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    min-height: var(--tap);
+    padding: var(--s2);
+    cursor: pointer;
   }
-  .progress-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-  .progress-actions .btn { flex: 1 1 140px; }
-  .today-intro .hint { margin-top: 8px; }
 
-  /* A tiny, optional Shelf option — an invitation, never a task. */
+  /* A small idea, revealed in place — never a task and never logged. */
   .shelf-option {
-    margin: 0 0 14px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: var(--card);
-    border: 1px dashed var(--line);
+    margin: var(--s3) 0 0;
+    padding: var(--s3) 0 0;
+    border-top: 1px solid var(--line);
   }
   .so-head {
-    font-size: 12px;
+    font-size: var(--t-cap);
     color: var(--ink-soft);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
   }
   .so-body {
     font-family: Georgia, "Times New Roman", serif;
     font-style: italic;
-    font-size: 16px;
+    font-size: 17px;
     line-height: 1.4;
-    margin: 6px 0 10px;
+    margin: var(--s1) 0;
   }
   .so-body small {
     display: block;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-style: normal;
-    font-size: 12px;
+    font-size: var(--t-small);
     color: var(--ink-soft);
     margin-top: 2px;
   }
-  .so-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-  .so-actions .btn { flex: 1 1 120px; }
+  .so-note { font-size: var(--t-small); color: var(--ink-soft); }
+  .so-actions { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s2); }
+  .so-actions .btn { flex: 0 1 auto; }
 
   /* ---------- Named shelves + borrowed items ----------
      A shelf is a library, not a to-do list. Items can be borrowed into the
      day without leaving their shelf, like taking a book out to read. */
-  .shelf-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .shelf-chips {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--s1);
+    padding: var(--s1);
+    background: var(--accent-soft);
+    border-radius: var(--radius-sm);
+    margin-bottom: var(--s4);
+  }
   .shelf-chip {
-    min-height: 44px;
-    padding: 8px 13px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--bg);
+    min-height: var(--tap);
+    padding: var(--s2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
     color: var(--ink);
     font: inherit;
-    font-size: 14px;
+    font-size: var(--t-small);
     cursor: pointer;
   }
   .shelf-chip[aria-pressed="true"] {
-    background: var(--sun-soft);
-    border-color: var(--sun);
+    background: var(--card);
     color: var(--accent-deep);
+    font-weight: 600;
   }
   .shelf-block { margin-bottom: 18px; }
   .shelf-block:last-child { margin-bottom: 0; }
@@ -272,15 +299,16 @@
     margin-top: 4px;
   }
   .shelf-picker {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-    padding-top: 8px;
-    border-top: 1px dashed var(--line);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--s2);
+    margin-top: var(--s2);
+    padding-top: var(--s2);
+    border-top: 1px solid var(--line);
   }
+  .row .shelf-picker { grid-column: 1 / -1; }
   .shelf-picker[hidden], .gentle-item .drag-btn[hidden], .gentle-item .remove-link[hidden] { display: none; }
-  .shelf-picker .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 10px; font-size: 13px; }
+  .shelf-picker .btn { width: 100%; min-height: var(--tap); padding: var(--s2); font-size: var(--t-small); }
   .shelf-empty { font-size: 13px; color: var(--ink-soft); font-style: italic; padding: 4px 0; }
 
   /* ---------- Last night banner + editable times ---------- */
@@ -307,7 +335,7 @@
     color: var(--ink-soft);
     border-radius: 10px;
     min-width: 44px;
-    min-height: 36px;
+    min-height: 44px;
     margin-left: auto;
     font-size: 16px;
     cursor: pointer;
@@ -338,80 +366,71 @@
   }
   .time-edit .btn { flex: 0 0 auto; }
 
-  /* ---------- Links screen ---------- */
+  /* ---------- Links: one calm repeated row everywhere ---------- */
+  .link-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s2);
+    min-height: 56px;
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .link-row:last-child { border-bottom: 0; }
   .link-main {
     display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 64px;
-    padding: 12px 14px;
-    border-radius: 14px;
-    background: var(--accent-soft);
-    border: 1px solid var(--accent);
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+    min-height: var(--tap);
+    padding: var(--s2) 0;
     color: var(--ink);
     text-decoration: none;
+    font-size: var(--t-body);
   }
-  .link-main:active { background: var(--card); }
-  .link-main .link-icon { font-size: 26px; line-height: 1; }
-  .link-copy { flex: 1; display: flex; flex-direction: column; }
-  .link-copy strong { font-size: 16px; font-weight: 600; }
-  .link-copy small { font-size: 13px; color: var(--ink-soft); }
-  .link-arrow { color: var(--accent-deep); font-size: 17px; }
-  .link-section-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: var(--ink-soft);
-    margin: 16px 0 8px;
-  }
-  .link-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .link-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    padding: 8px 12px;
+  .link-main strong { font-weight: 600; }
+  .link-main small { font-size: var(--t-small); color: var(--ink-soft); margin-top: 2px; }
+  .link-copy { display: flex; flex-direction: column; min-width: 0; }
+  .copy-btn, .remove-link {
+    min-height: var(--tap);
+    padding: var(--s2) var(--s3);
     border: 1px solid var(--line);
-    border-radius: 12px;
+    border-radius: var(--radius-sm);
     background: var(--card);
     color: var(--ink);
+    font: inherit;
+    font-size: var(--t-small);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .copy-btn:active, .remove-link:active { background: var(--accent-soft); }
+  .my-link-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--s2);
+    padding: var(--s2) 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .my-link-row:last-child { border-bottom: 0; }
+  .link-chip {
+    display: flex;
+    align-items: center;
+    min-height: var(--tap);
+    color: var(--ink);
     text-decoration: none;
-    font-size: 14px;
+    overflow-wrap: anywhere;
   }
-  .link-chip:active { background: var(--accent-soft); }
-  .link-row { display: flex; align-items: stretch; gap: 8px; }
-  .link-row .link-main { flex: 1; }
-  .link-item { display: flex; align-items: stretch; gap: 6px; }
-  .link-item .link-chip { flex: 1; }
-  .copy-btn {
-    flex: 0 0 48px;
-    min-height: 48px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--bg);
-    color: var(--ink-soft);
-    font-size: 18px;
+  .disclosure { border-top: 1px solid var(--line); margin-top: var(--s3); }
+  .disclosure summary {
+    min-height: var(--tap);
+    display: flex;
+    align-items: center;
+    font-size: var(--t-body);
+    font-weight: 600;
     cursor: pointer;
   }
-  .link-item .copy-btn { flex: 0 0 44px; min-height: 44px; font-size: 16px; }
-  .copy-btn:active { background: var(--accent-soft); }
-  .my-link-row { display: flex; align-items: stretch; gap: 6px; margin-bottom: 8px; }
-  .my-link-row .link-chip { flex: 1; overflow-wrap: anywhere; }
-  .remove-link {
-    flex: 0 0 44px;
-    min-height: 44px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--bg);
-    color: var(--ink-soft);
-    font-size: 17px;
-    cursor: pointer;
-  }
-  .remove-link:active { background: var(--accent-soft); }
-  .gentle-item .remove-link {
-    flex: 0 0 auto;
-    padding: 0 12px;
-    font-size: 14px;
-  }
+  .gentle-item .remove-link { padding: var(--s2) var(--s3); }
   .link-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .link-form[hidden] { display: none; }
   .link-form input, .link-form select {
@@ -453,24 +472,95 @@
 
   /* ---------- The quiet More page ---------- */
   .gentle-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    padding: 12px 0;
+    position: relative;
+    overflow: hidden;
+    --swipe: 0px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s2) var(--s3);
+    padding: var(--s3) 0;
     border-bottom: 1px solid var(--line);
+    touch-action: pan-y;
   }
   .gentle-item:last-child { border-bottom: none; }
-  .gentle-item .gi-mark { font-size: 17px; line-height: 1.4; }
-  .gentle-item .gi-body { flex: 1; min-width: 0; }
-  .gentle-item .gi-name { font-size: 16px; font-weight: 600; }
-  .gentle-item .gi-note { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .gentle-item > * {
+    position: relative;
+    z-index: 1;
+    transform: translateX(var(--swipe, 0px));
+    transition: transform 0.16s ease;
+  }
+  .gentle-item.swiping > * { transition: none; }
+  /* Swipe either way to reveal a quiet Delete action; Undo follows.
+     Icon-only, so screen readers don't hear a hidden word on every row. */
+  .gentle-item::before,
+  .gentle-item::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    width: 76px;
+    background: var(--ink) var(--swipe-icon) center / 20px 20px no-repeat;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .gentle-item::before { left: 0; }
+  .gentle-item::after { right: 0; }
+  .gentle-item.swipe-left::after,
+  .gentle-item.swipe-right::before { opacity: 1; }
+  .gentle-item.editing { grid-template-columns: 44px minmax(0, 1fr) auto; }
+  .gentle-item .drag-btn { grid-column: 1; grid-row: 1; }
+  .gentle-item .gi-body { grid-column: 1 / -1; min-width: 0; }
+  .gentle-item.editing .gi-body { grid-column: 2; }
+  .gentle-item .gi-name {
+    font-size: var(--t-body);
+    font-weight: 600;
+    text-align: left;
+    color: var(--ink);
+    padding-left: 0;
+    min-height: var(--tap);
+  }
+  .gentle-item .gi-note { font-size: var(--t-small); color: var(--ink-soft); margin-top: 2px; }
   .gentle-item .gi-small {
     font-family: Georgia, "Times New Roman", serif;
     font-style: italic;
     font-size: 14px;
     color: var(--accent-deep);
-    margin-top: 6px;
+    margin-top: var(--s2);
   }
+  .gentle-item .shelf-item-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s2);
+    margin-top: 0;
+  }
+  .gentle-item.editing .shelf-item-actions { grid-column: 2; }
+  .shelf-item-actions .borrow-target {
+    min-height: var(--tap);
+    padding: var(--s2) var(--s3);
+    font: inherit;
+    font-size: var(--t-small);
+    color: var(--ink);
+    background: var(--field);
+    border: 1px solid var(--control-line);
+    border-radius: var(--radius-sm);
+    width: 100%;
+  }
+  .shelf-item-actions .btn { white-space: nowrap; }
+  .shelf-item-actions .loan-status { font-size: var(--t-small); color: var(--ink-soft); }
+  .gentle-item .remove-link { grid-column: 3; grid-row: 1; }
+  .gentle-item > .shelf-picker {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: var(--s2);
+    justify-content: stretch;
+    margin-top: 0;
+    padding-top: var(--s2);
+  }
+  .gentle-item > .shelf-picker .btn { width: 100%; }
   .stat-row {
     display: flex;
     justify-content: space-between;
@@ -490,35 +580,27 @@
     background: var(--card);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
-    padding: 18px 16px;
-    margin-bottom: 14px;
+    padding: var(--s4);
+    margin-bottom: var(--s4);
     border: 1px solid var(--line);
   }
   .card > h2, .card > .card-heading h2 {
-    font-size: 15px;
+    font-size: var(--t-card);
     font-weight: 600;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    color: var(--ink-soft);
-    margin: 0 0 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--ink);
+    margin: 0 0 var(--s3);
   }
   .card-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: var(--s2);
+    margin-bottom: var(--s3);
   }
   .card-heading h2 { margin: 0; }
-  .card > h2 .dot {
-    width: 8px; height: 8px; border-radius: 50%;
-    background: var(--accent);
-  }
-  .card.morning > h2 .dot { background: var(--sun); }
-  .card.evening > h2 .dot { background: var(--evening); }
+  .card h2 .dot { display: none; }
 
   /* ---------- Checklist rows ---------- */
   .row {
@@ -533,7 +615,7 @@
     transition: background 0.15s ease;
   }
   .row + .row { border-top: 1px solid var(--line); }
-  .row:active { background: rgba(0,0,0,0.02); }
+  .row:active { background: var(--accent-soft); }
   .check-toggle {
     appearance: none;
     border: 0;
@@ -572,7 +654,7 @@
   .row.done .check::after {
     content: "";
     width: 8px; height: 14px;
-    border: solid #fff;
+    border: solid var(--on-accent);
     border-width: 0 2.5px 2.5px 0;
     transform: rotate(45deg) translate(-1px,-1px);
   }
@@ -621,7 +703,7 @@
     cursor: pointer;
     min-height: 44px;
   }
-  .morning-done-toggle button:active { background: rgba(0,0,0,0.04); }
+  .morning-done-toggle button:active { background: var(--accent-soft); }
   .morning-all-done {
     text-align: center;
     color: var(--ink-soft);
@@ -653,7 +735,8 @@
     border-radius: 10px;
     white-space: nowrap;
   }
-  .row .item-link::after { content: " ↗"; }
+  .row .item-link { text-decoration: underline; text-underline-offset: 2px; }
+  .row .item-link::after { content: ""; }
   .row .item-link:active { background: var(--accent-soft); }
   body.editing .row .item-link { display: none; }
 
@@ -678,40 +761,51 @@
     cursor: pointer;
     display: inline-flex; align-items: center; justify-content: center;
   }
-  .icon-btn:active { background: rgba(0,0,0,0.05); }
+  .icon-btn:active { background: var(--accent-soft); }
 
-  /* drag handle (edit mode) */
+  /* drag handle — a quiet two-line grip, drawn in CSS */
   .drag {
     cursor: grab;
-    color: var(--ink-soft);
-    font-size: 16px;
-    letter-spacing: -2px;
+    width: 24px;
+    min-height: var(--tap);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
-  /* a real button for the two smaller lists (My links / On the shelf) */
+  .drag::before, .drag-btn::before {
+    content: "";
+    display: block;
+    width: 16px;
+    height: 2px;
+    border-radius: 1px;
+    background: var(--ink-soft);
+    box-shadow: 0 6px 0 var(--ink-soft);
+  }
   .drag-btn {
     appearance: none;
     border: 0;
     background: transparent;
-    flex: 0 0 44px;
-    min-height: 44px;
+    flex: 0 0 var(--tap);
+    min-height: var(--tap);
     padding: 0;
-    color: var(--ink-soft);
-    font-size: 18px;
-    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     cursor: grab;
     touch-action: none;
   }
-  .drag-btn:active { color: var(--accent-deep); cursor: grabbing; }
+  .drag-btn:active { cursor: grabbing; }
+  .drag-btn:active::before, .drag:active::before { background: var(--accent-deep); box-shadow: 0 6px 0 var(--accent-deep); }
 
   /* ---------- Text / number inputs ---------- */
-  input[type="text"], input[type="number"], input[type="time"],
+  select, input[type="text"], input[type="number"], input[type="time"],
   input[type="password"], input[type="url"], textarea {
     font: inherit;
     color: var(--ink);
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px 12px;
+    background: var(--field);
+    border: 1px solid var(--control-line);
+    border-radius: var(--radius-sm);
+    padding: var(--s3);
     width: 100%;
     min-height: var(--tap);
   }
@@ -740,43 +834,34 @@
     color: var(--ink);
     font: inherit;
     font-weight: 500;
-    padding: 12px 16px;
-    border-radius: 12px;
+    padding: var(--s3) var(--s4);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     min-height: var(--tap);
-    transition: background 0.15s ease, transform 0.05s ease;
+    transition: background 0.16s ease;
   }
-  .btn:active { transform: scale(0.98); background: rgba(0,0,0,0.03); }
+  .btn:active { background: var(--accent-soft); }
   .btn.primary {
     background: var(--accent-deep);
     border-color: var(--accent-deep);
-    color: #fff;
+    color: var(--on-accent);
     width: 100%;
-    font-size: 17px;
+    font-size: var(--t-lead);
   }
   .btn.ghost { background: transparent; }
-  .btn.small { min-height: 44px; padding: 8px 12px; font-size: 14px; }
+  .btn.small { min-height: var(--tap); padding: var(--s2) var(--s3); font-size: var(--t-small); }
 
-  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
 
   /* ---------- Instead of gaming ---------- */
-  .instead-card {
-    background: linear-gradient(180deg, var(--accent-soft), var(--card));
-  }
+  .instead-card { background: var(--card); }
   .suggestion {
-    margin-top: 14px;
-    padding: 16px;
-    border-radius: 12px;
-    background: var(--card);
-    border: 1px dashed var(--accent);
-    font-size: 18px;
-    text-align: center;
-    min-height: 56px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin-top: var(--s3);
+    padding: var(--s3) 0;
+    font-size: var(--t-lead);
+    min-height: var(--tap);
   }
-  .suggestion.empty { color: var(--ink-soft); border-style: solid; font-size: 15px; }
+  .suggestion.empty { color: var(--ink-soft); font-size: var(--t-body); }
 
   /* ---------- Bedtime ---------- */
   .bed-grid {
@@ -821,27 +906,31 @@
   .bed-times .btn { flex: 1; }
 
   /* mood */
-  .mood-wrap { margin-top: 16px; }
-  .mood-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
+  .mood-wrap { margin-top: var(--s5); }
+  .mood-label { font-size: var(--t-small); color: var(--ink-soft); margin-bottom: var(--s1); }
   .mood-row {
-    display: flex;
-    gap: 12px;
-    margin: 8px 0 12px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s2);
+    margin: var(--s2) 0 var(--s3);
   }
-  .mood-item { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-  .mood-caption { font-size: 12px; color: var(--ink-soft); }
-  .mood {
-    appearance: none;
-    border: 2px solid var(--line);
-    background: var(--card);
-    border-radius: 14px;
-    font-size: 26px;
-    width: 56px; height: 56px;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s ease;
+  .mood.btn { padding: var(--s2); text-align: center; }
+  .mood.sel { border-color: var(--evening); background: var(--evening-soft); color: var(--ink); }
+
+  /* Sleep numbers: one quiet row, no scores. */
+  .trend-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--s2);
+    padding-bottom: var(--s3);
+    margin-bottom: var(--s3);
+    border-bottom: 1px solid var(--line);
+    font-size: var(--t-small);
   }
-  .mood.sel { border-color: var(--evening); background: var(--evening-soft); }
+  .trend-metrics .metric-label { display: block; color: var(--ink-soft); margin-bottom: 2px; }
+  .trend-metrics .metric-value { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .trend-metrics .btn { grid-column: 1 / -1; justify-self: start; }
+  .sleep-mood-line { font-size: var(--t-small); color: var(--ink-soft); margin-top: var(--s3); }
 
   /* ---------- Week view ---------- */
   .week {
@@ -1052,53 +1141,22 @@
      The whole page warms toward ochre in the morning and cools to dusk
      lavender near bedtime. JS sets data-phase on <body>; colours transition
      slowly so nothing flashes. */
-  body { transition: background-color 2.5s ease, color 2.5s ease; }
+  body { transition: background-color 0.16s ease, color 0.16s ease; }
   body[data-phase="morning"] {
-    --bg: #eed9c2; --card: #f8e9d5; --sun: #bd7c3c; --sun-soft: #f6dfb8;
+    --bg: #efdfcc; --card: #f8eddd; --sun-soft: #f2e0c5;
   }
   body[data-phase="day"] {
-    --bg: #e7dfd2; --card: #f2ebdf;
+    --bg: #eae2d7; --card: #f5f0e7;
   }
   body[data-phase="evening"] {
-    --bg: #ded7e6; --card: #ece6f1; --evening: #7d72a0; --evening-soft: #e3dcee;
+    --bg: #e3dce8; --card: #efeaf2;
   }
   body[data-phase="night"] {
-    --bg: #d6d2e1; --card: #e5e0ec; --ink: #3e384a; --ink-soft: #665f72;
+    --bg: #ddd8e3; --card: #ece7ef; --ink: #39343e; --ink-soft: #605a68;
   }
 
-  /* ---------- Rotating intention: a little note, not a label ---------- */
-  .rot-intention {
-    margin: 0 0 16px;
-    padding: 15px 17px 13px;
-    border-radius: 14px;
-    background: var(--sun-soft);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--sun);
-    color: var(--ink);
-    transition: opacity 0.5s ease;
-    cursor: pointer;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    min-height: 54px;
-  }
-  .rot-intention.fading { opacity: 0; }
-  .rot-intention .ri-mark { font-size: 20px; line-height: 1.25; }
-  .rot-intention .ri-text {
-    flex: 1;
-    font-family: Georgia, "Times New Roman", serif;
-    font-style: italic;
-    font-size: 18px;
-    line-height: 1.35;
-  }
-  .rot-intention .ri-hint {
-    display: block;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-style: normal;
-    font-size: 11px;
-    color: var(--ink-soft);
-    margin-top: 5px;
-  }
+  /* ---------- Daily line: quiet, stable for the day, not tappable ---------- */
+  .rot-intention { line-height: 1.4; }
 
   /* ---------- "Small win" whisper ---------- */
   #whisper {
@@ -1107,7 +1165,7 @@
     bottom: calc(86px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(8px);
     background: var(--accent-deep);
-    color: #fff;
+    color: var(--on-accent);
     font-size: 16px;
     padding: 10px 20px;
     border-radius: 999px;
@@ -1125,8 +1183,8 @@
     left: 50%;
     bottom: calc(86px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(12px);
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--snack-bg);
+    color: var(--snack-ink);
     font-size: 15px;
     padding: 12px 14px 12px 18px;
     border-radius: 12px;
@@ -1145,15 +1203,17 @@
     appearance: none;
     border: none;
     background: transparent;
-    color: #ffd9a8;   /* readable on the dark snackbar */
+    color: var(--snack-accent);
     font: inherit;
     font-weight: 600;
-    padding: 6px 8px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 6px 10px;
     border-radius: 8px;
     cursor: pointer;
     white-space: nowrap;
   }
-  #snackbar .snack-undo:active { background: rgba(255,255,255,0.08); }
+  #snackbar .snack-undo:active { background: var(--accent-soft); }
   #snackbar .snack-undo[hidden] { display: none; }
 
   /* ---------- Sunday mode ----------
@@ -1184,6 +1244,39 @@
   @media (min-width: 480px) {
     body { font-size: 17px; }
   }
+
+  /* Device dark mode — warm charcoal, not black. No manual toggle. */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --bg: #201b18;
+      --card: #2a2420;
+      --field: #332c27;
+      --ink: #f4ece2;
+      --ink-soft: #ccbcab;
+      --line: #463b34;
+      --control-line: #6c5d51;
+      --accent: #8fae95;
+      --accent-deep: #bcd6c2;
+      --accent-soft: #34453a;
+      --sun: #d8a46a;
+      --sun-soft: #423326;
+      --evening: #b5a7d0;
+      --evening-soft: #382f45;
+      --on-accent: #201b18;
+      --snack-bg: #f4ece2;
+      --snack-ink: #201b18;
+      --snack-accent: #3f5f47;
+      --swipe-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a2420' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'/%3E%3C/svg%3E");
+    }
+    body[data-phase="morning"] { --bg:#241d18; --card:#2e261f; --sun-soft:#463426; }
+    body[data-phase="day"]     { --bg:#211c18; --card:#2b2521; }
+    body[data-phase="evening"] { --bg:#231f2a; --card:#2e2937; --evening-soft:#3a3248; }
+    body[data-phase="night"]   {
+      --bg:#1e1c24; --card:#282530; --ink:#f2edf5; --ink-soft:#c9c1d2;
+    }
+    #snackbar .snack-undo:active { background: rgba(32,27,24,0.12); }
+  }
 </style>
 </head>
 <body>
@@ -1204,32 +1297,27 @@
   <!-- ============ HOME ============ -->
   <div class="screen" id="screen-home">
 
-  <div class="sleep-banner" id="sleepBanner" hidden></div>
-
   <div class="sunday-note">
-    Rest is the practice. 🌿<br />Nothing to do today but log your sleep.
+    Rest is the practice. Nothing to log today.
     <button type="button" class="btn" id="sundaySleepBtn">Log sleep</button>
   </div>
 
   <section class="card today-intro" id="todayCard">
-    <div class="today-top">
-      <div class="greeting" id="greeting">A quiet day.</div>
-      <div class="day-count" id="dayCount" aria-live="polite">0 / 0</div>
+    <h2 class="greeting" id="greeting">A quiet day.</h2>
+    <div class="rot-intention" id="rotIntention">A gentle word will wait here.</div>
+    <div class="idea-entry" id="ideaEntry">
+      <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
+      <button type="button" class="btn small quiet-btn" id="homeWakeBtn">Log wake</button>
     </div>
-    <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
     <div class="shelf-option" id="shelfOption" hidden>
-      <div class="so-head">A small option from the shelf</div>
-      <div class="so-body"><span id="shelfOptionText"></span><small id="shelfOptionName"></small></div>
+      <div class="so-head">A small start</div>
+      <div class="so-body" aria-live="polite"><span id="shelfOptionText"></span><small id="shelfOptionName"></small></div>
+      <div class="so-note">Nothing to log.</div>
       <div class="so-actions">
+        <button type="button" class="btn small" id="shelfOptionAnother">Another</button>
         <button type="button" class="btn small" id="shelfOptionLater">Not now</button>
-        <button type="button" class="btn small" id="shelfOptionBorrow">Borrow into my day</button>
       </div>
-    </div>
-    <div class="progress-line" id="progressLine"></div>
-    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="progress-actions">
-      <button type="button" class="btn small" id="homeFocusBtn">◎ &nbsp;Start focus mode</button>
-      <button type="button" class="btn small" id="homeWakeBtn">☀ &nbsp;Log wake</button>
+      <button type="button" class="see-shelf" id="shelfOptionShelf">See the shelf</button>
     </div>
     <div class="time-edit" id="wakeEdit" hidden>
       <label for="wakeInput">Woke at</label>
@@ -1237,7 +1325,6 @@
       <button type="button" class="btn small" id="wakeSave">Save</button>
       <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
     </div>
-    <div class="hint" id="wakeLine"></div>
   </section>
 
   <!-- ============ MORNING ============ -->
@@ -1327,18 +1414,9 @@
     <div class="mood-wrap">
       <div class="mood-label">How was today?</div>
       <div class="mood-row" id="moodRow">
-        <div class="mood-item">
-          <button type="button" class="mood" data-mood="low" aria-label="Low" aria-pressed="false">😔</button>
-          <span class="mood-caption">Low</span>
-        </div>
-        <div class="mood-item">
-          <button type="button" class="mood" data-mood="okay" aria-label="Okay" aria-pressed="false">😐</button>
-          <span class="mood-caption">Okay</span>
-        </div>
-        <div class="mood-item">
-          <button type="button" class="mood" data-mood="good" aria-label="Good" aria-pressed="false">🙂</button>
-          <span class="mood-caption">Good</span>
-        </div>
+        <button type="button" class="mood btn" data-mood="low" aria-pressed="false">Low</button>
+        <button type="button" class="mood btn" data-mood="okay" aria-pressed="false">Okay</button>
+        <button type="button" class="mood btn" data-mood="good" aria-pressed="false">Good</button>
       </div>
       <textarea id="eveningNote" placeholder="A line about today (optional)…"
                 autocorrect="off" autocapitalize="sentences"></textarea>
@@ -1348,9 +1426,11 @@
   <!-- ============ SLEEP TRENDS ============ -->
   <section class="card" id="trendCard">
     <h2><span class="dot"></span>Sleep trends</h2>
+    <div class="trend-metrics" id="sleepStats"></div>
     <div class="trend-summary" id="trendSummary">Log a few bed + wake times to see a pattern here.</div>
     <div class="trend-chart" id="trendChart"></div>
-    <div class="trend-keys"><span>21 nights ago</span><span>each bar is a night</span><span>today</span></div>
+    <div class="sleep-mood-line" id="sleepMoodLine"></div>
+    <div class="trend-keys"><span>Earlier</span><span>Today</span></div>
     <details class="waking-note">
       <summary>A note on waking</summary>
       <ul>
@@ -1381,82 +1461,104 @@
            href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/"
            target="_blank" rel="noopener"
            aria-label="Open The Door, your local app launcher, in a new tab">
-          <span class="link-icon" aria-hidden="true">🚪</span>
           <span class="link-copy"><strong>Open The Door</strong><small>Your local app launcher</small></span>
-          <span class="link-arrow" aria-hidden="true">↗</span>
         </a>
         <button type="button" class="copy-btn" data-copy="https://danieles-mac-mini.tailab1fd5.ts.net:8451/"
-                aria-label="Copy The Door link" title="Copy link">⧉</button>
+                aria-label="Copy The Door link">Copy</button>
       </div>
-
-      <div class="link-section-label">Open on this device</div>
-      <div class="link-chips">
-        <span class="link-item">
-          <a class="link-chip" href="https://macbook-pro-6.tailab1fd5.ts.net:8778" target="_blank" rel="noopener">FNH Study Hub</a>
+      <details class="disclosure">
+        <summary>More links</summary>
+        <div class="link-row">
+          <a class="link-main" href="https://macbook-pro-6.tailab1fd5.ts.net:8778" target="_blank" rel="noopener"
+             aria-label="Open FNH Study Hub in a new tab">
+            <span class="link-copy"><strong>FNH Study Hub</strong><small>On this device</small></span>
+          </a>
           <button type="button" class="copy-btn" data-copy="https://macbook-pro-6.tailab1fd5.ts.net:8778"
-                  aria-label="Copy FNH Study Hub link" title="Copy link">⧉</button>
-        </span>
-        <span class="link-item">
-          <a class="link-chip" href="https://macbook-pro-6.tailab1fd5.ts.net:8445" target="_blank" rel="noopener">Comm Analytics</a>
+                  aria-label="Copy FNH Study Hub link">Copy</button>
+        </div>
+        <div class="link-row">
+          <a class="link-main" href="https://macbook-pro-6.tailab1fd5.ts.net:8445" target="_blank" rel="noopener"
+             aria-label="Open Comm Analytics in a new tab">
+            <span class="link-copy"><strong>Comm Analytics</strong><small>On this device</small></span>
+          </a>
           <button type="button" class="copy-btn" data-copy="https://macbook-pro-6.tailab1fd5.ts.net:8445"
-                  aria-label="Copy Comm Analytics link" title="Copy link">⧉</button>
-        </span>
-      </div>
-      <div class="link-section-label">Or find it in The Door</div>
-      <div class="link-chips">
-        <span class="link-item">
-          <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=fnh" target="_blank" rel="noopener">Search “fnh”</a>
+                  aria-label="Copy Comm Analytics link">Copy</button>
+        </div>
+        <div class="link-row">
+          <a class="link-main" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=fnh" target="_blank" rel="noopener"
+             aria-label="Search The Door for fnh in a new tab">
+            <span class="link-copy"><strong>Search “fnh”</strong><small>Find it in The Door</small></span>
+          </a>
           <button type="button" class="copy-btn" data-copy="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=fnh"
-                  aria-label="Copy the fnh search link" title="Copy link">⧉</button>
-        </span>
-      </div>
-      <p class="hint">Tap ⧉ to copy a link. The local links need those Macs awake; The Door runs on the mini.</p>
+                  aria-label="Copy the fnh search link">Copy</button>
+        </div>
+        <div class="link-row">
+          <a class="link-main" id="toolkitLink" href="https://thecalmafter.vercel.app/"
+             target="_blank" rel="noopener"
+             aria-label="Open The Calm After tool kit in a new tab">
+            <span class="link-copy"><strong>Tool kit</strong><small>The Calm After</small></span>
+          </a>
+          <button type="button" class="copy-btn" data-copy="https://thecalmafter.vercel.app/"
+                  aria-label="Copy tool kit link">Copy</button>
+        </div>
+      </details>
+      <p class="hint">The local links need those Macs awake; The Door runs on the mini.</p>
     </section>
 
     <section class="card" id="myLinksCard">
       <h2><span class="dot"></span>My links</h2>
       <div id="myLinksList"></div>
-      <button type="button" class="btn small" id="myLinksAddBtn">+ Add a link</button>
-      <div class="link-form" id="myLinksForm" hidden>
-        <input type="text" id="newLinkName" placeholder="Name, e.g. FNH notes" enterkeyhint="next"
-               autocorrect="off" autocapitalize="words" />
-        <input type="url" id="newLinkUrl" placeholder="https://…" enterkeyhint="done"
-               autocorrect="off" autocapitalize="off" spellcheck="false" />
-        <button type="button" class="btn small" id="newLinkSave">Add</button>
-      </div>
-      <p class="hint">Any site you use often — tap to open, ⧉ to copy, ≡ to reorder.</p>
+      <details class="disclosure">
+        <summary>Edit links</summary>
+        <button type="button" class="btn small" id="myLinksAddBtn">Add a link</button>
+        <div class="link-form" id="myLinksForm" hidden>
+          <input type="text" id="newLinkName" placeholder="Name, e.g. FNH notes" enterkeyhint="next"
+                 autocorrect="off" autocapitalize="words" />
+          <input type="url" id="newLinkUrl" placeholder="https://…" enterkeyhint="done"
+                 autocorrect="off" autocapitalize="off" spellcheck="false" />
+          <button type="button" class="btn small" id="newLinkSave">Add</button>
+        </div>
+      </details>
     </section>
 
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
-      <p class="hint">Your devices stay in step through a private bridge to a GitHub Gist. The token stays on the server, not on your device. It syncs by itself; Sync now is there if you want it straight away.</p>
-      <div class="field">
-        <label for="syncToken">GitHub token — <a href="https://github.com/settings/tokens/new?scopes=gist&description=Back%20on%20Track%20sync" target="_blank" rel="noopener">make one with gist scope ↗</a></label>
-        <input type="password" id="syncToken" placeholder="ghp_…" autocomplete="off" autocorrect="off" spellcheck="false" />
-      </div>
-      <div class="field">
-        <label for="syncGist">Gist ID (same on every device)</label>
-        <input type="text" id="syncGist" placeholder="From Set up" autocorrect="off" autocapitalize="off" spellcheck="false" />
-      </div>
+      <p class="hint">Your devices stay in step through a private bridge to a GitHub Gist. Enter the same six-character code on each device — no account, no token to type.</p>
       <div class="btn-row">
-        <button type="button" class="btn small" id="syncSetup">Set up</button>
         <button type="button" class="btn small" id="syncNow">Sync now</button>
       </div>
-      <div class="hint" id="syncStatus" aria-live="polite">Not set up yet.</div>
-    </section>
-
-    <section class="card" id="toolkitCard">
-      <h2><span class="dot"></span>Tool kit</h2>
-      <div class="more-row">
-        <a class="toolkit-link" id="toolkitLink" href="https://thecalmafter.vercel.app/"
-           target="_blank" rel="noopener" title="Tool kit"
-           aria-label="Open The Calm After tool kit in a new tab">
-          <span aria-hidden="true">⛈️</span>
-        </a>
-        <div class="more-copy"><strong>Tool kit</strong><small>The Calm After</small></div>
-        <button type="button" class="copy-btn" data-copy="https://thecalmafter.vercel.app/"
-                aria-label="Copy tool kit link" title="Copy link">⧉</button>
-      </div>
+      <div class="hint" id="syncStatus" aria-live="polite">Not set up yet — enter your pairing code.</div>
+      <details class="disclosure setup-only" id="syncSetupDetails">
+        <summary>Set up sync</summary>
+        <div class="field">
+          <label for="syncPairCode">Six-character pairing code</label>
+          <input type="text" id="syncPairCode" placeholder="6 characters" maxlength="6"
+                 pattern="[A-Z0-9]{6}" inputmode="text" autocapitalize="characters"
+                 autocorrect="off" spellcheck="false" />
+        </div>
+        <p class="hint">A home-screen app keeps its own storage, so enter the same code there too.</p>
+        <div class="btn-row">
+          <button type="button" class="btn small" id="syncPair">Pair this device</button>
+        </div>
+        <details class="disclosure">
+          <summary>Using a token instead</summary>
+          <div id="syncLegacy">
+            <div class="field">
+              <label for="syncToken">GitHub token with gist scope</label>
+              <input type="password" id="syncToken" placeholder="Token" autocomplete="off"
+                     autocorrect="off" spellcheck="false" />
+            </div>
+            <div class="field">
+              <label for="syncGist">Gist ID (same on every device)</label>
+              <input type="text" id="syncGist" placeholder="From your own Gist"
+                     autocorrect="off" autocapitalize="off" spellcheck="false" />
+            </div>
+            <div class="btn-row">
+              <button type="button" class="btn small" id="syncSetup">Set up</button>
+            </div>
+          </div>
+        </details>
+      </details>
     </section>
 
     <section class="card" id="dataCard">
@@ -1466,7 +1568,10 @@
         <button type="button" class="btn small" id="importBtn">Import</button>
         <input type="file" id="importFile" accept="application/json" hidden />
       </div>
-      <p class="hint">Everything stays on this device. Export to back it up or move it; importing adds to what's already here and never erases it.</p>
+      <details class="disclosure">
+        <summary>About your data</summary>
+        <p class="hint">Your data lives on this device. If device sync is set up, the same private copy is kept in your Gist. Export to back it up or move it; importing adds to what's already here and never erases it.</p>
+      </details>
     </section>
   </div><!-- /screen-links -->
 
@@ -1484,6 +1589,23 @@
       </div>
       <div class="shelf-chips" id="shelfChips" aria-label="Choose a shelf"></div>
       <div id="shelvesList"></div>
+      <details class="disclosure" id="movementGradual" hidden>
+        <summary>Gradual movement, if you want</summary>
+        <p class="hint">A sketch, not a schedule. Nothing here needs logging, and you can change or stop at any point.</p>
+        <div class="field">
+          <label for="walkStart">A walk that feels comfortable now</label>
+          <select id="walkStart">
+            <option value="5">About 5 minutes</option>
+            <option value="10">About 10 minutes</option>
+            <option value="15">About 15 minutes</option>
+            <option value="20">About 20 minutes</option>
+            <option value="30">About 30 minutes</option>
+            <option value="45">About 45 minutes</option>
+          </select>
+        </div>
+        <p class="hint" id="walkLadder"></p>
+        <p class="hint" id="pushLadder">Push-ups: against a wall, then hands on something low, then kneeling, then on the floor. Move on only if you want to.</p>
+      </details>
       <button type="button" class="btn small" id="gentleAddBtn">+ Add something</button>
       <button type="button" class="btn small" id="addShelfBtn" hidden>+ Add a shelf</button>
       <div class="link-form" id="gentleForm" hidden>
@@ -1494,39 +1616,34 @@
                autocorrect="off" autocapitalize="sentences" />
         <button type="button" class="btn small" id="gentleSave">Add</button>
       </div>
-      <p class="hint" id="shelfHint">Tap a shelf name to switch. Tap an item for a much smaller version. Borrow something into your day whenever you want it back — it stays on its shelf.</p>
+      <p class="hint" id="shelfHint">Tap a shelf name to switch. Tap an item for a much smaller version. Borrow something into your day whenever you want it back — it stays on its shelf. Swipe a row to remove it; Undo is there if you need it.</p>
     </section>
 
-    <section class="card" id="gentleStats">
-      <h2><span class="dot"></span>A quiet look back</h2>
-      <div id="gentleStatsBody"></div>
-      <p class="hint">Patterns, not scores.</p>
-    </section>
   </div>
 
-  <div class="version" id="versionTag">v32</div>
+  <div class="version" id="versionTag">v33</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
   <button type="button" class="nav-btn active" data-tab="home" aria-current="page">
-    <span class="nav-icon" aria-hidden="true">🏠</span><span>Home</span>
+    Home
   </button>
   <button type="button" class="nav-btn" data-tab="winddown">
-    <span class="nav-icon" aria-hidden="true">🌙</span><span>Wind down</span>
+    Wind down
   </button>
   <button type="button" class="nav-btn" data-tab="focus">
-    <span class="nav-icon" aria-hidden="true">◎</span><span>Focus</span>
+    Focus
   </button>
   <button type="button" class="nav-btn" data-tab="links">
-    <span class="nav-icon" aria-hidden="true">🔗</span><span>Links</span>
+    Links
   </button>
   <button type="button" class="nav-btn" data-tab="more">
-    <span class="nav-icon" aria-hidden="true">☰</span><span>More</span>
+    More
   </button>
 </nav>
 
 <div id="whisper" role="status" aria-live="polite"></div>
-<div id="snackbar" role="status" aria-live="polite">
+<div id="snackbar" role="status" aria-live="polite" inert aria-hidden="true">
   <span id="snackText"></span>
   <button class="snack-undo" id="snackUndo" type="button">Undo</button>
 </div>
@@ -1552,17 +1669,30 @@
 
 const STORE_KEY = "bot.v1";
 const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
+/* Only this bridge may ever receive the app's data. A pairing link cannot
+   redirect sync traffic to another host. */
+const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v32";
+const VERSION = "v33";
+
+/* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
+   had two copies with different ids, so ticks need careful consolidation. */
+const NICK_NATIVE_ID = "m_nick";
+const NICK_SHELF_ID = "g_nick";
+const NICK_TEXT = "Nick Moss daily meditation";
+const NICK_URL = "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260";
+const NICK_NEW_LOAN_ID = "ln_g_nick_morning";
+const NICK_LEGACY_LOAN_ID = "ln_nick_morning";
+const NICK_MERGE_VERSION = 2;
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
   morning: [
     { id: "m_breakfast", text: "Breakfast outside, quiet" },
     { id: "m_sun",     text: "Sun movements + sun salute + om" },
-    { id: "m_nick",    text: "Nick Moss daily meditation", url: "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260" },
+    { id: NICK_NATIVE_ID, text: NICK_TEXT, url: NICK_URL },
   ],
   anchors: [
     { id: "a_walk",    text: "Walk" },
@@ -1586,7 +1716,7 @@ const GENTLE_PRACTICES = [
   { id: "g_sangha", text: "Sangha meditation", note: "Not feeling it", small: "One breath, eyes closed." },
   { id: "g_kriya",  text: "Kriya meditation",  note: "Never feeling it", small: "Three slow breaths, hands still." },
   { id: "g_sun",    text: "Sun movements",     note: "Heavy mornings", small: "One stretch toward the light." },
-  { id: "g_nick",   text: "Nick Moss meditation", note: "Later is fine", small: "Play it and hear the first minute." },
+  { id: NICK_SHELF_ID, text: NICK_TEXT, note: "Later is fine", small: "Play it and hear the first minute.", url: NICK_URL },
   { id: "g_neuro",  text: "Functional neuro check-in", note: "Needs a little love and care", small: "One pathway, gently checked in." },
 ];
 
@@ -1605,10 +1735,34 @@ const DEFAULT_SHELVES = [
     note: "Good for you, just not in the daily rhythm.",
     items: [],
   },
+  {
+    id: "sh_movement",
+    name: "Movement",
+    note: "Bodies like a little movement. Take what you want; leave the rest.",
+    items: [
+      { id: "mv_push",  text: "Push-ups", note: "however feels right", small: "Wall push-ups, or one on the floor." },
+      { id: "mv_walk",  text: "Walk outside", note: "at your pace", small: "To the end of the street and back." },
+      { id: "mv_stairs", text: "Stairs", note: "if they're there", small: "One flight, slowly." },
+      { id: "mv_stretch", text: "A long stretch", note: "no effort", small: "Reach up once, then let go." },
+    ],
+  },
+  {
+    id: "sh_smallstarts",
+    name: "Small starts",
+    note: "For when you want to do something but aren't sure what — small, pleasant starts, with nothing to log.",
+    items: [
+      { id: "ss_piano",  text: "Five minutes of piano", note: "for fun", small: "Play one phrase, then stop if you like." },
+      { id: "ss_read",   text: "Read a few pages", note: "whatever's on the table", small: "Read one page." },
+      { id: "ss_master", text: "Tick one thing off the master list", note: "just one", small: "Pick the smallest thing on it." },
+      { id: "ss_beeper", text: "Reply to a couple of messages on Beeper", note: "briefly", small: "Open Beeper and answer one." },
+      { id: "ss_email",  text: "Clear a couple of emails", note: "not the whole inbox", small: "Archive two, not the whole inbox." },
+      { id: "ss_wall",   text: "Wall push-ups", note: "just a few", small: "Hands on the wall, bend your elbows, come back." },
+      { id: "ss_shortwalk", text: "A short walk", note: "around the block", small: "Put on shoes and step outside." },
+    ],
+  },
 ];
 
-/* A quiet rotating intention — a gentle word or line, never a task.
-   Yours to edit. Tapping the card in the morning cycles through these. */
+/* One gentle line per day — never a task, and no tap-to-cycle. */
 const INTENTIONS = [
   "Begin gently.",
   "There is no hurry.",
@@ -1629,6 +1783,7 @@ const WHISPERS = ["there.", "good.", "done.", "nice.", "that counts.", "mm."];
 
 /* ---------- State ---------- */
 let state = load() || freshState();
+migrate(state);   // fresh installs get the same canonical rows as old ones
 let syncCfg = loadSync();
 let editing = false;
 let editingShelf = false;      // removal/reordering is a deliberate mode on the Shelves
@@ -1645,8 +1800,11 @@ function freshState() {
       myLinks: [],         // your own sites: { id, name, url }
       shelves: JSON.parse(JSON.stringify(DEFAULT_SHELVES)), // named library shelves
       loans: [],           // temporary borrowings into morning/anchors
-      shelfOptionIndex: 0, // one tiny optional Shelf idea for today
+      shelfOptionIndex: 0, // one tiny optional Small starts idea
       shelfOptionDay: "",  // the YYYY-MM-DD that idea was chosen for
+      smallStartsAdded: false, // one-time seed guard for the Small starts shelf
+      movementAdded: false,    // one-time seed guard for the Movement shelf
+      walkStartMinutes: 10,    // only used to sketch a gradual walking ladder
       updatedAt: 0,        // last change, used to decide which device wins a sync
     },
     days: {},
@@ -1668,6 +1826,176 @@ function load() {
   }
 }
 
+/* ---------- Nick consolidation helpers ---------- */
+function normText(t) {
+  return String(t || "").toLowerCase().replace(/\s+/g, " ").trim();
+}
+function validHttpUrl(u) {
+  return typeof u === "string" && /^https?:\/\/\S+$/i.test(u.trim());
+}
+function nickRank(item) {
+  if (!item || typeof item !== "object") return -1;
+  if (item.id === NICK_SHELF_ID) return 0;
+  if (normText(item.text) === normText(NICK_TEXT)) return 1;
+  if (validHttpUrl(item.url) && item.url.trim() === NICK_URL) return 2;
+  if (/nick moss/i.test(item.text || "") && /meditation/i.test(item.text || "")) return 3;
+  return -1;
+}
+function firstValidUrl(urls) {
+  return (urls.find(validHttpUrl) || NICK_URL).trim();
+}
+function uniqueLoanId(loans, base) {
+  const used = new Set((loans || []).map((l) => String(l.id)));
+  let id = base, n = 1;
+  while (used.has(id)) id = base + "_" + (++n);
+  return id;
+}
+function hasTrueCheck(s, id) {
+  return Object.values(s.days || {}).some(
+    (d) => d && d.checks && d.checks[id] === true);
+}
+/* Move ticks off retired ids onto the surviving row. An explicit false on the
+   survivor wins, so unchecking a row is never silently reversed. */
+function transferChecksTo(s, fromIds, toId) {
+  const sources = [...new Set(fromIds)].filter((id) => id && id !== toId);
+  Object.keys(s.days || {}).forEach((key) => {
+    const day = s.days[key];
+    if (!day || !day.checks || !sources.length) return;
+    const checks = day.checks;
+    let copied = false, value;
+    sources.forEach((id) => {
+      if (!Object.prototype.hasOwnProperty.call(checks, id)) return;
+      if (!copied || checks[id] === true) { copied = true; value = checks[id]; }
+      delete checks[id];
+    });
+    if (copied && !Object.prototype.hasOwnProperty.call(checks, toId)) {
+      checks[toId] = value;
+    }
+  });
+}
+/* Convergent repair: run on load, on import and on every merged sync result.
+   It always converges to one shelf item and at most one morning loan. */
+function unifyNick(s) {
+  const settings = s.settings || (s.settings = {});
+  settings.lists = settings.lists || {};
+  settings.lists.morning = Array.isArray(settings.lists.morning) ? settings.lists.morning : [];
+  settings.shelves = Array.isArray(settings.shelves) ? settings.shelves : [];
+  settings.loans = Array.isArray(settings.loans) ? settings.loans : [];
+
+  const morning = settings.lists.morning;
+  const loans = settings.loans;
+  const nativeRows = morning.filter((it) => it && (
+    it.id === NICK_NATIVE_ID ||
+    (normText(it.text) === normText(NICK_TEXT) && validHttpUrl(it.url))));
+  const native = nativeRows[0] || null;
+
+  const found = [];
+  settings.shelves.forEach((shelf, si) => {
+    if (!shelf || typeof shelf !== "object") return;
+    if (!Array.isArray(shelf.items)) shelf.items = [];
+    shelf.items.forEach((item, ii) => {
+      const rank = nickRank(item);
+      if (rank >= 0) {
+        found.push({
+          shelf, item, si, ii, rank,
+          hasLoan: loans.some((l) => l && l.itemId === item.id),
+        });
+      }
+    });
+  });
+
+  const prefer = (a, b) =>
+    (Number(b.hasLoan) - Number(a.hasLoan)) || (a.si - b.si) || (a.ii - b.ii);
+  let chosen =
+    found.filter((c) => c.item.id === NICK_SHELF_ID).sort(prefer)[0] ||
+    found.filter((c) => c.rank === 1).sort(prefer)[0] ||
+    found.filter((c) => c.rank === 2).sort(prefer)[0] ||
+    found.filter((c) => c.rank === 3).sort(prefer)[0] ||
+    null;
+
+  const relatedIds = new Set([NICK_SHELF_ID, NICK_NATIVE_ID, NICK_LEGACY_LOAN_ID]);
+  found.forEach((c) => relatedIds.add(c.item.id));
+  const hasRelatedLoan = loans.some((l) => l && relatedIds.has(l.itemId));
+
+  if (!chosen && (native || hasRelatedLoan)) {
+    const seed = JSON.parse(JSON.stringify(
+      GENTLE_PRACTICES.find((it) => it.id === NICK_SHELF_ID) ||
+      { id: NICK_SHELF_ID, text: NICK_TEXT, note: "", small: "" }));
+    const shelf = (found[0] && found[0].shelf) || settings.shelves[0];
+    if (shelf && settings.shelves.indexOf(shelf) < 0) settings.shelves.push(shelf);
+    const item = { ...seed, id: NICK_SHELF_ID, text: NICK_TEXT,
+      url: firstValidUrl([native && native.url, seed.url]),
+      small: seed.small || "Play it and hear the first minute." };
+    if (shelf) {
+      shelf.items.unshift(item);
+      chosen = { shelf, item, si: settings.shelves.indexOf(shelf), ii: 0, rank: 0, hasLoan: false };
+      found.push(chosen);
+    }
+  }
+
+  settings.nickMergeVersion = NICK_MERGE_VERSION;
+  settings.nickUnified = true;   // legacy flag, no longer used as a skip guard
+  if (!chosen) return;           // a deliberate removal is respected
+
+  const oldChosenId = chosen.item.id;
+  chosen.item.id = NICK_SHELF_ID;
+  chosen.item.text = NICK_TEXT;
+  chosen.item.url = firstValidUrl([
+    native && native.url, chosen.item.url, ...found.map((c) => c.item && c.item.url),
+  ]);
+  chosen.item.small = chosen.item.small || "Play it and hear the first minute.";
+  relatedIds.add(oldChosenId);
+
+  // One canonical shelf row: fold any duplicate into it, then remove it.
+  found.forEach((c) => {
+    if (c === chosen || !c.item) return;
+    Object.keys(c.item).forEach((k) => {
+      if (!(k in chosen.item)) chosen.item[k] = c.item[k];
+    });
+    const at = c.shelf.items.indexOf(c.item);
+    if (at >= 0) c.shelf.items.splice(at, 1);
+  });
+
+  const relatedLoans = loans.filter((l) => l && relatedIds.has(l.itemId));
+  relatedLoans.sort((a, b) =>
+    (Number(hasTrueCheck(s, b.id)) - Number(hasTrueCheck(s, a.id))) ||
+    (Number(b.list === "morning") - Number(a.list === "morning")) ||
+    String(a.id).localeCompare(String(b.id)));
+  let survivor = relatedLoans[0] || null;
+
+  if (!survivor) {
+    if (native) {
+      survivor = {
+        id: uniqueLoanId(loans, NICK_NEW_LOAN_ID),
+        shelfId: chosen.shelf.id,
+        itemId: NICK_SHELF_ID,
+        list: "morning",
+        since: "",
+      };
+      loans.push(survivor);
+    }
+  } else {
+    survivor.itemId = NICK_SHELF_ID;
+    survivor.shelfId = chosen.shelf.id;
+    survivor.since = survivor.since || "";
+    if (native) survivor.list = "morning";
+  }
+  if (!survivor) return;
+
+  const dropped = relatedLoans.filter((l) => l !== survivor).map((l) => l.id);
+  const legacyIsForeign = loans.some(
+    (l) => l && l.id === NICK_LEGACY_LOAN_ID && !relatedIds.has(l.itemId));
+  if (!legacyIsForeign) dropped.push(NICK_LEGACY_LOAN_ID);
+  transferChecksTo(s, [NICK_NATIVE_ID, oldChosenId, ...dropped], survivor.id);
+
+  settings.loans = loans.filter((l) => l === survivor || !relatedIds.has(l.itemId));
+  if (survivor.list === "morning") {
+    const nativeIds = new Set(nativeRows.map((it) => it.id));
+    settings.lists.morning = morning.filter(
+      (it) => !nativeIds.has(it.id) && it.id !== NICK_NATIVE_ID);
+  }
+}
+
 /* Gentle, non-destructive migrations. The guided-meditation link lives on the
    Nick Moss item; move it there from any older build that put it on Sangha,
    and add it if missing. Never touches your other edits. */
@@ -1684,9 +2012,8 @@ function migrate(s) {
   });
   if (typeof s.settings.targetBed !== "string") s.settings.targetBed = "22:30";
 
-  const NICK_URL = DEFAULT_LISTS.morning.find((it) => it.id === "m_nick").url;
   const sangha = s.settings.lists.morning.find((it) => it.id === "m_sangha");
-  const nick = s.settings.lists.morning.find((it) => it.id === "m_nick");
+  const nick = s.settings.lists.morning.find((it) => it.id === NICK_NATIVE_ID);
   if (sangha && sangha.url) delete sangha.url;   // remove from Sangha if present
   if (nick && !nick.url) nick.url = NICK_URL;     // ensure it's on Nick
   // new settings fields (time-of-day + rotating intention)
@@ -1720,6 +2047,41 @@ function migrate(s) {
     s.settings.neuroAdded = true;
   }
   if (!Array.isArray(s.settings.loans)) s.settings.loans = [];
+  // Nick Moss has one home on the shelf, borrowed into morning — not two
+  // separate copies with different names. Existing ticks move with it.
+  unifyNick(s);
+  // One-time addition of the Small starts shelf. The collapsed Home entry
+  // replaces the old always-visible daily option, so reset its old marker too.
+  if (!s.settings.smallStartsAdded) {
+    const seed = DEFAULT_SHELVES.find((sh) => sh.id === "sh_smallstarts");
+    if (seed && !s.settings.shelves.some((sh) => sh.id === seed.id)) {
+      s.settings.shelves.push(JSON.parse(JSON.stringify(seed)));
+    }
+    s.settings.shelfOptionIndex = 0;
+    s.settings.shelfOptionDay = "";
+    s.settings.smallStartsAdded = true;
+  }
+  if (!s.settings.movementAdded) {
+    const seed = DEFAULT_SHELVES.find((sh) => sh.id === "sh_movement");
+    if (seed && !s.settings.shelves.some((sh) => sh.id === seed.id)) {
+      s.settings.shelves.push(JSON.parse(JSON.stringify(seed)));
+    }
+    // Small starts gained two movement ideas in the same release.
+    const small = s.settings.shelves.filter((sh) => sh.id === "sh_smallstarts")[0];
+    if (small) {
+      [["ss_wall", "Wall push-ups", "just a few", "Hands on the wall, bend your elbows, come back."],
+       ["ss_shortwalk", "A short walk", "around the block", "Put on shoes and step outside."]]
+        .forEach(([id, text, note, smallStep]) => {
+          if (!(small.items || []).some((it) => it.id === id)) {
+            small.items.push({ id, text, note, small: smallStep });
+          }
+        });
+    }
+    s.settings.movementAdded = true;
+  }
+  if (typeof s.settings.walkStartMinutes !== "number" || s.settings.walkStartMinutes < 5) {
+    s.settings.walkStartMinutes = 10;
+  }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
   // Sangha has moved off the Home checklist and onto the quiet ☰ page.
@@ -1877,6 +2239,7 @@ const FOCUS_SECTIONS = [
 ];
 let focusOn = false;
 let focusIdx = 0;
+let focusReturnEl = null;
 
 /* ---------- Bottom menu: fewer things on each screen ---------- */
 const TAB_SCREENS = {
@@ -1936,15 +2299,22 @@ function focusableSections() {
     !sunday || s.id === "bedCard" || s.id === "weekCard");
 }
 function toggleFocus(on) {
-  focusOn = (typeof on === "boolean") ? on : !focusOn;
+  const turningOn = (typeof on === "boolean") ? on : !focusOn;
+  if (turningOn && !focusOn) focusReturnEl = document.activeElement;
+  focusOn = turningOn;
   document.body.dataset.focus = focusOn ? "true" : "false";
   if (focusOn) {
     const n = focusableSections().length;
     if (focusIdx >= n) focusIdx = 0;
     renderFocus();
+    $("#focusPrev")?.focus();   // the button that was tapped is now hidden
     haptic(6);
   } else {
     FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
+    const back = focusReturnEl && document.contains(focusReturnEl) && focusReturnEl.offsetParent !== null
+      ? focusReturnEl : $('.nav-btn[data-tab="focus"]');
+    back?.focus();
+    focusReturnEl = null;
   }
   updateNav();
 }
@@ -1982,20 +2352,7 @@ function renderRotIntention() {
     state.settings.intentionIndex = pickDifferentIntention(state.settings.intentionIndex);
     saveQuiet();   // cosmetic only — don't claim a data change
   }
-  const text = INTENTIONS[state.settings.intentionIndex % INTENTIONS.length];
-  box.innerHTML = "";
-  const mark = document.createElement("span");
-  mark.className = "ri-mark";
-  mark.setAttribute("aria-hidden", "true");
-  mark.textContent = "☀";
-  const line = document.createElement("span");
-  line.className = "ri-text";
-  line.textContent = text;
-  const hint = document.createElement("span");
-  hint.className = "ri-hint";
-  hint.textContent = "tap for another";
-  line.append(hint);
-  box.append(mark, line);
+  box.textContent = INTENTIONS[state.settings.intentionIndex % INTENTIONS.length];
 }
 function pickDifferentIntention(prev) {
   if (INTENTIONS.length <= 1) return 0;
@@ -2003,17 +2360,6 @@ function pickDifferentIntention(prev) {
   while (n === prev) n = Math.floor(Math.random() * INTENTIONS.length);
   return n;
 }
-function cycleIntention() {
-  const box = $("#rotIntention");
-  box.classList.add("fading");
-  setTimeout(() => {
-    state.settings.intentionIndex = (state.settings.intentionIndex + 1) % INTENTIONS.length;
-    save();
-    renderRotIntention();
-    box.classList.remove("fading");
-  }, 500);
-}
-
 /* ---------- "Small win" whisper ---------- */
 let whisperTimer = null;
 function whisper() {
@@ -2040,13 +2386,19 @@ function showSnackbar(text, onUndo) {
   label.textContent = text;
   snackAction = onUndo || null;
   if (undo) undo.hidden = !snackAction;
+  bar.inert = false;
+  bar.removeAttribute("aria-hidden");
   bar.classList.add("show");
   if (snackTimer) clearTimeout(snackTimer);
   snackTimer = setTimeout(hideSnackbar, 5000);   // 5s to change your mind
 }
 function hideSnackbar() {
   const bar = $("#snackbar");
-  if (bar) bar.classList.remove("show");
+  if (bar) {
+    bar.classList.remove("show");
+    bar.inert = true;                 // invisible controls must not take focus
+    bar.setAttribute("aria-hidden", "true");
+  }
   snackAction = null;
 }
 
@@ -2065,31 +2417,13 @@ function renderGreeting() {
     : h < 17 ? "A quiet afternoon."
     : h < 21 ? "Winding down."
     : "Late and gentle.";
-  const glyph = h < 11 ? "🌤 " : h < 17 ? "🌿 " : h < 21 ? "◐ " : "☾ ";
   const el = $("#greeting");
-  if (el) el.textContent = glyph + text;
+  if (el) el.textContent = text;
 }
 
-function renderProgress() {
-  const rec = dayRecord();
-  const morning = state.settings.lists.morning;
-  const anchors = state.settings.lists.anchors;
-  const loans = (state.settings.loans || []).filter((l) => l.list === "morning" || l.list === "anchors");
-  const done = [morning, anchors].reduce(
-    (n, list) => n + list.filter((it) => rec.checks[it.id]).length, 0)
-    + loans.filter((l) => rec.checks[l.id]).length;
-  const total = morning.length + anchors.length + loans.length;
-  const line = $("#progressLine");
-  if (line) {
-    line.textContent = total
-      ? `${done} of ${total} gentle steps today`
-      : "A quiet day ahead.";
-  }
-  const count = $("#dayCount");
-  if (count) count.textContent = total ? `${done} / ${total}` : "—";
-  const fill = $("#progressFill");
-  if (fill) fill.style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
-}
+/* The count/progress bar are gone from Home. Kept as a no-op so old callers
+   stay harmless; no numbers are shown anywhere in the daily rhythm. */
+function renderProgress() { return; }
 
 /* Generic checklist renderer for morning + anchors */
 function renderList(which) {
@@ -2124,7 +2458,6 @@ function renderList(which) {
     if (editing) {
       const drag = document.createElement("span");
       drag.className = "drag";
-      drag.textContent = "⠿";
       drag.title = "Drag to reorder";
       drag.setAttribute("aria-hidden", "true");
       rowParts.push(drag);
@@ -2315,7 +2648,7 @@ function renderMorningDone() {
   if (total > 0 && doneCount === total && !editing) {
     const msg = document.createElement("div");
     msg.className = "morning-all-done";
-    msg.textContent = "Morning, done. 🌤️";
+    msg.textContent = "Morning is done.";
     box.append(msg);
     return;
   }
@@ -2382,6 +2715,59 @@ function attachSwipe(row, which, id, isDone) {
     const wantDone = dx > 0;
     if (wantDone !== isDone()) toggleCheck(which, id);
     swiped = false;
+  }
+  row.addEventListener("pointerup", finish);
+  row.addEventListener("pointercancel", finish);
+}
+
+/* Shelf rows swipe either way to remove an item. Editing mode keeps the
+   explicit Remove button and drag handle, so they never compete. Deletion
+   already offers Undo, so a slip isn't permanent. */
+function attachShelfSwipe(row, shelfId, itemId) {
+  let startX = null, startY = null, axis = null, armed = false;
+  const THRESHOLD = 72;
+
+  row.addEventListener("pointerdown", (e) => {
+    if (editingShelf || e.pointerType === "mouse") return;
+    if (e.target.closest("input, select, .item-link, .drag-btn, .remove-link, .borrow-target, .shelf-picker")) return;
+    startX = e.clientX; startY = e.clientY; axis = null; armed = false;
+  });
+
+  row.addEventListener("pointermove", (e) => {
+    if (startX === null || editingShelf) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!axis) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      if (axis === "x") row.classList.add("swiping");
+    }
+    if (axis !== "x") return;
+    const shift = Math.max(-112, Math.min(112, dx));
+    row.style.setProperty("--swipe", shift + "px");
+    row.classList.toggle("swipe-left", shift < 0);
+    row.classList.toggle("swipe-right", shift > 0);
+    armed = Math.abs(dx) >= THRESHOLD;
+  });
+
+  function finish(e) {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    const wasHorizontal = axis === "x";
+    const shouldDelete = wasHorizontal && armed;
+    row.style.setProperty("--swipe", "0px");
+    row.classList.remove("swiping", "swipe-left", "swipe-right");
+    startX = startY = axis = null;
+    if (!wasHorizontal) return;
+    e.preventDefault();
+    // Suppress the tap that follows a swipe so the name doesn't expand.
+    row.dataset.swiped = "1";
+    setTimeout(() => { delete row.dataset.swiped; }, 350);
+    if (shouldDelete) {
+      haptic(12);
+      removeGentleItem(shelfId, itemId);
+    }
+    armed = false;
   }
   row.addEventListener("pointerup", finish);
   row.addEventListener("pointercancel", finish);
@@ -2554,7 +2940,7 @@ function updateWindNote() {
   const total = h * 60 + m - 45;
   const hh = String(Math.floor(((total % 1440) + 1440) % 1440 / 60)).padStart(2, "0");
   const mm = String(((total % 60) + 60) % 60).padStart(2, "0");
-  note.textContent = `🌙 Wind-down around ${hh}:${mm} — screens off, reading, tea.`;
+  note.textContent = `Wind-down around ${hh}:${mm} — screens off, reading, tea.`;
 }
 
 function nowHHMM() {
@@ -2675,40 +3061,9 @@ function closeOpenEditors() {
   $$(".shelf-picker").forEach((row) => { row.hidden = true; });
 }
 
-/* A soft read-out at the top of Home: when sleep began last night. */
-function renderSleepBanner() {
-  const el = $("#sleepBanner");
-  if (!el) return;
-  const now = new Date();
-  const yesterday = new Date(now);
-  yesterday.setDate(now.getDate() - 1);
-  const rec = state.days[todayKey()] || {};
-  const prev = state.days[todayKey(yesterday)] || {};
-  const bed = prev.bedTime || rec.bedTime;
-  const wake = rec.wakeTime;
-  if (!bed && !wake) { el.hidden = true; el.innerHTML = ""; return; }
-  const bits = [];
-  if (bed) bits.push("Last night · bed " + fmtClock(bed));
-  if (wake) bits.push((bed ? "" : "Today · ") + "up " + fmtClock(wake));
-  const mins = sleepMinutesFor(todayKey());
-  if (mins) bits.push(fmtDuration(mins));
-  el.innerHTML = "";
-  const moon = document.createElement("span");
-  moon.className = "sb-moon";
-  moon.setAttribute("aria-hidden", "true");
-  moon.textContent = "🌙";
-  const text = document.createElement("span");
-  text.textContent = bits.join(" · ");
-  const edit = document.createElement("button");
-  edit.type = "button";
-  edit.className = "sb-edit";
-  edit.textContent = "✎";
-  edit.setAttribute("aria-label", wake ? "Edit wake time" : "Edit bedtime");
-  edit.title = edit.getAttribute("aria-label");
-  edit.addEventListener("click", editSleepFromBanner);
-  el.append(moon, text, edit);
-  el.hidden = false;
-}
+/* Sleep numbers live in one place now — the Sleep trends card on Wind down.
+   This hook is kept so callers don't need to change; Home stays quiet. */
+function renderSleepBanner() { return; }
 
 /* The banner is a read-out, but a small pencil makes corrections obvious.
    Wake lives on Home; bedtime lives on Wind down, so go where it can be edited. */
@@ -2722,15 +3077,8 @@ function editSleepFromBanner() {
 }
 
 function renderWakeLine() {
-  const rec = dayRecord();
-  const line = $("#wakeLine");
   const btn = $("#homeWakeBtn");
-  if (btn) btn.textContent = rec.wakeTime ? "☀  Update wake" : "☀  Log wake";
-  if (line) {
-    line.textContent = rec.wakeTime
-      ? `Woke ${rec.wakeTime} today — tap to change it.`
-      : "No rush — log it whenever you're ready.";
-  }
+  if (btn) btn.textContent = dayRecord().wakeTime ? "Update wake" : "Log wake";
 }
 
 function fmtDuration(mins) {
@@ -2739,22 +3087,50 @@ function fmtDuration(mins) {
 }
 
 /* A night belongs to the morning you wake: pair today's wake time with the
-   bedtime logged either last evening or just after midnight this morning. */
-function sleepMinutesFor(key) {
+   bedtime logged either last evening or just after midnight this morning.
+   Everything below is derived from times you already logged — no new state,
+   no scores, no clinical claims. */
+function sleepNightFor(key) {
   const rec = state.days[key];
   if (!rec || !rec.wakeTime) return null;
   const d = new Date(key + "T12:00:00");
   d.setDate(d.getDate() - 1);
   const prev = state.days[todayKey(d)];
   const bed = (prev && prev.bedTime) || rec.bedTime;
-  if (!bed) return null;
-  const [bh, bm] = bed.split(":").map(Number);
-  const [wh, wm] = rec.wakeTime.split(":").map(Number);
-  let start = bh * 60 + bm;
-  let end = wh * 60 + wm;
-  if (end <= start) end += 1440;
-  const mins = end - start;
-  return mins >= 180 && mins <= 960 ? mins : null;
+  let mins = null;
+  if (bed) {
+    const [bh, bm] = bed.split(":").map(Number);
+    const [wh, wm] = rec.wakeTime.split(":").map(Number);
+    let end = wh * 60 + wm;
+    if (end <= bh * 60 + bm) end += 1440;
+    const candidate = end - (bh * 60 + bm);
+    if (candidate >= 180 && candidate <= 960) mins = candidate;
+  }
+  return { bed, wake: rec.wakeTime, mins, mood: rec.mood || null };
+}
+function sleepMinutesFor(key) {
+  const night = sleepNightFor(key);
+  return night ? night.mins : null;
+}
+function nightClock(night) {
+  if (!night) return "—";
+  const bits = [];
+  if (night.bed) bits.push("Bed " + fmtClock(night.bed));
+  if (night.wake) bits.push("Up " + fmtClock(night.wake));
+  return bits.length ? bits.join(" · ") : "—";
+}
+function median(nums) {
+  if (!nums.length) return null;
+  const sorted = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+}
+function percentile(nums, p) {
+  if (!nums.length) return null;
+  const sorted = [...nums].sort((a, b) => a - b);
+  const at = (sorted.length - 1) * Math.min(1, Math.max(0, p));
+  const lo = Math.floor(at), hi = Math.ceil(at);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (at - lo);
 }
 
 function renderTrends() {
@@ -2762,20 +3138,16 @@ function renderTrends() {
   if (!chart) return;
   chart.innerHTML = "";
   const now = new Date();
-  const values = [], wakes = [], labels = [];
+  const nights = [], values = [], labels = [];
   for (let i = 20; i >= 0; i--) {
     const d = new Date(now);
     d.setDate(now.getDate() - i);
-    const key = todayKey(d);
-    values.push(sleepMinutesFor(key));
-    // three weeks of bars, with a label every third day so it stays readable
+    const night = sleepNightFor(todayKey(d));
+    nights.push(night);
+    values.push(night ? night.mins : null);
     labels.push(i % 3 === 0 ? d.toLocaleDateString(undefined, { weekday: "narrow" }) : "");
-    const rec = state.days[key];
-    if (rec && rec.wakeTime) {
-      const [h, m] = rec.wakeTime.split(":").map(Number);
-      wakes.push(h * 60 + m);
-    }
   }
+
   values.forEach((mins, i) => {
     const col = document.createElement("div");
     col.className = "trend-day";
@@ -2796,20 +3168,71 @@ function renderTrends() {
     col.append(bar, label);
     chart.append(col);
   });
+
+  // The most recent night with either time logged is the one shown above.
+  const latest = [...nights].reverse().find(
+    (n) => n && (n.bed || n.wake)) || null;
+  const stats = $("#sleepStats");
+  if (stats) {
+    stats.innerHTML = "";
+    const cell = (label, value) => {
+      const wrap = document.createElement("div");
+      const l = document.createElement("span");
+      l.className = "metric-label";
+      l.textContent = label;
+      const v = document.createElement("span");
+      v.className = "metric-value";
+      v.textContent = value;
+      wrap.append(l, v);
+      return wrap;
+    };
+    stats.append(
+      cell("Bed", latest && latest.bed ? fmtClock(latest.bed) : "—"),
+      cell("Up", latest && latest.wake ? fmtClock(latest.wake) : "—"),
+      cell("About", latest && latest.mins ? fmtDuration(latest.mins) : "—"));
+    const adjust = document.createElement("button");
+    adjust.type = "button";
+    adjust.className = "btn quiet";
+    adjust.id = "sleepAdjustBtn";
+    adjust.textContent = "Adjust times";
+    adjust.addEventListener("click", () => {
+      if (!latest || !latest.bed) {
+        openTimeEditor("#bedEdit", "#bedInput", "bedTime");
+      } else if (!latest.wake) {
+        openTimeEditor("#windWakeEdit", "#windWakeInput", "wakeTime");
+      } else {
+        openTimeEditor("#bedEdit", "#bedInput", "bedTime");
+      }
+    });
+    stats.append(adjust);
+  }
+
   const summary = $("#trendSummary");
-  if (!summary) return;
   const logged = values.filter((v) => v !== null);
-  if (logged.length < 3) {
-    summary.textContent = "Log a few bed + wake times to see a pattern here.";
-    return;
+  if (summary) {
+    summary.textContent = logged.length < 3
+      ? "Log a few bed + wake times to see a pattern here."
+      : "A few nights, softly observed.";
+    if (logged.length >= 3) {
+      summary.title = "Most nights here were close to " + fmtDuration(median(logged))
+        + ", with the middle half between " + fmtDuration(percentile(logged, 0.25))
+        + " and " + fmtDuration(percentile(logged, 0.75)) + ".";
+    } else {
+      summary.removeAttribute("title");
+    }
   }
-  const avg = logged.reduce((a, b) => a + b, 0) / logged.length;
-  let wakeText = "";
-  if (wakes.length) {
-    const avgWake = Math.round(wakes.reduce((a, b) => a + b, 0) / wakes.length);
-    wakeText = ` · waking around ${String(Math.floor(avgWake / 60)).padStart(2, "0")}:${String(avgWake % 60).padStart(2, "0")}`;
+
+  const moodLine = $("#sleepMoodLine");
+  if (moodLine) {
+    const noted = nights.filter((n) => n && n.mood).map((n) => n.mood);
+    if (noted.length >= 3) {
+      const tally = noted.reduce((m, x) => ((m[x] = (m[x] || 0) + 1), m), {});
+      const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
+      moodLine.textContent = "On these nights you most often noted “" + top + ".”";
+    } else {
+      moodLine.textContent = "";
+    }
   }
-  summary.textContent = `Average ${fmtDuration(avg)} across ${logged.length} nights${wakeText}.`;
 }
 
 /* =====================================================================
@@ -2870,6 +3293,7 @@ function setEditingShelf(on) {
    Last-change-wins: simple, predictable, and easy to explain.
    ===================================================================== */
 let syncTimer = null, syncBusy = false, syncAgain = false, applyingRemote = false;
+let syncError = null;   // last failed attempt; cleared on the next success
 
 function loadSync() {
   try { return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {}; }
@@ -2884,43 +3308,97 @@ function syncStatus(text) {
   if (el) el.textContent = text;
 }
 function syncIsAutomatic() {
-  return !!(syncCfg.endpoint && syncCfg.syncKey && syncCfg.gistId);
+  return !!(syncCfg.endpoint === SYNC_ENDPOINT && syncCfg.syncKey && syncCfg.gistId);
 }
 function renderSync() {
   const t = $("#syncToken"), g = $("#syncGist"), s = $("#syncStatus");
   const automatic = syncIsAutomatic();
   const card = $("#syncCard");
   if (card) card.classList.toggle("automatic", automatic);
-  $$("#syncCard .field, #syncSetup").forEach((el) => { el.hidden = automatic; });
+  $$("#syncCard .setup-only").forEach((el) => { el.hidden = automatic; });
   if (t && document.activeElement !== t) t.value = syncCfg.token || "";
   if (g && document.activeElement !== g) g.value = syncCfg.gistId || "";
-  if (s && syncCfg.gistId && !s.textContent.startsWith("Couldn't") && !s.textContent.startsWith("Set up")) {
-    const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
-    s.textContent = (automatic ? "Syncing automatically" : "Gist " + syncCfg.gistId) + when + ".";
+  if (!s) return;
+  if (!syncCfg.gistId) {
+    s.textContent = "Not set up yet — enter your pairing code.";
+    s.title = "";
+    return;
+  }
+  const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
+  s.textContent = syncError
+    ? "Sync paused · last successful" + when + "."
+    : (automatic ? "Syncing automatically" : "Gist " + syncCfg.gistId) + when + ".";
+  s.title = syncError || "";
+}
+/* New devices pair once with a six-character code; the GitHub token never
+   leaves the server. Older builds can still use the direct-token fields. */
+function cleanPairCode(raw) {
+  return String(raw || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
+}
+async function pairWithCode(raw) {
+  const code = cleanPairCode(raw);
+  if (code.length !== 6) { syncStatus("A pairing code is six characters."); return false; }
+  syncStatus("Connecting this device…");
+  try {
+    const res = await fetch(SYNC_ENDPOINT, {
+      method: "POST",
+      headers: { "x-sync-key": code, Accept: "application/json" },
+      body: "{}",
+    });
+    if (!res.ok) throw new Error("pairing was not accepted (" + res.status + ")");
+    const reply = await res.json();
+    if (!reply || reply.endpoint !== SYNC_ENDPOINT || !reply.gistId) {
+      throw new Error("that code isn't for this app");
+    }
+    syncCfg = {
+      endpoint: SYNC_ENDPOINT,
+      syncKey: reply.syncKey || code,
+      gistId: reply.gistId,
+      lastSync: syncCfg.lastSync || null,
+    };
+    saveSync(syncCfg);
+    syncError = null;
+    renderSync();
+    syncStatus("Paired. Use the same code on your other devices.");
+    setTimeout(() => syncNow({ silent: true }), 400);
+    return true;
+  } catch (e) {
+    syncStatus("Couldn't pair: " + e.message + ".");
+    return false;
   }
 }
-/* New devices pair once through a short link; the GitHub token never leaves
-   the server. Older builds can still use the direct-token fields. */
 function consumePairHash() {
   const hash = location.hash || "";
+  const clearHash = () => {
+    try { history.replaceState(null, "", location.pathname + location.search); }
+    catch (e) { location.hash = ""; }
+  };
+  if (hash.indexOf("#pair=") === 0) {
+    const code = hash.slice(6);
+    clearHash();
+    pairWithCode(code);
+    return;
+  }
   if (hash.indexOf("#sync=") !== 0) return;
   try {
     const cfg = JSON.parse(decodeURIComponent(hash.slice(6)));
-    if (cfg && cfg.endpoint && cfg.syncKey && cfg.gistId) {
+    if (cfg && cfg.endpoint === SYNC_ENDPOINT && cfg.syncKey && cfg.gistId) {
       syncCfg = {
-        endpoint: cfg.endpoint,
+        endpoint: SYNC_ENDPOINT,
         syncKey: cfg.syncKey,
         gistId: cfg.gistId,
         lastSync: syncCfg.lastSync || null,
       };
       saveSync(syncCfg);
       syncStatus("Sync connected.");
+    } else {
+      syncStatus("That sync link isn't for this app.");
     }
   } catch (e) {
     console.warn("Ignored an invalid sync link:", e);
+    syncStatus("That sync link isn't for this app.");
   }
-  try { history.replaceState(null, "", location.pathname + location.search); }
-  catch (e) { location.hash = ""; }
+  clearHash();
 }
 async function syncFetch(method, url, body) {
   const automatic = method === "GET" || method === "PUT" ? syncIsAutomatic() : false;
@@ -2983,17 +3461,18 @@ async function syncNow(opts = {}) {
   const token = (($("#syncToken") && $("#syncToken").value) || "").trim() || syncCfg.token;
   const id = (($("#syncGist") && $("#syncGist").value) || "").trim() || syncCfg.gistId;
   if (!id || (!automatic && !token)) {
-    if (!silent) syncStatus("Add a token and a gist ID first.");
+    if (!silent) syncStatus("Not set up yet — enter your pairing code, or use Set up sync.");
     return;
   }
   if (syncBusy) { syncAgain = true; return; }
   if (!automatic) { syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg); }
   syncBusy = true;
+  syncError = null;
   if (!silent) syncStatus("Checking your sync…");
   try {
     let remote = null;
     if (automatic) {
-      const reply = await syncFetch("GET", syncCfg.endpoint);
+      const reply = await syncFetch("GET", SYNC_ENDPOINT);
       remote = reply && reply.state ? reply.state : null;
     } else {
       const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
@@ -3010,7 +3489,7 @@ async function syncNow(opts = {}) {
       if (!silent) syncStatus("Pulled newer data from your sync.");
     } else if (!remote || localStamp > remoteStamp) {
       if (automatic) {
-        await syncFetch("PUT", syncCfg.endpoint, state);
+        await syncFetch("PUT", SYNC_ENDPOINT, state);
       } else {
         await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
           files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
@@ -3022,12 +3501,19 @@ async function syncNow(opts = {}) {
     }
     syncCfg.lastSync = new Date().toISOString();
     saveSync(syncCfg);
-    renderSync();
+    if (silent) renderSync();
+    else setTimeout(renderSync, 2500);   // let the plain-language message settle first
     if (!silent) haptic(8);
   } catch (e) {
-    syncStatus("Couldn't sync: " + e.message);
+    syncError = e.message;
+    renderSync();
+    if (!silent) syncStatus("Sync paused — your data is safe on this device.");
   } finally {
     syncBusy = false;
+    if (syncAgain) {
+      syncAgain = false;
+      setTimeout(() => syncNow({ silent: true }), 300);
+    }
   }
 }
 
@@ -3061,7 +3547,6 @@ function renderMyLinks() {
     drag.className = "drag-btn";
     drag.setAttribute("aria-label", "Drag to reorder " + link.name);
     drag.title = "Drag to reorder";
-    drag.textContent = "≡";
     const a = document.createElement("a");
     a.className = "link-chip";
     a.href = link.url;
@@ -3073,14 +3558,12 @@ function renderMyLinks() {
     copy.className = "copy-btn";
     copy.dataset.copy = link.url;
     copy.setAttribute("aria-label", "Copy " + link.name + " link");
-    copy.title = "Copy link";
-    copy.textContent = "⧉";
+    copy.textContent = "Copy";
     const del = document.createElement("button");
     del.type = "button";
     del.className = "remove-link";
     del.setAttribute("aria-label", "Remove " + link.name);
-    del.title = "Remove";
-    del.textContent = "×";
+    del.textContent = "Remove";
     del.addEventListener("click", () => removeMyLink(link.id));
     row.append(drag, a, copy, del);
     box.append(row);
@@ -3133,7 +3616,29 @@ function renderGentle() {
   renderGentleStats();
 }
 
+/* A walking sketch derived from one optional number. No tracking, no dates,
+   no targets — each step is only there if it's wanted. */
+function renderMovementLadder() {
+  const wrap = $("#movementGradual");
+  if (!wrap) return;
+  wrap.hidden = activeShelfId !== "sh_movement";
+  if (wrap.hidden) return;
+  const base = Math.max(5, Math.round(Number(state.settings.walkStartMinutes) || 10));
+  const select = $("#walkStart");
+  if (select && document.activeElement !== select) select.value = String(base);
+  const steps = [base, base + 5, base + 10, base + 15, base + 20, base + 30];
+  const labels = ["now", "a little later", "later", "after a while", "in a few months", "whenever you're ready"];
+  const line = $("#walkLadder");
+  if (line) {
+    line.textContent = "Walk: " + steps.map((m, i) =>
+      (i ? labels[i] + " " : "") + m + " minutes").join(" · ")
+      + ". Or simply go a little further than last time — only when that feels right."
+      + " Stay at any step as long as you like.";
+  }
+}
+
 function renderShelves() {
+  renderMovementLadder();
   const chips = $("#shelfChips");
   const box = $("#shelvesList");
   const select = $("#gentleShelfSelect");
@@ -3149,7 +3654,7 @@ function renderShelves() {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "shelf-chip";
-    b.textContent = shelf.name + " · " + (shelf.items || []).length;
+    b.textContent = shelf.name;
     b.setAttribute("aria-pressed", shelf.id === activeShelfId ? "true" : "false");
     b.addEventListener("click", () => {
       activeShelfId = shelf.id;
@@ -3167,6 +3672,15 @@ function renderShelves() {
       if (shelf.id === activeShelfId) o.selected = true;
       select.append(o);
     });
+  }
+  const nameInput = $("#gentleName"), noteInput = $("#gentleNote");
+  if (nameInput) {
+    nameInput.placeholder = activeShelfId === "sh_smallstarts"
+      ? "What's the small thing?" : "What is it?";
+  }
+  if (noteInput) {
+    noteInput.placeholder = activeShelfId === "sh_smallstarts"
+      ? "e.g. five minutes, just for fun" : "e.g. needs a little care";
   }
 
   box.innerHTML = "";
@@ -3215,7 +3729,9 @@ function renderShelves() {
     if (!(shelf.items || []).length) {
       const p = document.createElement("p");
       p.className = "shelf-empty";
-      p.textContent = "Nothing here — that's fine.";
+      p.textContent = shelf.id === "sh_smallstarts"
+        ? "Nothing here yet — add a few small things when you like."
+        : "Nothing here — that's fine.";
       listEl.append(p);
     } else {
       shelf.items.forEach((item) => listEl.append(renderShelfItem(item, shelf)));
@@ -3228,7 +3744,7 @@ function renderShelves() {
 
 function renderShelfItem(item, shelf) {
   const row = document.createElement("div");
-  row.className = "gentle-item";
+  row.className = "gentle-item" + (editingShelf ? " editing" : "");
   row.dataset.id = item.id;
   row.dataset.shelfId = shelf.id;
 
@@ -3238,20 +3754,13 @@ function renderShelfItem(item, shelf) {
   drag.hidden = !editingShelf;
   drag.setAttribute("aria-label", "Drag to reorder " + item.text);
   drag.title = "Drag to reorder";
-  drag.textContent = "≡";
-
-  const mark = document.createElement("span");
-  mark.className = "gi-mark";
-  mark.setAttribute("aria-hidden", "true");
-  mark.textContent = "🌿";
 
   const body = document.createElement("div");
   body.className = "gi-body";
-  const name = document.createElement("div");
-  name.className = "gi-name";
+  const name = document.createElement("button");
+  name.type = "button";
+  name.className = "btn quiet gi-name";
   name.textContent = item.text;
-  name.setAttribute("role", "button");
-  name.setAttribute("tabindex", "0");
   const note = document.createElement("div");
   note.className = "gi-note";
   note.textContent = [item.note, item.from ? "from " + (item.from === "morning" ? "morning" : "anchors") : ""]
@@ -3260,23 +3769,23 @@ function renderShelfItem(item, shelf) {
   small.className = "gi-small";
   small.textContent = item.small || "The smallest version is enough.";
   small.hidden = true;
-  const toggleSmall = () => { small.hidden = !small.hidden; };
+  const toggleSmall = () => {
+    if (row.dataset.swiped) return;
+    small.hidden = !small.hidden;
+    name.setAttribute("aria-expanded", String(!small.hidden));
+  };
+  name.setAttribute("aria-expanded", "false");
   name.addEventListener("click", toggleSmall);
-  name.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSmall(); }
-  });
   body.append(name, note, small);
 
   const actions = document.createElement("div");
   actions.className = "shelf-item-actions";
   const loan = loanFor(item.id);
   if (loan) {
-    const here = document.createElement("button");
-    here.type = "button";
-    here.className = "btn small";
+    const here = document.createElement("span");
+    here.className = "loan-status";
     here.textContent = loan.list === "morning" ? "In my morning" : "In my day";
     here.setAttribute("aria-label", item.text + " is borrowed into " + (loan.list === "morning" ? "morning" : "daily anchors"));
-    here.addEventListener("click", () => showSnackbar("Already borrowed — return it first if you want to change"));
     const back = document.createElement("button");
     back.type = "button";
     back.className = "btn small";
@@ -3285,27 +3794,22 @@ function renderShelfItem(item, shelf) {
     back.addEventListener("click", () => returnLoan(loan.id));
     actions.append(here, back);
   } else {
+    const target = document.createElement("select");
+    target.className = "borrow-target";
+    target.setAttribute("aria-label", "Borrow " + item.text + " into");
+    [["anchors", "Daily anchors"], ["morning", "Morning"]].forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      target.append(option);
+    });
     const borrow = document.createElement("button");
     borrow.type = "button";
     borrow.className = "btn small";
     borrow.textContent = "Borrow";
     borrow.setAttribute("aria-label", "Borrow " + item.text + " into your day");
-    const picker = document.createElement("div");
-    picker.className = "shelf-picker";
-    picker.hidden = true;
-    const toDay = document.createElement("button");
-    toDay.type = "button";
-    toDay.className = "btn small";
-    toDay.textContent = "Daily anchors";
-    toDay.setAttribute("aria-label", "Borrow " + item.text + " into daily anchors");
-    toDay.addEventListener("click", () => borrowItem(shelf.id, item.id, "anchors"));
-    const toMorning = document.createElement("button");
-    toMorning.type = "button";
-    toMorning.className = "btn small";
-    toMorning.textContent = "Morning";
-    toMorning.setAttribute("aria-label", "Borrow " + item.text + " into morning");
-    toMorning.addEventListener("click", () => borrowItem(shelf.id, item.id, "morning"));
-    picker.append(toDay, toMorning);
+    borrow.addEventListener("click", () => borrowItem(shelf.id, item.id, target.value));
+    actions.append(target, borrow);
     if (item.from) {
       const home = document.createElement("button");
       home.type = "button";
@@ -3313,10 +3817,8 @@ function renderShelfItem(item, shelf) {
       home.textContent = "Back on " + (item.from === "morning" ? "morning" : "anchors");
       home.setAttribute("aria-label", "Put " + item.text + " back on " + item.from);
       home.addEventListener("click", () => reinstateItem(shelf.id, item.id));
-      picker.append(home);
+      actions.append(home);
     }
-    borrow.addEventListener("click", () => { picker.hidden = !picker.hidden; });
-    actions.append(borrow, picker);
   }
 
   const del = document.createElement("button");
@@ -3325,10 +3827,11 @@ function renderShelfItem(item, shelf) {
   del.hidden = !editingShelf;
   del.setAttribute("aria-label", "Remove " + item.text);
   del.title = "Remove";
-  del.textContent = "×";
+  del.textContent = "Remove";
   del.addEventListener("click", () => removeGentleItem(shelf.id, item.id));
 
-  row.append(drag, mark, body, actions, del);
+  row.append(drag, body, actions, del);
+  attachShelfSwipe(row, shelf.id, item.id);
   return row;
 }
 
@@ -3485,91 +3988,62 @@ function removeShelf(shelfId) {
   });
 }
 
+/* One quiet idea, only from Small starts, revealed only when asked for. */
+function smallStartsPool() {
+  const shelf = findShelf("sh_smallstarts");
+  if (!shelf) return [];
+  return (shelf.items || []).filter((item) => item && !loanFor(item.id));
+}
+function chooseSmallStart() {
+  const pool = smallStartsPool();
+  if (!pool.length) return;
+  const current = $("#shelfOption")?.dataset.itemId;
+  let idx = Number(state.settings.shelfOptionIndex) || 0;
+  if (pool.length > 1 && pool[idx % pool.length]?.id === current) {
+    idx = (idx + 1) % pool.length;
+  } else {
+    idx %= pool.length;
+  }
+  state.settings.shelfOptionIndex = idx;
+  state.settings.shelfOptionDay = todayKey();
+  saveQuiet();   // looking is not a data change
+  renderShelfOption();
+  haptic(6);
+}
 function renderShelfOption() {
-  const box = $("#shelfOption");
-  if (!box) return;
+  const entry = $("#ideaEntry"), box = $("#shelfOption"), btn = $("#ideaBtn");
+  if (!entry || !box) return;
+  const pool = smallStartsPool();
+  if (!pool.length) {
+    entry.hidden = true;
+    box.hidden = true;
+    return;
+  }
+  entry.hidden = false;
   const today = todayKey();
   if (state.settings.shelfOptionDay !== today && state.settings.shelfOptionIndex < 0) {
     state.settings.shelfOptionIndex = 0;
-  }
-  if (state.settings.shelfOptionDay !== today) {
-    const n = allShelfItems().length;
-    state.settings.shelfOptionIndex = n
-      ? (Number(state.settings.shelfOptionIndex) + 1) % n
-      : 0;
-    state.settings.shelfOptionDay = today;
     saveQuiet();
   }
-  if (state.settings.shelfOptionIndex < 0) { box.hidden = true; return; }
-  const entries = allShelfItems().filter(({ item }) => !loanFor(item.id));
-  if (!entries.length) { box.hidden = true; return; }
-  const picked = entries[state.settings.shelfOptionIndex % entries.length];
+  const revealed = state.settings.shelfOptionDay === today
+    && Number(state.settings.shelfOptionIndex) >= 0;
+  if (btn) btn.hidden = revealed;
+  box.hidden = !revealed;
+  if (!revealed) return;
+  const idx = Number(state.settings.shelfOptionIndex) % pool.length;
+  const picked = pool[idx];
   const text = $("#shelfOptionText"), name = $("#shelfOptionName");
-  if (text) text.textContent = picked.item.small || "The smallest version is enough.";
-  if (name) name.textContent = picked.item.text + " · " + picked.shelf.name;
-  box.hidden = false;
-  box.dataset.itemId = picked.item.id;
-  box.dataset.shelfId = picked.shelf.id;
+  if (text) text.textContent = picked.small || "The smallest version is enough.";
+  if (name) name.textContent = picked.text;
+  const another = $("#shelfOptionAnother");
+  if (another) another.hidden = pool.length < 2;
+  box.dataset.itemId = picked.id;
+  box.dataset.shelfId = "sh_smallstarts";
 }
 
-function renderGentleStats() {
-  const box = $("#gentleStatsBody");
-  if (!box) return;
-  box.innerHTML = "";
-  const rows = [];
-  const nights = [];
-  const now = new Date();
-  for (let i = 0; i < 21; i++) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const m = sleepMinutesFor(todayKey(d));
-    if (m) nights.push(m);
-  }
-  if (nights.length >= 2) {
-    rows.push(["Sleep", "About " + fmtDuration(nights.reduce((a, b) => a + b, 0) / nights.length) + " over " + nights.length + " nights"]);
-  }
-  let active = 0;
-  const dots = document.createElement("div");
-  dots.className = "stat-dots";
-  for (let i = 29; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(now.getDate() - i);
-    const rec = state.days[todayKey(d)];
-    const on = !!(rec && rec.checks && Object.keys(rec.checks).some((k) => rec.checks[k]));
-    if (on) active++;
-    const dot = document.createElement("span");
-    dot.className = "adot" + (on ? " on" : "");
-    dot.title = d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
-    dots.append(dot);
-  }
-  rows.push(["Showing up", active + " of the last 30 days had one gentle step"]);
-  const counts = {};
-  Object.keys(state.days).forEach((k) => {
-    const rec = state.days[k];
-    Object.keys(rec.checks || {}).forEach((id) => { if (rec.checks[id]) counts[id] = (counts[id] || 0) + 1; });
-  });
-  const topId = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
-  if (topId) {
-    const all = [].concat(state.settings.lists.morning || [], state.settings.lists.anchors || []);
-    (state.settings.loans || []).forEach((loan) => {
-      const found = allShelfItems().find((x) => x.item.id === loan.itemId);
-      if (found) all.push({ id: loan.id, text: found.item.text });
-    });
-    const item = all.find((x) => x.id === topId);
-    rows.push(["Often", item ? item.text : topId]);
-  }
-  rows.forEach((row) => {
-    const line = document.createElement("div");
-    line.className = "stat-row";
-    const l = document.createElement("span");
-    l.textContent = row[0];
-    const v = document.createElement("span");
-    v.textContent = row[1];
-    line.append(l, v);
-    box.append(line);
-  });
-  if (active) box.append(dots);
-}
+/* Kept as a no-op so older callers stay harmless. Counts and "often" scores
+   have no place in the daily rhythm now. */
+function renderGentleStats() { return; }
 
 /* ---------- Open external links in real Safari on iPhone ----------
    A home-screen PWA uses a separate web view, so iCloud Keychain autofill
@@ -3657,24 +4131,81 @@ function importJSON(file) {
   reader.readAsText(file);
 }
 
+/* Collections are merged by id so a pull or import can never quietly drop a
+   row the other device added. Later values win for the same id. */
+function mergeCollection(localList, incomingList) {
+  const byId = new Map();
+  [localList, incomingList].forEach((list) => {
+    (Array.isArray(list) ? list : []).forEach((item) => {
+      if (!item || typeof item !== "object") return;
+      byId.set(String(item.id || JSON.stringify(item)), item);
+    });
+  });
+  return [...byId.values()];
+}
+function mergeShelves(localShelves, incomingShelves) {
+  const byId = new Map();
+  [localShelves, incomingShelves].forEach((list) => {
+    (Array.isArray(list) ? list : []).forEach((shelf) => {
+      if (!shelf || typeof shelf !== "object" || !shelf.id) return;
+      const previous = byId.get(shelf.id);
+      byId.set(shelf.id, previous
+        ? { ...previous, ...shelf, items: mergeCollection(previous.items, shelf.items) }
+        : { ...shelf, items: mergeCollection([], shelf.items) });
+    });
+  });
+  return [...byId.values()];
+}
+function mergeDay(localDay, incomingDay) {
+  const a = localDay && typeof localDay === "object" ? localDay : {};
+  const b = incomingDay && typeof incomingDay === "object" ? incomingDay : {};
+  const out = { ...freshDay(), ...a };
+  // Blank fields on the incoming side never erase a real value on this device.
+  Object.keys(b).forEach((key) => {
+    const value = b[key];
+    if (key === "checks" || key === "note" || key === "intention") {
+      if (value !== undefined && value !== null) out[key] = value;
+    } else if (value !== undefined && value !== null && value !== "") {
+      out[key] = value;
+    }
+  });
+  out.checks = { ...(a.checks || {}), ...(b.checks || {}) };
+  return out;
+}
 function mergeState(local, incoming) {
-  // Keep defaults for any setting the export predates, but never overwrite a
-  // list or value that actually came in.
+  if (!incoming || typeof incoming !== "object") return local;
+  migrate(incoming);   // older exports and remote records get the same repair
   const base = freshState().settings;
-  return {
-    settings: Object.assign({}, base, local.settings, incoming.settings, {
-      lists: Object.assign({}, base.lists, local.settings?.lists, incoming.settings?.lists),
-    }),
-    days: Object.assign({}, local.days, incoming.days),
-  };
+  const a = local.settings || {};
+  const b = incoming.settings || {};
+  const mergedSettings = Object.assign({}, base, a, b);
+  ["morning", "anchors", "instead"].forEach((key) => {
+    mergedSettings.lists = mergedSettings.lists || {};
+    mergedSettings.lists[key] = mergeCollection(
+      (a.lists || {})[key], (b.lists || {})[key]);
+  });
+  mergedSettings.shelves = mergeShelves(a.shelves, b.shelves);
+  mergedSettings.loans = mergeCollection(a.loans, b.loans);
+  mergedSettings.myLinks = mergeCollection(a.myLinks, b.myLinks);
+
+  const days = { ...(local.days || {}) };
+  Object.keys(incoming.days || {}).forEach((key) => {
+    days[key] = mergeDay(days[key], incoming.days[key]);
+  });
+  const merged = { settings: mergedSettings, days };
+  unifyNick(merged);   // repair the union, not just each side
+  return merged;
 }
 
 /* =====================================================================
    EVENT WIRING
    ===================================================================== */
 function wire() {
-  // rotating intention: tap the card for another gentle line
-  $("#rotIntention").addEventListener("click", cycleIntention);
+  const darkScheme = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+  if (darkScheme) {
+    if (darkScheme.addEventListener) darkScheme.addEventListener("change", syncThemeColor);
+    else if (darkScheme.addListener) darkScheme.addListener(syncThemeColor);
+  }
 
   // undo snackbar
   $("#snackUndo").addEventListener("click", () => {
@@ -3689,7 +4220,6 @@ function wire() {
 
   // home shortcuts: plain-language labels, no guessing what they do
   $("#sundaySleepBtn").addEventListener("click", () => showTab("winddown"));
-  $("#homeFocusBtn").addEventListener("click", () => handleTab("focus"));
   $("#homeWakeBtn").addEventListener("click", () => openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
   $("#wakeSave").addEventListener("click", () => saveTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
 
@@ -3803,17 +4333,24 @@ function wire() {
   $$("#gentleForm input").forEach((input) => {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addGentleItem(); });
   });
+  const walkStart = $("#walkStart");
+  if (walkStart) walkStart.addEventListener("change", (e) => {
+    state.settings.walkStartMinutes = Math.max(5, Math.round(Number(e.target.value) || 10));
+    save();           // the sketch follows the app to your other devices
+    renderMovementLadder();
+  });
+  $("#ideaBtn").addEventListener("click", chooseSmallStart);
+  $("#shelfOptionAnother").addEventListener("click", chooseSmallStart);
   $("#shelfOptionLater").addEventListener("click", () => {
     state.settings.shelfOptionIndex = -1;
     state.settings.shelfOptionDay = todayKey();
     saveQuiet();
-    const box = $("#shelfOption");
-    if (box) box.hidden = true;
+    renderShelfOption();
   });
-  $("#shelfOptionBorrow").addEventListener("click", () => {
-    const box = $("#shelfOption");
-    if (!box || !box.dataset.itemId) return;
-    borrowItem(box.dataset.shelfId, box.dataset.itemId, "anchors");
+  $("#shelfOptionShelf").addEventListener("click", () => {
+    activeShelfId = "sh_smallstarts";
+    renderShelves();
+    showTab("more");
   });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
@@ -3835,7 +4372,14 @@ function wire() {
     e.target.value = "";
   });
 
-  // sync
+  // sync — a short code pairs home-screen apps too; tokens stay behind Set up
+  const pairInput = $("#syncPairCode");
+  if (pairInput) pairInput.addEventListener("input", (e) => {
+    e.target.value = cleanPairCode(e.target.value);
+  });
+  $("#syncPair").addEventListener("click", () => {
+    pairWithCode(pairInput && pairInput.value);
+  });
   $("#syncToken").addEventListener("change", (e) => {
     syncCfg.token = e.target.value.trim(); saveSync(syncCfg);
   });
