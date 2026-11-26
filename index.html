@@ -1943,7 +1943,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v59";
+const VERSION = "v60";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -4036,7 +4036,29 @@ function renderShelfNotice() {
   });
   if (!candidate) { el.textContent = ""; el.hidden = true; return; }
   el.hidden = false;
-  el.textContent = candidate.item.text + " kept showing up. Keep it close?";
+  el.innerHTML = "";
+  const msg = document.createElement("span");
+  msg.textContent = candidate.item.text + " kept showing up. Keep it close?";
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "btn small";
+  btn.textContent = "Move to Keep close";
+  btn.addEventListener("click", () => {
+    const fromShelf = candidate.loan.shelfId;
+    const item = candidate.item;
+    const toShelf = findShelf("sh_keepclose");
+    if (!toShelf) return;
+    const from = findShelf(fromShelf);
+    if (from) {
+      const idx = from.items.findIndex((x) => x.id === item.id);
+      if (idx >= 0) from.items.splice(idx, 1);
+    }
+    item.from = item.from || null;
+    toShelf.items.unshift(item);
+    save(); renderShelves();
+    haptic(8);
+  });
+  el.append(msg, btn);
 }
 function renderShelves() {
   renderShelfNotice();
@@ -4521,6 +4543,11 @@ function fillProgramCard(prefix, p, step, at) {
   }
   const smaller = q("SmallerText");
   if (smaller) smaller.textContent = PROGRAM_SMALLER[step.kind] || "Just be here for one breath.";
+  const smallerDetails = q("Smaller");
+  if (smallerDetails) {
+    const gapDays = daysSinceKey(p.lastDoneAt);
+    smallerDetails.open = !!(gapDays !== null && gapDays >= 2);
+  }
   const last = p.step >= PROGRAM30.length - 1;
   const done = q("Done");
   if (done) done.textContent = last ? "Keep this step" : "That's enough";

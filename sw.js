@@ -1,7 +1,7 @@
 /* Back on Track — minimal offline service worker.
    Caches the app shell so it opens offline / from the home screen.
    Bump CACHE_VERSION when you change files. */
-const CACHE_VERSION = "bot-v59";
+const CACHE_VERSION = "bot-v60";
 const ASSETS = [
   "./",
   "./index.html",
