@@ -238,6 +238,8 @@
   .program-meta { font-size: var(--t-cap); color: var(--ink-soft); margin: 0 0 var(--s1); }
   .program-gap { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.45; }
   .program-gap[hidden] { display: none; }
+  .program-home-nudge { display: block; margin: var(--s2) 0 0; }
+  .program-home-nudge[hidden] { display: none; }
   .program-title {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 18px; font-weight: 500; line-height: 1.35;
@@ -1346,6 +1348,7 @@
       <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
       <button type="button" class="btn small quiet-btn" id="homeWakeBtn">Log wake</button>
     </div>
+    <button type="button" class="see-shelf program-home-nudge" id="programHomeNudge" hidden>A quiet 30 days is here, if you want it.</button>
     <div class="shelf-option" id="shelfOption" hidden>
       <div class="so-head">A small start</div>
       <div class="so-body" aria-live="polite"><span id="shelfOptionText"></span><small id="shelfOptionName"></small></div>
@@ -1712,7 +1715,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v39</div>
+  <div class="version" id="versionTag">v40</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1766,7 +1769,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v39";
+const VERSION = "v40";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -4283,6 +4286,8 @@ function renderProgram() {
   const p = state.settings.program30 || {};
   const step = currentProgramStep();
   const at = Math.min(PROGRAM30.length, (Math.round(Number(p.step) || 0) + 1));
+  const nudge = $("#programHomeNudge");
+  if (nudge) nudge.hidden = !!p.loaded;
   if (more) {
     const marks = Object.keys(p.done || {}).length;
     more.textContent = p.loaded
@@ -4652,6 +4657,7 @@ function wire() {
   $("#programLoadBtn").addEventListener("click", () => {
     setProgramLoaded(!state.settings.program30.loaded);
   });
+  $("#programHomeNudge").addEventListener("click", () => setProgramLoaded(true));
   $("#programDone").addEventListener("click", completeProgramStep);
   $("#programEveDone").addEventListener("click", completeProgramStep);
   // One optional closing line, mirrored across both cards without a re-render.

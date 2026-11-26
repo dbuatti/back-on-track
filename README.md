@@ -45,6 +45,11 @@ passed since a step was last marked, both cards quietly say *"Your step is right
 where you left it. Nothing to catch up on."* It is derived from the existing
 `lastDoneAt` date — no new state, no counter, no reset.
 
+**v40** makes the sequence discoverable from Home. While it is loaded out, a quiet
+underlined line under *I don't know what to do* reads *"A quiet 30 days is here,
+if you want it."* One tap loads it in; the line then disappears. The More control
+still works the same way, so loading in and out remain equally easy.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
