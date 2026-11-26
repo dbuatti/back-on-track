@@ -529,6 +529,7 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    min-height: 44px;
     font-size: 14px;
     color: var(--accent-deep);
     text-decoration: none;
@@ -575,7 +576,7 @@
     appearance: none;
     border: 0;
     background: transparent;
-    flex: 0 0 28px;
+    flex: 0 0 44px;
     min-height: 44px;
     padding: 0;
     color: var(--ink-soft);
@@ -587,7 +588,8 @@
   .drag-btn:active { color: var(--accent-deep); cursor: grabbing; }
 
   /* ---------- Text / number inputs ---------- */
-  input[type="text"], input[type="number"], input[type="time"], textarea {
+  input[type="text"], input[type="number"], input[type="time"],
+  input[type="password"], input[type="url"], textarea {
     font: inherit;
     color: var(--ink);
     background: var(--bg);
@@ -595,6 +597,7 @@
     border-radius: 10px;
     padding: 10px 12px;
     width: 100%;
+    min-height: var(--tap);
   }
   input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   textarea { resize: vertical; min-height: 44px; }
@@ -671,7 +674,12 @@
     color: var(--ink-soft);
     margin-bottom: 6px;
   }
-  .field label a { color: var(--accent-deep); }
+  .field label a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--accent-deep);
+  }
   .windnote {
     font-size: 13px;
     color: var(--ink-soft);
@@ -1342,7 +1350,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v26</div>
+  <div class="version" id="versionTag">v27</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1393,7 +1401,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v26";
+const VERSION = "v27";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
