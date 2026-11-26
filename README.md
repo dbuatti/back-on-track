@@ -22,6 +22,13 @@ sync now union the per-step marks instead of letting a newer device erase marks
 made on another. The current step is a real heading, so the sequence reads cleanly
 with a screen reader.
 
+**v36** mirrors the loaded sequence onto **Wind down**, so the current invitation
+is there in the evenings too. Each step now carries a quiet kind label using the
+same focus-area words as the Med Log app (*Awareness, Sleep, Movement, Connection,
+Everyday, Quiet repeat*) — no counts or grades. The final step closes with a
+gentle "nothing to score" line rather than a completion badge. Both cards share
+one renderer and one reversible mark, so they can never disagree.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
@@ -124,11 +131,13 @@ The bottom menu keeps each screen light:
   **Back on morning** / **Back on anchors** permanently reinstates things that
   came from Home. Home or Escape takes you back.
 - **A quiet 30 days** — an optional overlay, loaded in or out from More. While
-  loaded, Home shows one invitation: the current step, a Nick Moss link only when
-  that step asks for it, an optional slightly larger version, and *That's enough*.
-  The next invitation waits until you mark the current one; a missed day simply
-  leaves the same step. Sunday hides the card along with the other doing controls.
-  Loading out keeps the step and all gentle marks; loading in resumes there.
+  loaded, Home and Wind down each show the same invitation: the current step and
+  its quiet kind label, a Nick Moss link only when that step asks for it, an
+  optional slightly larger version, and *That's enough*. The next invitation waits
+  until you mark the current one; a missed day simply leaves the same step. Sunday
+  hides both cards along with the other doing controls. Loading out keeps the step
+  and all gentle marks; loading in resumes there. Marking either card can be
+  undone from the snackbar.
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the

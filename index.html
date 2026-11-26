@@ -242,6 +242,15 @@
     margin: 0 0 var(--s2);
   }
   .program-invite { font-size: var(--t-body); line-height: 1.45; margin: 0 0 var(--s3); }
+  /* A quiet "what kind of step" label, using the same focus-area words as Med Log. */
+  .program-kind {
+    display: inline-block;
+    font-size: var(--t-small);
+    color: var(--accent-deep);
+    margin: 0 0 var(--s2);
+  }
+  .program-kind::before { content: "· "; }
+  .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.45; }
   .program-nick { display: inline-flex; margin-bottom: var(--s2); }
   .program-nick[hidden] { display: none; }
   .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
@@ -1239,6 +1248,7 @@
   body[data-sunday="true"] #insteadCard,
   body[data-sunday="true"] #todayCard,
   body[data-sunday="true"] #programCard,
+  body[data-sunday="true"] #programEveCard,
   body[data-sunday="true"] .home-foot,
   body[data-sunday="true"] #screen-home .screen-hint { display: none; }
   .sunday-note {
@@ -1347,6 +1357,7 @@
   <section class="card program-card" id="programCard" hidden>
     <h2><span class="dot"></span>A quiet 30 days</h2>
     <p class="program-meta" id="programMeta"></p>
+    <span class="program-kind" id="programKind"></span>
     <h3 class="program-title" id="programTitle"></h3>
     <p class="program-invite" id="programInvite"></p>
     <a class="btn small program-nick" id="programNick" target="_blank" rel="noopener" hidden></a>
@@ -1354,6 +1365,7 @@
     <div class="btn-row">
       <button type="button" class="btn small" id="programDone">That's enough</button>
     </div>
+    <p class="program-close" id="programClose" hidden></p>
   </section>
 
   <!-- ============ MORNING ============ -->
@@ -1392,6 +1404,21 @@
 
   <!-- ============ WIND DOWN ============ -->
   <div class="screen" id="screen-winddown" hidden>
+
+  <!-- ============ 30-DAY SEQUENCE — evening view ============ -->
+  <section class="card program-card" id="programEveCard" hidden>
+    <h2><span class="dot"></span>A quiet 30 days</h2>
+    <p class="program-meta" id="programEveMeta"></p>
+    <span class="program-kind" id="programEveKind"></span>
+    <h3 class="program-title" id="programEveTitle"></h3>
+    <p class="program-invite" id="programEveInvite"></p>
+    <a class="btn small program-nick" id="programEveNick" target="_blank" rel="noopener" hidden></a>
+    <p class="hint program-optional" id="programEveOptional" hidden></p>
+    <div class="btn-row">
+      <button type="button" class="btn small" id="programEveDone">That's enough</button>
+    </div>
+    <p class="program-close" id="programEveClose" hidden></p>
+  </section>
 
   <!-- ============ INSTEAD OF GAMING ============ -->
   <section class="card instead-card" id="insteadCard">
@@ -1658,7 +1685,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v35</div>
+  <div class="version" id="versionTag">v36</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1712,7 +1739,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v35";
+const VERSION = "v36";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -4143,8 +4170,52 @@ function currentProgramStep() {
   const i = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
   return PROGRAM30[i] || null;
 }
+/* Quiet labels drawn from the focus-area words used in Med Log, so both apps
+   describe the same kinds of care the same way. */
+const PROGRAM_KIND_LABELS = {
+  nick: "Awareness",
+  rest: "Quiet repeat",
+  sleep: "Sleep",
+  body: "Movement",
+  day: "Everyday",
+  connection: "Connection",
+};
+function fillProgramCard(prefix, p, step, at) {
+  const q = (name) => $("#" + prefix + name);
+  const card = q("Card");
+  if (!card) return;
+  card.hidden = !p.loaded || !step;
+  if (card.hidden) return;
+  const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
+  if (meta) meta.textContent = "Step " + at + " of " + PROGRAM30.length;
+  if (kind) kind.textContent = PROGRAM_KIND_LABELS[step.kind] || "";
+  if (title) title.textContent = step.title;
+  if (invite) invite.textContent = step.invitation;
+  const nick = q("Nick");
+  if (nick) {
+    nick.hidden = !step.nick;
+    if (step.nick) {
+      nick.href = NICK_URL;
+      nick.textContent = "Open Nick Moss · " + step.nick;
+      nick.setAttribute("aria-label", "Open the Nick Moss daily meditation in a new tab");
+    }
+  }
+  const optional = q("Optional");
+  if (optional) {
+    optional.hidden = !step.optional;
+    optional.textContent = step.optional || "";
+  }
+  const last = p.step >= PROGRAM30.length - 1;
+  const done = q("Done");
+  if (done) done.textContent = last ? "Keep this step" : "That's enough";
+  const close = q("Close");
+  if (close) {
+    close.hidden = !last;
+    if (last) close.textContent = "That's the thirty. Nothing to score — just notice what felt okay, if you want.";
+  }
+}
 function renderProgram() {
-  const card = $("#programCard"), more = $("#programMoreText"), load = $("#programLoadBtn");
+  const more = $("#programMoreText"), load = $("#programLoadBtn");
   const p = state.settings.program30 || {};
   const step = currentProgramStep();
   const at = Math.min(PROGRAM30.length, (Math.round(Number(p.step) || 0) + 1));
@@ -4157,29 +4228,8 @@ function renderProgram() {
         : "Thirty small invitations, at your pace. Nothing to catch up on.";
   }
   if (load) load.textContent = p.loaded ? "Load out" : "Load in";
-  if (!card) return;
-  card.hidden = !p.loaded || !step;
-  if (card.hidden) return;
-  const meta = $("#programMeta"), title = $("#programTitle"), invite = $("#programInvite");
-  if (meta) meta.textContent = "Step " + at + " of " + PROGRAM30.length;
-  if (title) title.textContent = step.title;
-  if (invite) invite.textContent = step.invitation;
-  const nick = $("#programNick");
-  if (nick) {
-    nick.hidden = !step.nick;
-    if (step.nick) {
-      nick.href = NICK_URL;
-      nick.textContent = "Open Nick Moss · " + step.nick;
-      nick.setAttribute("aria-label", "Open the Nick Moss daily meditation in a new tab");
-    }
-  }
-  const optional = $("#programOptional");
-  if (optional) {
-    optional.hidden = !step.optional;
-    optional.textContent = step.optional || "";
-  }
-  const done = $("#programDone");
-  if (done) done.textContent = p.step >= PROGRAM30.length - 1 ? "Keep this step" : "That's enough";
+  fillProgramCard("program", p, step, at);
+  fillProgramCard("programEve", p, step, at);
 }
 function setProgramLoaded(loaded) {
   const p = state.settings.program30;
@@ -4537,6 +4587,7 @@ function wire() {
     setProgramLoaded(!state.settings.program30.loaded);
   });
   $("#programDone").addEventListener("click", completeProgramStep);
+  $("#programEveDone").addEventListener("click", completeProgramStep);
   $("#ideaBtn").addEventListener("click", chooseSmallStart);
   $("#shelfOptionAnother").addEventListener("click", chooseSmallStart);
   $("#shelfOptionLater").addEventListener("click", () => {
