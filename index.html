@@ -193,6 +193,22 @@
     color: var(--ink-soft);
   }
 
+  /* optional "open" link on a checklist item (e.g. the guided meditation) */
+  .row .item-link {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 14px;
+    color: var(--accent);
+    text-decoration: none;
+    padding: 8px 10px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .row .item-link:active { background: var(--accent-soft); }
+  body.editing .row .item-link { display: none; }
+
   /* editable controls revealed in edit mode */
   .row .row-edit {
     display: none;
@@ -399,6 +415,87 @@
 
   .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
 
+  /* ---------- Time-of-day shift ----------
+     The whole page warms toward ochre in the morning and cools to dusk
+     lavender near bedtime. JS sets data-phase on <body>; colours transition
+     slowly so nothing flashes. */
+  body { transition: background-color 2.5s ease, color 2.5s ease; }
+  body[data-phase="morning"] {
+    --bg: #f6ecd8; --card: #fdf6e8; --sun: #d9a441;
+  }
+  body[data-phase="day"] {
+    --bg: #f4efe6; --card: #fbf8f2;
+  }
+  body[data-phase="evening"] {
+    --bg: #edeaf2; --card: #f6f3f8; --evening: #8a86a8;
+  }
+  body[data-phase="night"] {
+    --bg: #e6e3ee; --card: #efecf4; --ink: #3a3842; --ink-soft: #6a6678;
+  }
+
+  /* ---------- Rotating intention ---------- */
+  .rot-intention {
+    margin: 2px 0 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--sun-soft);
+    font-size: 16px;
+    color: var(--ink);
+    line-height: 1.35;
+    transition: opacity 0.5s ease;
+    cursor: pointer;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .rot-intention.fading { opacity: 0; }
+  .rot-intention .ri-label {
+    display: block;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 2px;
+  }
+
+  /* ---------- "Small win" whisper ---------- */
+  #whisper {
+    position: fixed;
+    left: 50%;
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(8px);
+    background: var(--accent);
+    color: #fff;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease, transform 0.6s ease;
+    z-index: 50;
+    box-shadow: var(--shadow);
+  }
+  #whisper.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- Sunday mode ----------
+     A protected day. JS adds data-sunday="true"; we soften the page and
+     tuck the do-y things away, leaving rest + the bedtime log. */
+  body[data-sunday="true"] .card:not(#bedCard):not(#weekCard) { opacity: 0.55; }
+  body[data-sunday="true"] #morningCard,
+  body[data-sunday="true"] #anchorsCard,
+  body[data-sunday="true"] #insteadCard { display: none; }
+  .sunday-note {
+    display: none;
+    text-align: center;
+    font-size: 17px;
+    color: var(--ink-soft);
+    padding: 20px 12px 6px;
+    line-height: 1.4;
+  }
+  body[data-sunday="true"] .sunday-note { display: block; }
+
   @media (min-width: 480px) {
     body { font-size: 17px; }
   }
@@ -412,9 +509,12 @@
     <span class="date" id="todayLabel"></span>
   </header>
 
+  <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
+
   <!-- ============ MORNING ============ -->
   <section class="card morning" id="morningCard">
     <h2><span class="dot"></span>Morning</h2>
+    <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
     <div id="morningList"></div>
     <div id="morningDone"></div>
     <div class="intention-wrap">
@@ -500,6 +600,8 @@
   </footer>
 </div>
 
+<div id="whisper" role="status" aria-live="polite"></div>
+
 <script>
 "use strict";
 /* =====================================================================
@@ -524,7 +626,7 @@ const STORE_KEY = "bot.v1";
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
   morning: [
-    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)" },
+    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)", url: "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260" },
     { id: "m_breakfast", text: "Breakfast outside, quiet" },
     { id: "m_sun",     text: "Sun movements + sun salute + om" },
     { id: "m_nick",    text: "Nick Moss daily meditation" },
@@ -544,6 +646,24 @@ const DEFAULT_LISTS = {
   ],
 };
 
+/* A quiet rotating intention — a gentle word or line, never a task.
+   Yours to edit. Tapping the card in the morning cycles through these. */
+const INTENTIONS = [
+  "Begin gently.",
+  "There is no hurry.",
+  "One thing at a time is enough.",
+  "Come back to the body.",
+  "You can start small.",
+  "Quiet is allowed.",
+  "Let it be easy.",
+  "Nothing to prove today.",
+  "Soft is a strength.",
+  "Return, don't push.",
+];
+
+/* One-word soft acknowledgements for finishing an anchor. Quiet, then gone. */
+const WHISPERS = ["there.", "good.", "done.", "nice.", "that counts.", "mm."];
+
 /* ---------- State ---------- */
 let state = load() || freshState();
 let editing = false;
@@ -554,6 +674,8 @@ function freshState() {
     settings: {
       lists: JSON.parse(JSON.stringify(DEFAULT_LISTS)),
       targetBed: "22:30",
+      intentionIndex: 0,   // rotates through INTENTIONS; persisted so it's stable per day
+      intentionDay: "",    // the YYYY-MM-DD the current intention was chosen for
     },
     days: {},
   };
@@ -566,11 +688,24 @@ function load() {
     const parsed = JSON.parse(raw);
     // minimal shape guard
     if (!parsed || typeof parsed !== "object" || !parsed.settings || !parsed.days) return null;
+    migrate(parsed);
     return parsed;
   } catch (e) {
     console.warn("Could not load state:", e);
     return null;
   }
+}
+
+/* Gentle, non-destructive migrations. Only fills in the Sangha meditation
+   link if that item exists and has no url yet — never touches your edits. */
+function migrate(s) {
+  const sangha = s.settings.lists.morning.find((it) => it.id === "m_sangha");
+  if (sangha && !sangha.url) {
+    sangha.url = DEFAULT_LISTS.morning.find((it) => it.id === "m_sangha").url;
+  }
+  // new settings fields (time-of-day + rotating intention)
+  if (typeof s.settings.intentionIndex !== "number") s.settings.intentionIndex = 0;
+  if (typeof s.settings.intentionDay !== "string") s.settings.intentionDay = "";
 }
 
 function save() {
@@ -613,13 +748,81 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 function renderAll() {
+  applyPhase();
+  applySunday();
   renderHeader();
+  renderRotIntention();
   renderList("morning");
   renderList("anchors");
   renderIntention();
   renderBedtime();
   renderMood();
   renderWeek();
+}
+
+/* ---------- Time-of-day phase (warm morning → cool dusk) ---------- */
+function currentPhase(d = new Date()) {
+  const h = d.getHours();
+  if (h >= 5 && h < 11) return "morning";
+  if (h >= 11 && h < 17) return "day";
+  if (h >= 17 && h < 21) return "evening";
+  return "night";
+}
+function applyPhase() {
+  document.body.dataset.phase = currentPhase();
+}
+
+/* ---------- Sunday mode: protected rest day ---------- */
+function applySunday() {
+  document.body.dataset.sunday = (new Date().getDay() === 0) ? "true" : "false";
+}
+
+/* ---------- Rotating intention ---------- */
+function renderRotIntention() {
+  const box = $("#rotIntention");
+  if (!box) return;
+  const today = todayKey();
+  // pick a fresh intention once per day, stable across reloads that day
+  if (state.settings.intentionDay !== today) {
+    state.settings.intentionDay = today;
+    state.settings.intentionIndex = pickDifferentIntention(state.settings.intentionIndex);
+    save();
+  }
+  const text = INTENTIONS[state.settings.intentionIndex % INTENTIONS.length];
+  box.innerHTML = "";
+  const label = document.createElement("span");
+  label.className = "ri-label";
+  label.textContent = "A small lift";
+  const line = document.createElement("span");
+  line.textContent = text;
+  box.append(label, line);
+}
+function pickDifferentIntention(prev) {
+  if (INTENTIONS.length <= 1) return 0;
+  let n = prev;
+  while (n === prev) n = Math.floor(Math.random() * INTENTIONS.length);
+  return n;
+}
+function cycleIntention() {
+  const box = $("#rotIntention");
+  box.classList.add("fading");
+  setTimeout(() => {
+    state.settings.intentionIndex = (state.settings.intentionIndex + 1) % INTENTIONS.length;
+    save();
+    renderRotIntention();
+    box.classList.remove("fading");
+  }, 500);
+}
+
+/* ---------- "Small win" whisper ---------- */
+let whisperTimer = null;
+function whisper() {
+  const el = $("#whisper");
+  if (!el) return;
+  el.textContent = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
+  el.classList.add("show");
+  if (whisperTimer) clearTimeout(whisperTimer);
+  whisperTimer = setTimeout(() => el.classList.remove("show"), 1600);
 }
 
 function renderHeader() {
@@ -664,6 +867,18 @@ function renderList(which) {
     label.textContent = item.text;
 
     row.append(drag, check, label);
+
+    // optional tap-to-open link (e.g. the guided meditation in Kajabi)
+    if (item.url) {
+      const a = document.createElement("a");
+      a.className = "item-link";
+      a.href = item.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Open ↗";
+      a.addEventListener("click", (e) => e.stopPropagation());
+      row.append(a);
+    }
 
     // optional minutes field for reading
     if (item.minutes) {
@@ -757,7 +972,8 @@ function toggleCheck(which, id) {
   save();
   renderList(which);
   renderWeek();
-  // gentle, quiet: nothing else. no confetti storms.
+  // quiet celebration when an anchor is completed (not when un-ticking)
+  if (which === "anchors" && rec.checks[id]) whisper();
 }
 
 function moveItem(which, id, dir) {
@@ -980,6 +1196,9 @@ function mergeState(local, incoming) {
    EVENT WIRING
    ===================================================================== */
 function wire() {
+  // rotating intention: tap the card for another gentle line
+  $("#rotIntention").addEventListener("click", cycleIntention);
+
   // intention
   $("#intentionInput").addEventListener("input", (e) => {
     dayRecord().intention = e.target.value;
@@ -1060,8 +1279,14 @@ function wire() {
 /* ---------- Boot ---------- */
 wire();
 renderAll();
-// re-render header at midnight-ish if left open
-setInterval(renderHeader, 60 * 1000);
+// keep header, time-of-day phase, Sunday mode and the daily intention fresh
+// if the app is left open across a boundary (no timers needed otherwise)
+setInterval(() => {
+  renderHeader();
+  applyPhase();
+  applySunday();
+  renderRotIntention();
+}, 60 * 1000);
 
 // PWA service worker (no-op if unsupported / file://)
 if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
