@@ -10,6 +10,13 @@ an optional gradual walking sketch, device dark mode, named-shelf swipe-to-delet
 with Undo, and sleep details derived only from times you already logged. No new
 tracking, scores or clinical claims.
 
+**v34** adds an optional **quiet 30 days**: thirty small invitations sequenced by
+an agent brief, beginning with 30 seconds of the Nick Moss meditation and rising
+slowly to eight minutes with repeat/rest steps. It can be **loaded in** or
+**loaded out** from More at any time; loading out only hides the Home card and
+keeps the step, dates and gentle marks exactly where they were. Steps advance
+only when you tap *That's enough* — no calendar pressure, streak or catch-up.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
@@ -55,9 +62,11 @@ The JS is organised in labelled sections inside one `<script>`:
   `state.settings.targetBed`. Named shelves live in `state.settings.shelves`, and
   temporary "borrowings" in `state.settings.loans`, so a shelf item can be used in
   the day without being deleted from the shelf. `state.settings.walkStartMinutes`
-  only feeds the optional walking sketch — it is not a target or a log. Export
-  writes the same shape and Import merges it, so it's easy to fold into an anchor
-  planner later.
+  only feeds the optional walking sketch — it is not a target or a log.
+  `state.settings.program30` holds the optional sequence (`loaded`, `step`,
+  `startedAt`, `lastDoneAt`, `done`); its per-step marks are kept but never scored.
+  Export writes the same shape and Import merges it, so it's easy to fold into an
+  anchor planner later.
 - **Rendering** — `renderAll()` and friends rebuild each section from state.
 - **Edit mode** — toggled by *Edit lists*; reveals add / remove / reorder (↑↓ and drag).
   In edit mode a Home row also gets **↧ Shelf**, which moves it to a named shelf
@@ -109,6 +118,12 @@ The bottom menu keeps each screen light:
   "a little further when that feels right" and no dates, targets or logging.
   **Back on morning** / **Back on anchors** permanently reinstates things that
   came from Home. Home or Escape takes you back.
+- **A quiet 30 days** — an optional overlay, loaded in or out from More. While
+  loaded, Home shows one invitation: the current step, a Nick Moss link only when
+  that step asks for it, an optional slightly larger version, and *That's enough*.
+  The next invitation waits until you mark the current one; a missed day simply
+  leaves the same step. Sunday hides the card along with the other doing controls.
+  Loading out keeps the step and all gentle marks; loading in resumes there.
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the

@@ -233,6 +233,21 @@
   .so-actions { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s2); }
   .so-actions .btn { flex: 0 1 auto; }
 
+  /* A 30-day sequence: one invitation, no clock and no catching up. */
+  .program-card[hidden] { display: none; }
+  .program-meta { font-size: var(--t-cap); color: var(--ink-soft); margin: 0 0 var(--s1); }
+  .program-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 18px; font-weight: 500; line-height: 1.35;
+    margin: 0 0 var(--s2);
+  }
+  .program-invite { font-size: var(--t-body); line-height: 1.45; margin: 0 0 var(--s3); }
+  .program-nick { display: inline-flex; margin-bottom: var(--s2); }
+  .program-nick[hidden] { display: none; }
+  .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
+  .program-optional[hidden] { display: none; }
+  .program-card .btn-row { grid-template-columns: minmax(0, 1fr); }
+
   /* ---------- Named shelves + borrowed items ----------
      A shelf is a library, not a to-do list. Items can be borrowed into the
      day without leaving their shelf, like taking a book out to read. */
@@ -1223,6 +1238,7 @@
   body[data-sunday="true"] #anchorsCard,
   body[data-sunday="true"] #insteadCard,
   body[data-sunday="true"] #todayCard,
+  body[data-sunday="true"] #programCard,
   body[data-sunday="true"] .home-foot,
   body[data-sunday="true"] #screen-home .screen-hint { display: none; }
   .sunday-note {
@@ -1324,6 +1340,19 @@
       <input type="time" id="wakeInput" />
       <button type="button" class="btn small" id="wakeSave">Save</button>
       <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
+    </div>
+  </section>
+
+  <!-- ============ 30-DAY SEQUENCE (hidden until loaded in) ============ -->
+  <section class="card program-card" id="programCard" hidden>
+    <h2><span class="dot"></span>A quiet 30 days</h2>
+    <p class="program-meta" id="programMeta"></p>
+    <div class="program-title" id="programTitle"></div>
+    <p class="program-invite" id="programInvite"></p>
+    <a class="btn small program-nick" id="programNick" target="_blank" rel="noopener" hidden></a>
+    <p class="hint program-optional" id="programOptional" hidden></p>
+    <div class="btn-row">
+      <button type="button" class="btn small" id="programDone">That's enough</button>
     </div>
   </section>
 
@@ -1582,6 +1611,14 @@
       <p class="hint">Good things you know you're good at, but aren't pulling into the day right now. Each shelf has its own name. Nothing here is a task.</p>
     </section>
 
+    <section class="card" id="programMoreCard">
+      <h2><span class="dot"></span>A quiet 30 days</h2>
+      <p class="hint" id="programMoreText"></p>
+      <div class="btn-row">
+        <button type="button" class="btn small" id="programLoadBtn">Load in</button>
+      </div>
+    </section>
+
     <section class="card" id="gentlePractices">
       <div class="card-heading">
         <h2><span class="dot"></span>On the shelf</h2>
@@ -1621,7 +1658,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v33</div>
+  <div class="version" id="versionTag">v34</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1675,7 +1712,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v33";
+const VERSION = "v34";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -1762,6 +1799,42 @@ const DEFAULT_SHELVES = [
   },
 ];
 
+/* Thirty quiet invitations, sequenced by the agent brief. The current step only
+   moves on when it is gently marked enough; a missed day leaves it waiting.
+   Nick listening grows from 30 seconds to eight minutes with repeat days. */
+const PROGRAM30 = [
+  { id: "d01", title: "Press play once", invitation: "If you want, press play on the Nick Moss meditation and hear how it starts.", nick: "first 30 seconds", kind: "nick", optional: "If you like, let it run to the first minute, then stop whenever." },
+  { id: "d02", title: "Hear one minute", invitation: "Open the meditation again if you like and let the first minute play.", nick: "first minute", kind: "nick", optional: "If you want, sit with it through a minute and a half." },
+  { id: "d03", title: "A shorter listen", invitation: "Let it be a short listen — the first half minute is enough.", nick: "first 30 seconds", kind: "rest", optional: null },
+  { id: "d04", title: "One gentle stretch", invitation: "Reach up once, slowly, and let your arms come down again.", nick: null, kind: "body", optional: "If you like, follow it with one more stretch, at your pace." },
+  { id: "d05", title: "A little longer", invitation: "If you want, press play and stay for a minute and a half.", nick: "through the first minute and a half", kind: "nick", optional: "If you like, let it reach two minutes, then stop whenever." },
+  { id: "d06", title: "Log waking up", invitation: "If you want, note the time you woke, just as it was.", nick: null, kind: "sleep", optional: "If you like, add a line about how the night felt." },
+  { id: "d07", title: "One small anchor", invitation: "Pick one anchor you fancy and give it a minute or two.", nick: null, kind: "day", optional: "If you want, follow it with one more small anchor." },
+  { id: "d08", title: "A softer repeat", invitation: "Let the meditation play again, only as far as feels easy.", nick: "first minute", kind: "rest", optional: null },
+  { id: "d09", title: "Two minutes of sound", invitation: "Press play when you like and let two minutes of it be enough.", nick: "through the first two minutes", kind: "nick", optional: "If you want, stay a little longer, then stop whenever." },
+  { id: "d10", title: "One short message", invitation: "If you want, send one brief message to someone you like.", nick: null, kind: "connection", optional: "If you like, reply to one more, whenever suits." },
+  { id: "d11", title: "Three quiet minutes", invitation: "Open the meditation if you like and listen for three gentle minutes.", nick: "through the first three minutes", kind: "nick", optional: "If you want, choose a shorter stretch instead — two minutes is plenty." },
+  { id: "d12", title: "Feel your feet", invitation: "Notice your feet on the floor for a few slow breaths.", nick: null, kind: "body", optional: "If you like, press them gently into the floor, then let go." },
+  { id: "d13", title: "Step back gently", invitation: "Return to a shorter listen today — two minutes is enough.", nick: "through the first two minutes", kind: "rest", optional: null },
+  { id: "d14", title: "A simple bedtime note", invitation: "If you want, log your bed time when you get there.", nick: null, kind: "sleep", optional: "If you like, add one word about the day before sleeping." },
+  { id: "d15", title: "Four easy minutes", invitation: "Press play when it suits and let four minutes pass.", nick: "through the first four minutes", kind: "nick", optional: "If you want, rest your hands and stay a little longer." },
+  { id: "d16", title: "Tidy one surface", invitation: "If you want, put three things back where they belong.", nick: null, kind: "day", optional: "If you like, clear one more corner, then stop whenever." },
+  { id: "d17", title: "Walk to the corner", invitation: "Step outside if you like and walk to the nearest corner.", nick: null, kind: "body", optional: "If you want, go a little further, at your own pace." },
+  { id: "d18", title: "Return to three", invitation: "Let the meditation play for three minutes, then that's plenty.", nick: "through the first three minutes", kind: "rest", optional: null },
+  { id: "d19", title: "Five minutes of rest", invitation: "If you want, press play and let five minutes be enough.", nick: "through the first five minutes", kind: "nick", optional: "If you like, stay for one more minute, then stop." },
+  { id: "d20", title: "A kind check-in", invitation: "If you want, ask someone how they are and listen briefly.", nick: null, kind: "connection", optional: "If you like, tell them one small thing about your day." },
+  { id: "d21", title: "Keep wake time soft", invitation: "Log your wake time if you like, even after a rough night.", nick: null, kind: "sleep", optional: "If you want, note one thing that made the morning easier." },
+  { id: "d22", title: "Six unhurried minutes", invitation: "Open the meditation when you like and let it run six minutes.", nick: "through the first six minutes", kind: "nick", optional: "If you want, turn it off early — five minutes counts too." },
+  { id: "d23", title: "A little less today", invitation: "Let today's listen be shorter, four minutes or less.", nick: "through the first four minutes", kind: "rest", optional: null },
+  { id: "d24", title: "Read one page", invitation: "Open whatever is on the table and read one page.", nick: null, kind: "day", optional: "If you like, read a few more pages, then stop whenever." },
+  { id: "d25", title: "One long stretch", invitation: "Reach up slowly if you like and hold the stretch for a moment.", nick: null, kind: "body", optional: "If you want, stretch one more time, gently." },
+  { id: "d26", title: "Seven calm minutes", invitation: "Press play when you like and stay for seven gentle minutes.", nick: "through the first seven minutes", kind: "nick", optional: "If you like, sit quietly for a moment after it ends." },
+  { id: "d27", title: "Share a small thing", invitation: "If you want, tell someone one small thing you noticed.", nick: null, kind: "connection", optional: "If you like, let them answer whenever they can." },
+  { id: "d28", title: "Five is plenty", invitation: "Let the meditation be short today — five minutes is enough.", nick: "through the first five minutes", kind: "rest", optional: null },
+  { id: "d29", title: "Lights low early", invitation: "If you want, lower the lights a little earlier tonight.", nick: null, kind: "sleep", optional: "If you like, log your bed time and leave the rest." },
+  { id: "d30", title: "Eight minutes, if you want", invitation: "Press play when you like and listen for eight minutes.", nick: "through the first eight minutes", kind: "nick", optional: "If you want, stop early and just sit quietly for a moment." },
+];
+
 /* One gentle line per day — never a task, and no tap-to-cycle. */
 const INTENTIONS = [
   "Begin gently.",
@@ -1805,6 +1878,13 @@ function freshState() {
       smallStartsAdded: false, // one-time seed guard for the Small starts shelf
       movementAdded: false,    // one-time seed guard for the Movement shelf
       walkStartMinutes: 10,    // only used to sketch a gradual walking ladder
+      program30: {             // 30 quiet invitations; load in/out keeps this intact
+        loaded: false,
+        step: 0,             // index into PROGRAM30; moves only when marked enough
+        startedAt: "",
+        lastDoneAt: "",
+        done: {},            // step id -> date, kept but never scored
+      },
       updatedAt: 0,        // last change, used to decide which device wins a sync
     },
     days: {},
@@ -2082,6 +2162,18 @@ function migrate(s) {
   if (typeof s.settings.walkStartMinutes !== "number" || s.settings.walkStartMinutes < 5) {
     s.settings.walkStartMinutes = 10;
   }
+  // The 30-day sequence is a visibility flip on one record. Loading out never
+  // clears the step, the dates or the gentle per-step marks.
+  const p = s.settings.program30;
+  if (!p || typeof p !== "object" || Array.isArray(p)) {
+    s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {} };
+  } else {
+    p.loaded = !!p.loaded;
+    p.step = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
+    if (typeof p.startedAt !== "string") p.startedAt = "";
+    if (typeof p.lastDoneAt !== "string") p.lastDoneAt = "";
+    if (!p.done || typeof p.done !== "object" || Array.isArray(p.done)) p.done = {};
+  }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
   // Sangha has moved off the Home checklist and onto the quiet ☰ page.
@@ -2190,6 +2282,7 @@ function renderAll() {
   renderMyLinks();
   renderGentle();
   renderShelfOption();
+  renderProgram();
   renderSync();
   if (focusOn) renderFocus();
 }
@@ -4041,6 +4134,75 @@ function renderShelfOption() {
   box.dataset.shelfId = "sh_smallstarts";
 }
 
+/* ---------- A 30-day sequence, loaded in or out at will ----------
+   It is an overlay on the rhythm, not another list. Loading out only hides the
+   card; the step, the dates and the gentle marks stay exactly where they were.
+   There is no calendar pressure and nothing to catch up on. */
+function currentProgramStep() {
+  const p = state.settings.program30 || {};
+  const i = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
+  return PROGRAM30[i] || null;
+}
+function renderProgram() {
+  const card = $("#programCard"), more = $("#programMoreText"), load = $("#programLoadBtn");
+  const p = state.settings.program30 || {};
+  const step = currentProgramStep();
+  const at = Math.min(PROGRAM30.length, (Math.round(Number(p.step) || 0) + 1));
+  if (more) {
+    const marks = Object.keys(p.done || {}).length;
+    more.textContent = p.loaded
+      ? "Thirty small invitations, at your pace. Loading out hides the card; your place is kept."
+      : (marks || p.startedAt)
+        ? "Kept at step " + at + " of " + PROGRAM30.length + ". Loading in resumes there — nothing is lost."
+        : "Thirty small invitations, at your pace. Nothing to catch up on.";
+  }
+  if (load) load.textContent = p.loaded ? "Load out" : "Load in";
+  if (!card) return;
+  card.hidden = !p.loaded || !step;
+  if (card.hidden) return;
+  const meta = $("#programMeta"), title = $("#programTitle"), invite = $("#programInvite");
+  if (meta) meta.textContent = "Step " + at + " of " + PROGRAM30.length;
+  if (title) title.textContent = step.title;
+  if (invite) invite.textContent = step.invitation;
+  const nick = $("#programNick");
+  if (nick) {
+    nick.hidden = !step.nick;
+    if (step.nick) {
+      nick.href = NICK_URL;
+      nick.textContent = "Open Nick Moss · " + step.nick;
+      nick.setAttribute("aria-label", "Open the Nick Moss daily meditation in a new tab");
+    }
+  }
+  const optional = $("#programOptional");
+  if (optional) {
+    optional.hidden = !step.optional;
+    optional.textContent = step.optional || "";
+  }
+  const done = $("#programDone");
+  if (done) done.textContent = p.step >= PROGRAM30.length - 1 ? "Keep this step" : "That's enough";
+}
+function setProgramLoaded(loaded) {
+  const p = state.settings.program30;
+  if (!p) return;
+  p.loaded = !!loaded;
+  save();
+  renderProgram();
+  haptic(6);
+}
+function completeProgramStep() {
+  const p = state.settings.program30;
+  const step = currentProgramStep();
+  if (!p || !p.loaded || !step) return;
+  const today = todayKey();
+  p.done[step.id] = today;
+  p.lastDoneAt = today;
+  if (!p.startedAt) p.startedAt = today;
+  if (p.step < PROGRAM30.length - 1) p.step += 1;
+  save();
+  renderProgram();
+  haptic(8);
+}
+
 /* Kept as a no-op so older callers stay harmless. Counts and "often" scores
    have no place in the daily rhythm now. */
 function renderGentleStats() { return; }
@@ -4339,6 +4501,10 @@ function wire() {
     save();           // the sketch follows the app to your other devices
     renderMovementLadder();
   });
+  $("#programLoadBtn").addEventListener("click", () => {
+    setProgramLoaded(!state.settings.program30.loaded);
+  });
+  $("#programDone").addEventListener("click", completeProgramStep);
   $("#ideaBtn").addEventListener("click", chooseSmallStart);
   $("#shelfOptionAnother").addEventListener("click", chooseSmallStart);
   $("#shelfOptionLater").addEventListener("click", () => {
