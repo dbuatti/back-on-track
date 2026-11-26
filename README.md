@@ -54,17 +54,34 @@ The JS is organised in labelled sections inside one `<script>`:
 
 The bottom menu keeps each screen light:
 
-- **Home** — greeting, rotating intention, a soft progress strip (tap *Morning* or
-  *Anchors* to drop straight into focus mode), morning checklist, daily anchors.
-- **Wind down** — "instead of gaming", bedtime/wake + mood, the soft-dot week.
+- **Home** — greeting, a little italic note for the day, a soft progress strip,
+  **Start focus mode**, **Log wake**, morning checklist, daily anchors.
+- **Wind down** — "instead of gaming", bedtime/wake + mood, a sleep-trend strip
+  (last 14 nights with an average and usual wake time), a short note on waking,
+  and the soft-dot week.
 - **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
   onto its screen, and skips hidden sections on Sunday.
 - **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`) with
   `?app=` / `?search=` shortcuts (ids come from `~/Projects/the-door/apps.yaml`),
-  the ⛈️ Tool kit button (`thecalmafter.vercel.app`), and Export/Import.
+  device sync, the ⛈️ Tool kit button (`thecalmafter.vercel.app`), and Export/Import.
+
+## Sync across devices
+
+The Links screen can keep devices in step using a **private GitHub Gist**:
+
+1. On one device, make a classic GitHub token with only `gist` scope
+   (the link on the Sync card opens the right page) and paste it in.
+2. Tap **Set up**. The app creates a secret gist and shows its ID.
+3. On each other device, paste the same token and gist ID, then tap **Sync now**.
+
+The token and gist ID live only in that browser's `localStorage` (`bot.sync.v1`),
+never in exports or the app source. Sync is last-change-wins, using
+`settings.updatedAt`; tap **Sync now** before switching devices. Sleep and mood
+trends are then computed from the shared records on each device.
 
 ## Design notes
 
+- Warm clay / oat colours instead of white, with a gentle morning → dusk shift.
 - Kind by default: missed days render as empty dots, never red X's or streaks.
 - Big tap targets, few choices per screen, collapsible-by-done morning items.
 - Swipe a row right to tick it, left to untick; a plain tap still works.

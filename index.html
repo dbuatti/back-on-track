@@ -13,19 +13,20 @@
 <style>
   /* ---------- Design tokens: calm, warm, low-contrast ---------- */
   :root {
-    --bg: #f4efe6;          /* warm paper */
-    --card: #fbf8f2;        /* slightly lighter card */
-    --ink: #3b3a36;         /* soft near-black, not pure black */
-    --ink-soft: #6f6a60;    /* muted text */
-    --line: #e4dccd;        /* hairline dividers */
-    --accent: #7c9a82;      /* sage green */
-    --accent-soft: #e7efe7; /* sage tint for done states */
-    --sun: #d9a441;         /* warm ochre for sun/morning */
-    --sun-soft: #f6ecd6;
-    --evening: #8a86a8;     /* dusk lavender for bedtime */
-    --evening-soft: #eceaf3;
-    --radius: 16px;
-    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 4px 14px rgba(60,55,45,0.04);
+    --bg: #e9dccd;          /* warm clay — colour, not white */
+    --card: #f3e8da;        /* soft oat, a shade lighter than the page */
+    --ink: #43372f;         /* deep warm brown, easier on the eyes */
+    --ink-soft: #7a6a5d;    /* muted text */
+    --line: #d9c5b1;        /* hairline dividers */
+    --accent: #6f8f76;      /* sage green */
+    --accent-deep: #55735c; /* darker sage for text on green */
+    --accent-soft: #dce7da; /* sage tint for done states */
+    --sun: #c48744;         /* warm ochre for sun/morning */
+    --sun-soft: #f3ddba;
+    --evening: #857aa6;     /* dusk lavender for bedtime */
+    --evening-soft: #e4dcee;
+    --radius: 18px;
+    --shadow: 0 1px 2px rgba(80,55,35,0.06), 0 6px 18px rgba(80,55,35,0.07);
     --tap: 52px;            /* big tap targets */
   }
 
@@ -60,7 +61,9 @@
   html, body {
     margin: 0;
     padding: 0;
-    background: var(--bg);
+    background-color: var(--bg);
+    background-image: radial-gradient(ellipse 120% 55% at 50% -8%, rgba(255,255,255,0.34), transparent 62%);
+    background-repeat: no-repeat;
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 17px;
@@ -142,6 +145,8 @@
     transition: width 0.3s ease;
   }
   .progress-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .progress-actions .btn { flex: 1 1 140px; }
+  .today-intro .hint { margin-top: 8px; }
 
   /* ---------- Links screen ---------- */
   .link-main {
@@ -417,8 +422,8 @@
   }
   .btn:active { transform: scale(0.98); background: rgba(0,0,0,0.03); }
   .btn.primary {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent-deep);
+    border-color: var(--accent-deep);
     color: #fff;
     width: 100%;
     font-size: 17px;
@@ -459,6 +464,7 @@
     color: var(--ink-soft);
     margin-bottom: 6px;
   }
+  .field label a { color: var(--accent-deep); }
   .windnote {
     font-size: 13px;
     color: var(--ink-soft);
@@ -530,6 +536,60 @@
     background: var(--accent);
     opacity: 0.85;
   }
+
+  /* ---------- Sleep trends ---------- */
+  .trend-summary { font-size: 14px; color: var(--ink-soft); margin-bottom: 12px; }
+  .trend-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 88px;
+    padding-top: 6px;
+  }
+  .trend-day {
+    flex: 1;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+  }
+  .trend-bar {
+    width: 100%;
+    max-width: 22px;
+    min-height: 3px;
+    border-radius: 6px 6px 3px 3px;
+    background: var(--evening);
+    opacity: 0.75;
+  }
+  .trend-bar.missing { background: var(--line); opacity: 0.6; }
+  .trend-label { font-size: 10px; color: var(--ink-soft); }
+  .trend-keys {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .waking-note { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 8px; }
+  .waking-note summary {
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+  .waking-note ul {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+  .waking-note li + li { margin-top: 6px; }
 
   /* ---------- Footer controls ---------- */
   footer.controls {
@@ -646,43 +706,49 @@
      slowly so nothing flashes. */
   body { transition: background-color 2.5s ease, color 2.5s ease; }
   body[data-phase="morning"] {
-    --bg: #f6ecd8; --card: #fdf6e8; --sun: #d9a441;
+    --bg: #eed9c2; --card: #f8e9d5; --sun: #bd7c3c; --sun-soft: #f6dfb8;
   }
   body[data-phase="day"] {
-    --bg: #f4efe6; --card: #fbf8f2;
+    --bg: #e7dfd2; --card: #f2ebdf;
   }
   body[data-phase="evening"] {
-    --bg: #edeaf2; --card: #f6f3f8; --evening: #8a86a8;
+    --bg: #ded7e6; --card: #ece6f1; --evening: #7d72a0; --evening-soft: #e3dcee;
   }
   body[data-phase="night"] {
-    --bg: #e6e3ee; --card: #efecf4; --ink: #3a3842; --ink-soft: #6a6678;
+    --bg: #d6d2e1; --card: #e5e0ec; --ink: #3e384a; --ink-soft: #6f687d;
   }
 
-  /* ---------- Rotating intention ---------- */
+  /* ---------- Rotating intention: a little note, not a label ---------- */
   .rot-intention {
-    margin: 2px 0 14px;
-    padding: 14px 16px;
-    border-radius: 12px;
-    background: var(--sun-soft);
-    font-size: 16px;
+    margin: 0 0 16px;
+    padding: 15px 17px 13px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--sun-soft), var(--card));
+    border: 1px solid rgba(196,135,68,0.24);
     color: var(--ink);
-    line-height: 1.35;
     transition: opacity 0.5s ease;
     cursor: pointer;
-    text-align: center;
-    min-height: 48px;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 54px;
   }
   .rot-intention.fading { opacity: 0; }
-  .rot-intention .ri-label {
+  .rot-intention .ri-mark { font-size: 20px; line-height: 1.25; }
+  .rot-intention .ri-text {
+    flex: 1;
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.35;
+  }
+  .rot-intention .ri-hint {
     display: block;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-style: normal;
+    font-size: 11px;
     color: var(--ink-soft);
-    margin-bottom: 2px;
+    margin-top: 5px;
   }
 
   /* ---------- "Small win" whisper ---------- */
@@ -691,7 +757,7 @@
     left: 50%;
     bottom: calc(86px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(8px);
-    background: var(--accent);
+    background: var(--accent-deep);
     color: #fff;
     font-size: 16px;
     padding: 10px 20px;
@@ -787,9 +853,10 @@
     <div class="progress-line" id="progressLine"></div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-actions">
-      <button type="button" class="btn small ghost" data-focus-jump="morningCard">Morning</button>
-      <button type="button" class="btn small ghost" data-focus-jump="anchorsCard">Anchors</button>
+      <button type="button" class="btn small" id="homeFocusBtn">◎ &nbsp;Start focus mode</button>
+      <button type="button" class="btn small" id="homeWakeBtn">☀ &nbsp;Log wake</button>
     </div>
+    <div class="hint" id="wakeLine"></div>
   </section>
 
   <!-- ============ MORNING ============ -->
@@ -878,6 +945,22 @@
     </div>
   </section>
 
+  <!-- ============ SLEEP TRENDS ============ -->
+  <section class="card" id="trendCard">
+    <h2><span class="dot"></span>Sleep trends</h2>
+    <div class="trend-summary" id="trendSummary">Log a few bed + wake times to see a pattern here.</div>
+    <div class="trend-chart" id="trendChart"></div>
+    <div class="trend-keys"><span>5h</span><span>7h</span><span>9h</span></div>
+    <details class="waking-note">
+      <summary>A note on waking</summary>
+      <ul>
+        <li>Keep wake time roughly the same each day — a steady cue helps the body clock, even after a rough night.</li>
+        <li>Step into daylight within the first hour. Morning light anchors the rhythm better than anything else.</li>
+        <li>If you wake at 3am, don't check the clock. Low light, no problem-solving — leave it until morning.</li>
+      </ul>
+    </details>
+  </section>
+
   <!-- ============ WEEK ============ -->
   <section class="card" id="weekCard">
     <h2><span class="dot"></span>This week</h2>
@@ -910,6 +993,24 @@
         <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=kinesiology" target="_blank" rel="noopener">Search “kinesiology”</a>
       </div>
       <p class="hint">Links open on your Tailnet — if the Mac mini is asleep, The Door won't open. Use the search field there for anything not listed.</p>
+    </section>
+
+    <section class="card" id="syncCard">
+      <h2><span class="dot"></span>Sync</h2>
+      <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it.</p>
+      <div class="field" style="margin-top:10px">
+        <label for="syncToken">GitHub token — <a href="https://github.com/settings/tokens/new?scopes=gist&description=Back%20on%20Track%20sync" target="_blank" rel="noopener">make one with gist scope ↗</a></label>
+        <input type="password" id="syncToken" placeholder="ghp_…" autocomplete="off" autocorrect="off" spellcheck="false" />
+      </div>
+      <div class="field" style="margin-top:10px">
+        <label for="syncGist">Gist ID (same on every device)</label>
+        <input type="text" id="syncGist" placeholder="From Set up" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      </div>
+      <div class="btn-row" style="margin-top:12px">
+        <button type="button" class="btn small" id="syncSetup">Set up</button>
+        <button type="button" class="btn small" id="syncNow">Sync now</button>
+      </div>
+      <div class="hint" id="syncStatus">Not set up yet.</div>
     </section>
 
     <section class="card" id="moreCard">
@@ -979,10 +1080,11 @@
    ===================================================================== */
 
 const STORE_KEY = "bot.v1";
+const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v12";
+const VERSION = "v13";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1019,7 +1121,9 @@ const INTENTIONS = [
   "Let it be easy.",
   "Nothing to prove today.",
   "Soft is a strength.",
-  "Return, don't push.",
+  "You can begin again.",
+  "A little is plenty.",
+  "The day can be kind.",
 ];
 
 /* One-word soft acknowledgements for finishing an anchor. Quiet, then gone. */
@@ -1027,6 +1131,7 @@ const WHISPERS = ["there.", "good.", "done.", "nice.", "that counts.", "mm."];
 
 /* ---------- State ---------- */
 let state = load() || freshState();
+let syncCfg = loadSync();
 let editing = false;
 let showDoneMorning = false;   // when true, done morning items stay expanded
 
@@ -1037,6 +1142,7 @@ function freshState() {
       targetBed: "22:30",
       intentionIndex: 0,   // rotates through INTENTIONS; persisted so it's stable per day
       intentionDay: "",    // the YYYY-MM-DD the current intention was chosen for
+      updatedAt: 0,        // last change, used to decide which device wins a sync
     },
     days: {},
   };
@@ -1085,6 +1191,7 @@ function migrate(s) {
 
 function save() {
   try {
+    state.settings.updatedAt = Date.now();
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
   } catch (e) {
     console.warn("Could not save state:", e);
@@ -1152,8 +1259,11 @@ function renderAll() {
   renderList("anchors");
   renderIntention();
   renderBedtime();
+  renderWakeLine();
+  renderTrends();
   renderMood();
   renderWeek();
+  renderSync();
   if (focusOn) renderFocus();
 }
 
@@ -1232,17 +1342,6 @@ function handleTab(name) {
   showTab(name);
 }
 
-function jumpToSection(id) {
-  const idx = focusableSections().findIndex((s) => s.id === id);
-  if (idx < 0) {
-    handleTab(id === "bedCard" || id === "weekCard" ? "winddown" : "home");
-    return;
-  }
-  if (!focusOn) showTab("home");
-  focusIdx = idx;
-  toggleFocus(true);
-}
-
 function focusableSections() {
   // Sunday tucks some cards away — skip those in focus mode too.
   const sunday = isSunday();
@@ -1298,12 +1397,18 @@ function renderRotIntention() {
   }
   const text = INTENTIONS[state.settings.intentionIndex % INTENTIONS.length];
   box.innerHTML = "";
-  const label = document.createElement("span");
-  label.className = "ri-label";
-  label.textContent = "A small lift";
+  const mark = document.createElement("span");
+  mark.className = "ri-mark";
+  mark.setAttribute("aria-hidden", "true");
+  mark.textContent = "☀";
   const line = document.createElement("span");
+  line.className = "ri-text";
   line.textContent = text;
-  box.append(label, line);
+  const hint = document.createElement("span");
+  hint.className = "ri-hint";
+  hint.textContent = "tap for another";
+  line.append(hint);
+  box.append(mark, line);
 }
 function pickDifferentIntention(prev) {
   if (INTENTIONS.length <= 1) return 0;
@@ -1785,6 +1890,107 @@ function renderWeek() {
   }
 }
 
+/* ---------- Waking + sleep trends ---------- */
+function logWake() {
+  dayRecord().wakeTime = nowHHMM();
+  save();
+  renderBedtime();
+  renderWakeLine();
+  renderTrends();
+  haptic(8);
+}
+
+function logBed() {
+  dayRecord().bedTime = nowHHMM();
+  save();
+  renderBedtime();
+  renderTrends();
+  haptic(8);
+}
+
+function renderWakeLine() {
+  const rec = dayRecord();
+  const line = $("#wakeLine");
+  const btn = $("#homeWakeBtn");
+  if (btn) btn.textContent = rec.wakeTime ? "☀  Update wake" : "☀  Log wake";
+  if (line) line.textContent = rec.wakeTime ? `Woke ${rec.wakeTime} today — tap to change it.` : "";
+}
+
+function fmtDuration(mins) {
+  const total = Math.round(mins);
+  return `${Math.floor(total / 60)}h ${String(total % 60).padStart(2, "0")}m`;
+}
+
+/* A night belongs to the morning you wake: pair today's wake time with the
+   bedtime logged either last evening or just after midnight this morning. */
+function sleepMinutesFor(key) {
+  const rec = state.days[key];
+  if (!rec || !rec.wakeTime) return null;
+  const d = new Date(key + "T12:00:00");
+  d.setDate(d.getDate() - 1);
+  const prev = state.days[todayKey(d)];
+  const bed = (prev && prev.bedTime) || rec.bedTime;
+  if (!bed) return null;
+  const [bh, bm] = bed.split(":").map(Number);
+  const [wh, wm] = rec.wakeTime.split(":").map(Number);
+  let start = bh * 60 + bm;
+  let end = wh * 60 + wm;
+  if (end <= start) end += 1440;
+  const mins = end - start;
+  return mins >= 180 && mins <= 960 ? mins : null;
+}
+
+function renderTrends() {
+  const chart = $("#trendChart");
+  if (!chart) return;
+  chart.innerHTML = "";
+  const now = new Date();
+  const values = [], wakes = [], labels = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const key = todayKey(d);
+    values.push(sleepMinutesFor(key));
+    labels.push(d.toLocaleDateString(undefined, { weekday: "narrow" }));
+    const rec = state.days[key];
+    if (rec && rec.wakeTime) {
+      const [h, m] = rec.wakeTime.split(":").map(Number);
+      wakes.push(h * 60 + m);
+    }
+  }
+  values.forEach((mins, i) => {
+    const col = document.createElement("div");
+    col.className = "trend-day";
+    const bar = document.createElement("div");
+    bar.className = "trend-bar" + (mins === null ? " missing" : "");
+    if (mins === null) {
+      bar.title = "No sleep logged";
+    } else {
+      bar.style.height = Math.max(8, Math.min(100, ((mins - 300) / 300) * 100)) + "%";
+      bar.title = fmtDuration(mins);
+    }
+    const label = document.createElement("span");
+    label.className = "trend-label";
+    label.textContent = labels[i];
+    col.append(bar, label);
+    chart.append(col);
+  });
+  const summary = $("#trendSummary");
+  if (!summary) return;
+  const logged = values.filter((v) => v !== null);
+  if (logged.length < 3) {
+    summary.textContent = "Log a few bed + wake times to see a pattern here.";
+    return;
+  }
+  const avg = logged.reduce((a, b) => a + b, 0) / logged.length;
+  let wakeText = "";
+  if (wakes.length) {
+    const avgWake = Math.round(wakes.reduce((a, b) => a + b, 0) / wakes.length);
+    wakeText = ` · waking around ${String(Math.floor(avgWake / 60)).padStart(2, "0")}:${String(avgWake % 60).padStart(2, "0")}`;
+  }
+  summary.textContent = `Average ${fmtDuration(avg)} across ${logged.length} nights${wakeText}.`;
+}
+
 /* =====================================================================
    "INSTEAD OF GAMING"
    ===================================================================== */
@@ -1817,6 +2023,104 @@ function setEditing(on) {
   document.body.classList.toggle("editing", on);
   $("#editToggle").classList.toggle("on", on);
   $("#editToggle").textContent = on ? "Done editing" : "Edit lists";
+}
+
+/* =====================================================================
+   SYNC ACROSS DEVICES (private GitHub Gist)
+   Credentials live in their own localStorage key so exports stay clean.
+   Last-change-wins: simple, predictable, and easy to explain.
+   ===================================================================== */
+function loadSync() {
+  try { return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {}; }
+  catch (e) { return {}; }
+}
+function saveSync(cfg) {
+  try { localStorage.setItem(SYNC_KEY, JSON.stringify(cfg)); }
+  catch (e) { console.warn("Could not save sync settings:", e); }
+}
+function syncStatus(text) {
+  const el = $("#syncStatus");
+  if (el) el.textContent = text;
+}
+function renderSync() {
+  const t = $("#syncToken"), g = $("#syncGist"), s = $("#syncStatus");
+  if (t && document.activeElement !== t) t.value = syncCfg.token || "";
+  if (g && document.activeElement !== g) g.value = syncCfg.gistId || "";
+  if (s && syncCfg.gistId && !s.textContent.startsWith("Couldn't") && !s.textContent.startsWith("Set up")) {
+    const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
+    s.textContent = "Gist " + syncCfg.gistId + when + ".";
+  }
+}
+async function syncFetch(method, url, body) {
+  const headers = {
+    Authorization: "token " + (syncCfg.token || ""),
+    Accept: "application/vnd.github+json",
+  };
+  if (body !== undefined) headers["Content-Type"] = "application/json";
+  const res = await fetch(url, {
+    method, headers,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let detail = "";
+    try { const j = await res.json(); if (j.message) detail = " — " + j.message; } catch (e) {}
+    throw new Error("GitHub " + res.status + detail);
+  }
+  return res.json();
+}
+async function syncSetup() {
+  const token = (($("#syncToken") && $("#syncToken").value) || "").trim();
+  if (!token) { syncStatus("Add a token with gist scope first."); return; }
+  syncCfg.token = token; saveSync(syncCfg);
+  syncStatus("Creating a private gist…");
+  try {
+    const gist = await syncFetch("POST", "https://api.github.com/gists", {
+      description: "Back on Track — private device sync",
+      public: false,
+      files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
+    });
+    syncCfg.gistId = gist.id;
+    syncCfg.lastSync = new Date().toISOString();
+    saveSync(syncCfg);
+    renderSync();
+    syncStatus("Set up. Copy the gist ID to your other devices, then tap Sync now there.");
+    haptic(8);
+  } catch (e) {
+    syncStatus("Couldn't set up: " + e.message + ". Check the token has gist scope.");
+  }
+}
+async function syncNow() {
+  const token = (($("#syncToken") && $("#syncToken").value) || "").trim() || syncCfg.token;
+  const id = (($("#syncGist") && $("#syncGist").value) || "").trim() || syncCfg.gistId;
+  if (!token || !id) { syncStatus("Add a token and a gist ID first."); return; }
+  syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg);
+  syncStatus("Checking your gist…");
+  try {
+    const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
+    const file = gist.files && gist.files["back-on-track.json"];
+    let remote = null;
+    if (file && file.content) remote = JSON.parse(file.content);
+    const localStamp = Number(state.settings.updatedAt) || 0;
+    const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
+    if (remote && remoteStamp > localStamp) {
+      state = mergeState(state, remote);
+      save(); renderAll();
+      syncStatus("Pulled newer data from your gist.");
+    } else if (!remote || localStamp > remoteStamp) {
+      await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
+        files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
+      });
+      syncStatus("Pushed this device's data to your gist.");
+    } else {
+      syncStatus("Already in step.");
+    }
+    syncCfg.lastSync = new Date().toISOString();
+    saveSync(syncCfg);
+    renderSync();
+    haptic(8);
+  } catch (e) {
+    syncStatus("Couldn't sync: " + e.message);
+  }
 }
 
 /* =====================================================================
@@ -1883,10 +2187,9 @@ function wire() {
     b.addEventListener("click", () => handleTab(b.dataset.tab));
   });
 
-  // home progress strip jumps straight into focus mode for that section
-  $$("[data-focus-jump]").forEach((b) => {
-    b.addEventListener("click", () => jumpToSection(b.dataset.focusJump));
-  });
+  // home shortcuts: plain-language labels, no guessing what they do
+  $("#homeFocusBtn").addEventListener("click", () => handleTab("focus"));
+  $("#homeWakeBtn").addEventListener("click", logWake);
 
   // focus mode
   $("#focusPrev").addEventListener("click", () => moveFocus(-1));
@@ -1912,14 +2215,8 @@ function wire() {
   });
 
   // log bed / wake
-  $("#logBed").addEventListener("click", () => {
-    dayRecord().bedTime = nowHHMM();
-    save(); renderBedtime();
-  });
-  $("#logWake").addEventListener("click", () => {
-    dayRecord().wakeTime = nowHHMM();
-    save(); renderBedtime();
-  });
+  $("#logBed").addEventListener("click", logBed);
+  $("#logWake").addEventListener("click", logWake);
 
   // mood
   $$("#moodRow .mood").forEach((b) => {
@@ -1968,6 +2265,16 @@ function wire() {
     if (e.target.files[0]) importJSON(e.target.files[0]);
     e.target.value = "";
   });
+
+  // sync
+  $("#syncToken").addEventListener("change", (e) => {
+    syncCfg.token = e.target.value.trim(); saveSync(syncCfg);
+  });
+  $("#syncGist").addEventListener("change", (e) => {
+    syncCfg.gistId = e.target.value.trim(); saveSync(syncCfg);
+  });
+  $("#syncSetup").addEventListener("click", syncSetup);
+  $("#syncNow").addEventListener("click", syncNow);
 }
 
 /* ---------- Boot ---------- */
