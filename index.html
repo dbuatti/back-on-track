@@ -1943,7 +1943,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v57";
+const VERSION = "v58";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3881,6 +3881,87 @@ async function syncNow(opts = {}) {
     }
   } catch (e) {}
 })();
+
+
+/* ---------- Your own links ---------- */
+function normaliseURL(raw) {
+  let url = (raw || "").trim();
+  if (!url) return "";
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(url)) return "";
+  return url;
+}
+
+function renderMyLinks() {
+  const box = $("#myLinksList");
+  if (!box) return;
+  box.innerHTML = "";
+  const links = state.settings.myLinks || [];
+  if (!links.length) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Nothing here yet — add a site you visit often.";
+    box.append(p);
+    return;
+  }
+  links.forEach((link) => {
+    const row = document.createElement("div");
+    row.className = "my-link-row";
+    row.dataset.id = link.id;
+    const drag = document.createElement("button");
+    drag.type = "button";
+    drag.className = "drag-btn";
+    drag.setAttribute("aria-label", "Drag to reorder " + link.name);
+    drag.title = "Drag to reorder";
+    const a = document.createElement("a");
+    a.className = "link-chip";
+    a.href = link.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = link.name;
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "copy-btn";
+    copy.dataset.copy = link.url;
+    copy.setAttribute("aria-label", "Copy " + link.name + " link");
+    copy.textContent = "Copy";
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "remove-link";
+    del.setAttribute("aria-label", "Remove " + link.name);
+    del.textContent = "Remove";
+    del.addEventListener("click", () => removeMyLink(link.id));
+    row.append(drag, a, copy, del);
+    box.append(row);
+  });
+  attachSimpleDrag(box, "myLinks", ".my-link-row", renderMyLinks);
+}
+
+function addMyLink() {
+  const nameEl = $("#newLinkName"), urlEl = $("#newLinkUrl");
+  const name = ((nameEl && nameEl.value) || "").trim();
+  const url = normaliseURL(urlEl && urlEl.value);
+  if (!name || !url) { showSnackbar("Add a name and a valid web address"); return; }
+  state.settings.myLinks.unshift({ id: "lnk_" + Date.now().toString(36), name, url });
+  if (nameEl) nameEl.value = "";
+  if (urlEl) urlEl.value = "";
+  const form = $("#myLinksForm");
+  if (form) form.hidden = true;
+  save(); renderMyLinks();
+  haptic(8);
+}
+
+function removeMyLink(id) {
+  const links = state.settings.myLinks || [];
+  const idx = links.findIndex((l) => l.id === id);
+  if (idx < 0) return;
+  const [gone] = links.splice(idx, 1);
+  save(); renderMyLinks();
+  showSnackbar("Removed " + gone.name, () => {
+    state.settings.myLinks.splice(idx, 0, gone);
+    save(); renderMyLinks();
+  });
+}
 
 /* =====================================================================
    EVENT WIRING
