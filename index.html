@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#f4efe6" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Back on Track" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="apple-touch-icon" href="icon-192.png" />
+<title>Back on Track</title>
+<style>
+  /* ---------- Design tokens: calm, warm, low-contrast ---------- */
+  :root {
+    --bg: #f4efe6;          /* warm paper */
+    --card: #fbf8f2;        /* slightly lighter card */
+    --ink: #3b3a36;         /* soft near-black, not pure black */
+    --ink-soft: #6f6a60;    /* muted text */
+    --line: #e4dccd;        /* hairline dividers */
+    --accent: #7c9a82;      /* sage green */
+    --accent-soft: #e7efe7; /* sage tint for done states */
+    --sun: #d9a441;         /* warm ochre for sun/morning */
+    --sun-soft: #f6ecd6;
+    --evening: #8a86a8;     /* dusk lavender for bedtime */
+    --evening-soft: #eceaf3;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(60,55,45,0.05), 0 4px 14px rgba(60,55,45,0.04);
+    --tap: 52px;            /* big tap targets */
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 20px 16px 80px;
+  }
+
+  /* ---------- Header ---------- */
+  header.top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 8px 4px 18px;
+  }
+  header.top h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  header.top .date {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- Section cards ---------- */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--line);
+  }
+  .card > h2 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card > h2 .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .card.morning > h2 .dot { background: var(--sun); }
+  .card.evening > h2 .dot { background: var(--evening); }
+
+  /* ---------- Checklist rows ---------- */
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: var(--tap);
+    padding: 6px 4px;
+    border-radius: 12px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease;
+  }
+  .row + .row { border-top: 1px solid var(--line); }
+  .row:active { background: rgba(0,0,0,0.02); }
+
+  .check {
+    flex: 0 0 auto;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.18s ease;
+    background: var(--card);
+  }
+  .row.done .check {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .row.done .check::after {
+    content: "";
+    width: 8px; height: 14px;
+    border: solid #fff;
+    border-width: 0 2.5px 2.5px 0;
+    transform: rotate(45deg) translate(-1px,-1px);
+  }
+  .morning .row.done .check { background: var(--sun); border-color: var(--sun); }
+
+  .row .label {
+    flex: 1 1 auto;
+    font-size: 17px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .row.done .label {
+    color: var(--ink-soft);
+  }
+
+  /* editable controls revealed in edit mode */
+  .row .row-edit {
+    display: none;
+    flex: 0 0 auto;
+    gap: 6px;
+    align-items: center;
+  }
+  body.editing .row .row-edit { display: flex; }
+  body.editing .row .check { pointer-events: none; }
+
+  .icon-btn {
+    appearance: none;
+    border: none;
+    background: transparent;
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .icon-btn:active { background: rgba(0,0,0,0.05); }
+
+  /* drag handle (edit mode) */
+  .drag {
+    cursor: grab;
+    color: var(--ink-soft);
+    font-size: 16px;
+    letter-spacing: -2px;
+  }
+
+  /* ---------- Text / number inputs ---------- */
+  input[type="text"], input[type="number"], input[type="time"], textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    width: 100%;
+  }
+  input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  textarea { resize: vertical; min-height: 44px; }
+
+  .intention-wrap { margin-top: 6px; }
+
+  .minutes-input {
+    width: 76px !important;
+    text-align: center;
+    padding: 8px !important;
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    font-weight: 500;
+    padding: 12px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    min-height: var(--tap);
+    transition: background 0.15s ease, transform 0.05s ease;
+  }
+  .btn:active { transform: scale(0.98); background: rgba(0,0,0,0.03); }
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    width: 100%;
+    font-size: 17px;
+  }
+  .btn.ghost { background: transparent; }
+  .btn.small { min-height: 40px; padding: 8px 12px; font-size: 14px; }
+
+  .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* ---------- Instead of gaming ---------- */
+  .instead-card {
+    background: linear-gradient(180deg, var(--accent-soft), var(--card));
+  }
+  .suggestion {
+    margin-top: 14px;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px dashed var(--accent);
+    font-size: 18px;
+    text-align: center;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .suggestion.empty { color: var(--ink-soft); border-style: solid; font-size: 15px; }
+
+  /* ---------- Bedtime ---------- */
+  .bed-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+  .windnote {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-top: 8px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .bed-times {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .bed-times .btn { flex: 1; }
+
+  /* mood */
+  .mood-row {
+    display: flex;
+    gap: 12px;
+    margin: 8px 0 12px;
+  }
+  .mood {
+    appearance: none;
+    border: 2px solid var(--line);
+    background: var(--card);
+    border-radius: 14px;
+    font-size: 26px;
+    width: 56px; height: 56px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+  }
+  .mood.sel { border-color: var(--evening); background: var(--evening-soft); }
+
+  /* ---------- Week view ---------- */
+  .week {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .day .dow {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .day .num {
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .day.today .dow, .day.today .num { color: var(--ink); font-weight: 600; }
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    min-height: 22px;
+    max-width: 44px;
+  }
+  .adot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.85;
+  }
+
+  /* ---------- Footer controls ---------- */
+  footer.controls {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .edit-toggle.on {
+    background: var(--sun-soft);
+    border-color: var(--sun);
+  }
+
+  /* add-item row in edit mode */
+  .add-row {
+    display: none;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  body.editing .add-row { display: flex; }
+  .add-row input { flex: 1; }
+
+  .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
+
+  @media (min-width: 480px) {
+    body { font-size: 17px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Back on Track</h1>
+    <span class="date" id="todayLabel"></span>
+  </header>
+
+  <!-- ============ MORNING ============ -->
+  <section class="card morning" id="morningCard">
+    <h2><span class="dot"></span>Morning</h2>
+    <div id="morningList"></div>
+    <div class="intention-wrap">
+      <div class="row" style="cursor:default">
+        <div class="label" style="flex:0 0 auto;color:var(--ink-soft);font-size:14px">One intention</div>
+      </div>
+      <input type="text" id="intentionInput" placeholder="A word, a feeling, a direction…" />
+    </div>
+    <div class="add-row" data-list="morning">
+      <input type="text" placeholder="New morning item…" />
+      <button class="btn small" data-add="morning">Add</button>
+    </div>
+  </section>
+
+  <!-- ============ DAILY ANCHORS ============ -->
+  <section class="card" id="anchorsCard">
+    <h2><span class="dot"></span>Daily anchors</h2>
+    <div id="anchorsList"></div>
+    <div class="add-row" data-list="anchors">
+      <input type="text" placeholder="New anchor…" />
+      <button class="btn small" data-add="anchors">Add</button>
+    </div>
+  </section>
+
+  <!-- ============ INSTEAD OF GAMING ============ -->
+  <section class="card instead-card" id="insteadCard">
+    <h2><span class="dot"></span>Instead of gaming</h2>
+    <button class="btn primary" id="insteadBtn">I feel the pull — give me one thing</button>
+    <div class="suggestion empty" id="suggestion">A gentle nudge will appear here.</div>
+    <div class="add-row" data-list="instead">
+      <input type="text" placeholder="New off-screen idea…" />
+      <button class="btn small" data-add="instead">Add</button>
+    </div>
+    <p class="hint">Tap the button whenever the computer starts calling. Nothing to log, nothing to fail.</p>
+  </section>
+
+  <!-- ============ BEDTIME ============ -->
+  <section class="card evening" id="bedCard">
+    <h2><span class="dot"></span>Bedtime</h2>
+
+    <div class="bed-grid">
+      <div class="field">
+        <label for="targetBed">Target bedtime</label>
+        <input type="time" id="targetBed" />
+      </div>
+      <div class="field">
+        <label>Wind-down nudge</label>
+        <div style="padding-top:8px;color:var(--ink-soft);font-size:15px">45 min before</div>
+      </div>
+    </div>
+    <div class="windnote" id="windNote"></div>
+
+    <div class="bed-times">
+      <button class="btn" id="logBed">Log bed time</button>
+      <button class="btn" id="logWake">Log wake time</button>
+    </div>
+    <div class="hint" id="bedSummary"></div>
+
+    <div style="margin-top:16px">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px">How was today?</div>
+      <div class="mood-row" id="moodRow">
+        <button class="mood" data-mood="low">😔</button>
+        <button class="mood" data-mood="okay">😐</button>
+        <button class="mood" data-mood="good">🙂</button>
+      </div>
+      <textarea id="eveningNote" placeholder="A line about today (optional)…"></textarea>
+    </div>
+  </section>
+
+  <!-- ============ WEEK ============ -->
+  <section class="card" id="weekCard">
+    <h2><span class="dot"></span>This week</h2>
+    <div class="week" id="weekView"></div>
+    <p class="hint">Soft dots are anchors that happened. Empty days are just empty — no catching up needed.</p>
+  </section>
+
+  <!-- ============ CONTROLS ============ -->
+  <footer class="controls">
+    <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
+    <button class="btn small" id="exportBtn">Export</button>
+    <button class="btn small" id="importBtn">Import</button>
+    <input type="file" id="importFile" accept="application/json" hidden />
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Back on Track — single-file daily rhythm app
+   Data model (localStorage key "bot.v1"):
+   {
+     settings: { lists: {morning, anchors, instead}, targetBed },
+     days: { "YYYY-MM-DD": {
+        checks: { <itemId>: true },
+        intention: "",
+        readingMinutes: number|null,
+        bedTime: "HH:MM"|null,
+        wakeTime: "HH:MM"|null,
+        mood: "low"|"okay"|"good"|null,
+        note: ""
+     }}
+   }
+   ===================================================================== */
+
+const STORE_KEY = "bot.v1";
+
+/* ---------- Default lists (editable later) ---------- */
+const DEFAULT_LISTS = {
+  morning: [
+    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)" },
+    { id: "m_breakfast", text: "Breakfast outside, quiet" },
+    { id: "m_sun",     text: "Sun movements + sun salute + om" },
+    { id: "m_nick",    text: "Nick Moss daily meditation" },
+  ],
+  anchors: [
+    { id: "a_walk",    text: "Walk" },
+    { id: "a_read",    text: "Reading", minutes: true },
+    { id: "a_journal", text: "Journal" },
+    { id: "a_offscreen", text: "One off-screen thing (tidy, stretch, piano)" },
+  ],
+  instead: [
+    { id: "i_journal", text: "Open the journal and write three lines" },
+    { id: "i_read",    text: "Read 10 pages of whatever's on the table" },
+    { id: "i_walk",    text: "Walk around the block, no phone" },
+    { id: "i_tidy",    text: "Tidy one surface — just one" },
+    { id: "i_piano",   text: "Five minutes of piano, for fun" },
+  ],
+};
+
+/* ---------- State ---------- */
+let state = load() || freshState();
+let editing = false;
+
+function freshState() {
+  return {
+    settings: {
+      lists: JSON.parse(JSON.stringify(DEFAULT_LISTS)),
+      targetBed: "22:30",
+    },
+    days: {},
+  };
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    // minimal shape guard
+    if (!parsed || typeof parsed !== "object" || !parsed.settings || !parsed.days) return null;
+    return parsed;
+  } catch (e) {
+    console.warn("Could not load state:", e);
+    return null;
+  }
+}
+
+function save() {
+  try {
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn("Could not save state:", e);
+    alert("Sorry — I couldn't save to this browser's storage. Your data is still here until you close the tab.");
+  }
+}
+
+/* ---------- Date helpers ---------- */
+function todayKey(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function dayRecord(key = todayKey()) {
+  if (!state.days[key]) {
+    state.days[key] = {
+      checks: {},
+      intention: "",
+      readingMinutes: null,
+      bedTime: null,
+      wakeTime: null,
+      mood: null,
+      note: "",
+    };
+  }
+  return state.days[key];
+}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+
+const $ = (sel, root = document) => root.querySelector(sel);
+const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+function renderAll() {
+  renderHeader();
+  renderList("morning");
+  renderList("anchors");
+  renderIntention();
+  renderBedtime();
+  renderMood();
+  renderWeek();
+}
+
+function renderHeader() {
+  const d = new Date();
+  const label = d.toLocaleDateString(undefined, {
+    weekday: "long", day: "numeric", month: "long",
+  });
+  $("#todayLabel").textContent = label;
+}
+
+/* Generic checklist renderer for morning + anchors */
+function renderList(which) {
+  const container = which === "morning" ? $("#morningList") : $("#anchorsList");
+  const list = state.settings.lists[which];
+  const rec = dayRecord();
+  container.innerHTML = "";
+
+  list.forEach((item) => {
+    const done = !!rec.checks[item.id];
+
+    const row = document.createElement("div");
+    row.className = "row" + (done ? " done" : "");
+    row.dataset.id = item.id;
+
+    // drag handle (edit mode only via CSS)
+    const drag = document.createElement("span");
+    drag.className = "drag";
+    drag.textContent = "⠿";
+    drag.title = "Drag to reorder";
+
+    const check = document.createElement("div");
+    check.className = "check";
+
+    const label = document.createElement("div");
+    label.className = "label";
+    label.textContent = item.text;
+
+    row.append(drag, check, label);
+
+    // optional minutes field for reading
+    if (item.minutes) {
+      const min = document.createElement("input");
+      min.type = "number";
+      min.className = "minutes-input";
+      min.min = "0";
+      min.placeholder = "min";
+      min.value = rec.readingMinutes ?? "";
+      min.addEventListener("click", (e) => e.stopPropagation());
+      min.addEventListener("change", () => {
+        rec.readingMinutes = min.value === "" ? null : Number(min.value);
+        save();
+      });
+      row.append(min);
+    }
+
+    // edit controls
+    const editWrap = document.createElement("div");
+    editWrap.className = "row-edit";
+    const up = mkIcon("↑", "Move up", () => moveItem(which, item.id, -1));
+    const down = mkIcon("↓", "Move down", () => moveItem(which, item.id, 1));
+    const del = mkIcon("✕", "Remove", () => removeItem(which, item.id));
+    editWrap.append(up, down, del);
+    row.append(editWrap);
+
+    // tap to toggle (ignore when editing)
+    row.addEventListener("click", (e) => {
+      if (editing) return;
+      if (e.target.closest(".row-edit")) return;
+      toggleCheck(which, item.id);
+    });
+
+    container.append(row);
+  });
+
+  attachDrag(container, which);
+}
+
+function mkIcon(txt, title, onClick) {
+  const b = document.createElement("button");
+  b.className = "icon-btn";
+  b.textContent = txt;
+  b.title = title;
+  b.addEventListener("click", (e) => { e.stopPropagation(); onClick(); });
+  return b;
+}
+
+function toggleCheck(which, id) {
+  const rec = dayRecord();
+  rec.checks[id] = !rec.checks[id];
+  save();
+  renderList(which);
+  renderWeek();
+  // gentle, quiet: nothing else. no confetti storms.
+}
+
+function moveItem(which, id, dir) {
+  const list = state.settings.lists[which];
+  const i = list.findIndex((x) => x.id === id);
+  const j = i + dir;
+  if (j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
+  save();
+  renderList(which);
+}
+
+function removeItem(which, id) {
+  const list = state.settings.lists[which];
+  const i = list.findIndex((x) => x.id === id);
+  if (i < 0) return;
+  list.splice(i, 1);
+  save();
+  renderList(which);
+}
+
+function addItem(which, text) {
+  text = text.trim();
+  if (!text) return;
+  const id = which[0] + "_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  state.settings.lists[which].push({ id, text });
+  save();
+  renderList(which);
+}
+
+/* Simple pointer-based drag reorder within a list container */
+function attachDrag(container, which) {
+  let dragId = null;
+  container.querySelectorAll(".row").forEach((row) => {
+    const handle = row.querySelector(".drag");
+    if (!handle) return;
+    handle.addEventListener("pointerdown", (e) => {
+      if (!editing) return;
+      e.preventDefault();
+      dragId = row.dataset.id;
+      row.style.opacity = "0.5";
+      row.setPointerCapture?.(e.pointerId);
+    });
+    handle.addEventListener("pointerup", () => { row.style.opacity = ""; dragId = null; });
+  });
+  container.addEventListener("pointermove", (e) => {
+    if (!dragId || !editing) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const targetRow = el?.closest(".row");
+    if (!targetRow || targetRow.dataset.id === dragId) return;
+    const list = state.settings.lists[which];
+    const from = list.findIndex((x) => x.id === dragId);
+    const to = list.findIndex((x) => x.id === targetRow.dataset.id);
+    if (from < 0 || to < 0) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    save();
+    renderList(which);
+  });
+}
+
+function renderIntention() {
+  const rec = dayRecord();
+  const input = $("#intentionInput");
+  if (document.activeElement !== input) input.value = rec.intention || "";
+}
+
+/* ---------- Bedtime ---------- */
+function renderBedtime() {
+  const rec = dayRecord();
+  $("#targetBed").value = state.settings.targetBed || "";
+  updateWindNote();
+
+  const bits = [];
+  if (rec.bedTime) bits.push("Bed " + rec.bedTime);
+  if (rec.wakeTime) bits.push("Woke " + rec.wakeTime);
+  $("#bedSummary").textContent = bits.length ? bits.join(" · ") : "";
+}
+
+function updateWindNote() {
+  const t = state.settings.targetBed;
+  const note = $("#windNote");
+  if (!t) { note.textContent = ""; return; }
+  const [h, m] = t.split(":").map(Number);
+  const total = h * 60 + m - 45;
+  const hh = String(Math.floor(((total % 1440) + 1440) % 1440 / 60)).padStart(2, "0");
+  const mm = String(((total % 60) + 60) % 60).padStart(2, "0");
+  note.textContent = `🌙 Wind-down around ${hh}:${mm} — screens off, reading, tea.`;
+}
+
+function nowHHMM() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+}
+
+/* ---------- Mood ---------- */
+function renderMood() {
+  const rec = dayRecord();
+  $$("#moodRow .mood").forEach((b) => {
+    b.classList.toggle("sel", b.dataset.mood === rec.mood);
+  });
+  const note = $("#eveningNote");
+  if (document.activeElement !== note) note.value = rec.note || "";
+}
+
+/* ---------- Week view ---------- */
+function renderWeek() {
+  const view = $("#weekView");
+  view.innerHTML = "";
+  const now = new Date();
+  // week starts Monday
+  const dayIdx = (now.getDay() + 6) % 7; // Mon=0
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dayIdx);
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const key = todayKey(d);
+    const rec = state.days[key];
+
+    const cell = document.createElement("div");
+    cell.className = "day" + (key === todayKey() ? " today" : "");
+
+    const dow = document.createElement("div");
+    dow.className = "dow";
+    dow.textContent = d.toLocaleDateString(undefined, { weekday: "narrow" });
+
+    const num = document.createElement("div");
+    num.className = "num";
+    num.textContent = d.getDate();
+
+    const dots = document.createElement("div");
+    dots.className = "dots";
+    if (rec) {
+      const anchorIds = state.settings.lists.anchors.map((a) => a.id);
+      anchorIds.forEach((id) => {
+        if (rec.checks[id]) {
+          const dot = document.createElement("span");
+          dot.className = "adot";
+          dots.append(dot);
+        }
+      });
+    }
+
+    cell.append(dow, num, dots);
+    view.append(cell);
+  }
+}
+
+/* =====================================================================
+   "INSTEAD OF GAMING"
+   ===================================================================== */
+function pickSuggestion() {
+  const list = state.settings.lists.instead;
+  const box = $("#suggestion");
+  if (!list.length) {
+    box.className = "suggestion empty";
+    box.textContent = "Your off-screen list is empty — add a few ideas in Edit mode.";
+    return;
+  }
+  const pick = list[Math.floor(Math.random() * list.length)];
+  box.className = "suggestion";
+  box.textContent = pick.text;
+}
+
+/* =====================================================================
+   EDIT MODE
+   ===================================================================== */
+function setEditing(on) {
+  editing = on;
+  document.body.classList.toggle("editing", on);
+  $("#editToggle").classList.toggle("on", on);
+  $("#editToggle").textContent = on ? "Done editing" : "Edit lists";
+}
+
+/* =====================================================================
+   EXPORT / IMPORT
+   ===================================================================== */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `back-on-track-${todayKey()}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || !parsed.settings || !parsed.days) throw new Error("bad shape");
+      // merge: imported days/settings win where present, keep the rest
+      state = mergeState(state, parsed);
+      save();
+      renderAll();
+      alert("Imported. Welcome back.");
+    } catch (e) {
+      alert("That file doesn't look like a Back on Track export.");
+    }
+  };
+  reader.readAsText(file);
+}
+
+function mergeState(local, incoming) {
+  // settings: prefer incoming if it has lists
+  const merged = {
+    settings: incoming.settings || local.settings,
+    days: Object.assign({}, local.days, incoming.days),
+  };
+  return merged;
+}
+
+/* =====================================================================
+   EVENT WIRING
+   ===================================================================== */
+function wire() {
+  // intention
+  $("#intentionInput").addEventListener("input", (e) => {
+    dayRecord().intention = e.target.value;
+    save();
+  });
+
+  // reading minutes handled per-row
+
+  // instead of gaming
+  $("#insteadBtn").addEventListener("click", pickSuggestion);
+
+  // target bedtime
+  $("#targetBed").addEventListener("change", (e) => {
+    state.settings.targetBed = e.target.value;
+    save();
+    updateWindNote();
+  });
+
+  // log bed / wake
+  $("#logBed").addEventListener("click", () => {
+    dayRecord().bedTime = nowHHMM();
+    save(); renderBedtime();
+  });
+  $("#logWake").addEventListener("click", () => {
+    dayRecord().wakeTime = nowHHMM();
+    save(); renderBedtime();
+  });
+
+  // mood
+  $$("#moodRow .mood").forEach((b) => {
+    b.addEventListener("click", () => {
+      const rec = dayRecord();
+      rec.mood = rec.mood === b.dataset.mood ? null : b.dataset.mood;
+      save(); renderMood();
+    });
+  });
+
+  // evening note
+  $("#eveningNote").addEventListener("input", (e) => {
+    dayRecord().note = e.target.value;
+    save();
+  });
+
+  // edit toggle
+  $("#editToggle").addEventListener("click", () => setEditing(!editing));
+
+  // add item buttons
+  $$("[data-add]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const which = btn.dataset.add;
+      const wrap = document.querySelector(`.add-row[data-list="${which}"]`);
+      const input = wrap.querySelector("input");
+      addItem(which, input.value);
+      input.value = "";
+      input.focus();
+    });
+  });
+  // enter key in add inputs
+  $$(".add-row input").forEach((input) => {
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const which = input.closest(".add-row").dataset.list;
+        addItem(which, input.value);
+        input.value = "";
+      }
+    });
+  });
+
+  // export / import
+  $("#exportBtn").addEventListener("click", exportJSON);
+  $("#importBtn").addEventListener("click", () => $("#importFile").click());
+  $("#importFile").addEventListener("change", (e) => {
+    if (e.target.files[0]) importJSON(e.target.files[0]);
+    e.target.value = "";
+  });
+}
+
+/* ---------- Boot ---------- */
+wire();
+renderAll();
+// re-render header at midnight-ish if left open
+setInterval(renderHeader, 60 * 1000);
+
+// PWA service worker (no-op if unsupported / file://)
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
