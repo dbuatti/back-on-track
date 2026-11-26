@@ -755,15 +755,13 @@
 
   /* ---------- Section cards ---------- */
   .card {
-    background: transparent;
-    border: 0;
-    box-shadow: none;
-    border-radius: 0;
-    padding: var(--s4) 0;
-    margin-bottom: var(--s6);
-    border-top: 1px solid var(--line);
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: var(--s4);
+    margin-bottom: var(--s4);
+    border: 1px solid var(--line);
   }
-  .card:first-child { border-top: 0; }
   .card > h2, .card > .card-heading h2 {
     font-family: Georgia, "Times New Roman", serif;
     font-size: var(--t-card);
@@ -1937,7 +1935,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v44";
+const VERSION = "v45";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
