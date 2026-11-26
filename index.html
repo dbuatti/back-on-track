@@ -31,6 +31,32 @@
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+  /* Snappier taps, no double-tap zoom, no long-press callout, no bounce.
+     (ADHD: the app responds instantly and never does something surprising.) */
+  html {
+    touch-action: manipulation;
+    overscroll-behavior-y: contain;
+  }
+  body { -webkit-touch-callout: none; }
+
+  /* Visible keyboard/switch-control focus — never removed, only styled calmly. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  /* Respect "Reduce Motion": calm the transitions right down.
+     (AuDHD/vestibular: nothing slides, fades or pulses if you've asked iOS
+     or your system to reduce motion.) */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
   html, body {
     margin: 0;
     padding: 0;
@@ -489,6 +515,42 @@
   }
   #whisper.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ---------- Undo snackbar (reversible deletes = calmer) ---------- */
+  #snackbar {
+    position: fixed;
+    left: 50%;
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    transform: translateX(-50%) translateY(12px);
+    background: var(--ink);
+    color: var(--bg);
+    font-size: 15px;
+    padding: 12px 14px 12px 18px;
+    border-radius: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 60;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: calc(100vw - 32px);
+  }
+  #snackbar.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  #snackbar .snack-undo {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--sun);
+    font: inherit;
+    font-weight: 600;
+    padding: 6px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  #snackbar .snack-undo:active { background: rgba(255,255,255,0.08); }
+
   /* ---------- Sunday mode ----------
      A protected day. JS adds data-sunday="true"; we soften the page and
      tuck the do-y things away, leaving rest + the bedtime log. */
@@ -531,10 +593,12 @@
       <div class="row" style="cursor:default">
         <div class="label" style="flex:0 0 auto;color:var(--ink-soft);font-size:14px">One intention</div>
       </div>
-      <input type="text" id="intentionInput" placeholder="A word, a feeling, a direction…" />
+      <input type="text" id="intentionInput" placeholder="A word, a feeling, a direction…"
+             autocorrect="off" autocapitalize="sentences" spellcheck="true" enterkeyhint="done" />
     </div>
     <div class="add-row" data-list="morning">
-      <input type="text" placeholder="New morning item…" />
+      <input type="text" placeholder="New morning item…" enterkeyhint="done"
+             autocorrect="off" autocapitalize="sentences" />
       <button class="btn small" data-add="morning">Add</button>
     </div>
   </section>
@@ -544,7 +608,8 @@
     <h2><span class="dot"></span>Daily anchors</h2>
     <div id="anchorsList"></div>
     <div class="add-row" data-list="anchors">
-      <input type="text" placeholder="New anchor…" />
+      <input type="text" placeholder="New anchor…" enterkeyhint="done"
+             autocorrect="off" autocapitalize="sentences" />
       <button class="btn small" data-add="anchors">Add</button>
     </div>
   </section>
@@ -555,7 +620,8 @@
     <button class="btn primary" id="insteadBtn">I feel the pull — give me one thing</button>
     <div class="suggestion empty" id="suggestion">A gentle nudge will appear here.</div>
     <div class="add-row" data-list="instead">
-      <input type="text" placeholder="New off-screen idea…" />
+      <input type="text" placeholder="New off-screen idea…" enterkeyhint="done"
+             autocorrect="off" autocapitalize="sentences" />
       <button class="btn small" data-add="instead">Add</button>
     </div>
     <p class="hint">Tap the button whenever the computer starts calling. Nothing to log, nothing to fail.</p>
@@ -590,7 +656,8 @@
         <button class="mood" data-mood="okay">😐</button>
         <button class="mood" data-mood="good">🙂</button>
       </div>
-      <textarea id="eveningNote" placeholder="A line about today (optional)…"></textarea>
+      <textarea id="eveningNote" placeholder="A line about today (optional)…"
+                autocorrect="off" autocapitalize="sentences"></textarea>
     </div>
   </section>
 
@@ -612,6 +679,10 @@
 </div>
 
 <div id="whisper" role="status" aria-live="polite"></div>
+<div id="snackbar" role="status" aria-live="polite">
+  <span id="snackText"></span>
+  <button class="snack-undo" id="snackUndo" type="button">Undo</button>
+</div>
 
 <script>
 "use strict";
@@ -636,7 +707,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v5";
+const VERSION = "v6";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -842,6 +913,25 @@ function whisper() {
   whisperTimer = setTimeout(() => el.classList.remove("show"), 1600);
 }
 
+/* ---------- Undo snackbar ---------- */
+let snackTimer = null;
+let snackAction = null;
+function showSnackbar(text, onUndo) {
+  const bar = $("#snackbar");
+  const label = $("#snackText");
+  if (!bar || !label) return;
+  label.textContent = text;
+  snackAction = onUndo;
+  bar.classList.add("show");
+  if (snackTimer) clearTimeout(snackTimer);
+  snackTimer = setTimeout(hideSnackbar, 5000);   // 5s to change your mind
+}
+function hideSnackbar() {
+  const bar = $("#snackbar");
+  if (bar) bar.classList.remove("show");
+  snackAction = null;
+}
+
 function renderHeader() {
   const d = new Date();
   const label = d.toLocaleDateString(undefined, {
@@ -903,6 +993,8 @@ function renderList(which) {
       min.type = "number";
       min.className = "minutes-input";
       min.min = "0";
+      min.inputMode = "numeric";
+      min.enterKeyHint = "done";
       min.placeholder = "min";
       min.value = rec.readingMinutes ?? "";
       min.addEventListener("click", (e) => e.stopPropagation());
@@ -1007,9 +1099,21 @@ function removeItem(which, id) {
   const list = state.settings.lists[which];
   const i = list.findIndex((x) => x.id === id);
   if (i < 0) return;
-  list.splice(i, 1);
+  const [removed] = list.splice(i, 1);
   save();
   renderList(which);
+  // Reversible delete — a spike of "did I just lose that?" shouldn't be
+  // permanent. Offer a quiet Undo for a few seconds.
+  showSnackbar(`Removed “${trimLabel(removed.text)}”`, () => {
+    state.settings.lists[which].splice(i, 0, removed);
+    save();
+    renderList(which);
+  });
+}
+
+function trimLabel(s) {
+  s = String(s || "");
+  return s.length > 32 ? s.slice(0, 31) + "…" : s;
 }
 
 function addItem(which, text) {
@@ -1215,6 +1319,12 @@ function mergeState(local, incoming) {
 function wire() {
   // rotating intention: tap the card for another gentle line
   $("#rotIntention").addEventListener("click", cycleIntention);
+
+  // undo snackbar
+  $("#snackUndo").addEventListener("click", () => {
+    if (snackAction) snackAction();
+    hideSnackbar();
+  });
 
   // intention
   $("#intentionInput").addEventListener("input", (e) => {
