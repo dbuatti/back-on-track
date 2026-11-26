@@ -132,6 +132,57 @@
   }
   .morning .row.done .check { background: var(--sun); border-color: var(--sun); }
 
+  /* Morning items gently collapse once done (AuDHD: fewer things on screen).
+     Edit mode always reveals everything. */
+  .morning .row {
+    max-height: 90px;
+    min-height: var(--tap);
+    overflow: hidden;
+    transition: max-height 0.28s ease, min-height 0.28s ease,
+                opacity 0.22s ease, padding 0.28s ease, border-color 0.2s ease;
+  }
+  .morning .row.collapsed {
+    max-height: 0;
+    min-height: 0;
+    opacity: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-color: transparent;
+    pointer-events: none;
+  }
+  body.editing .morning .row.collapsed {
+    max-height: 90px;
+    min-height: var(--tap);
+    opacity: 1;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    border-top-color: var(--line);
+    pointer-events: auto;
+  }
+  .morning-done-toggle {
+    margin-top: 8px;
+    text-align: center;
+  }
+  .morning-done-toggle button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 14px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    min-height: 40px;
+  }
+  .morning-done-toggle button:active { background: rgba(0,0,0,0.04); }
+  .morning-all-done {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 15px;
+    padding: 12px 4px 2px;
+  }
+
   .row .label {
     flex: 1 1 auto;
     font-size: 17px;
@@ -365,6 +416,7 @@
   <section class="card morning" id="morningCard">
     <h2><span class="dot"></span>Morning</h2>
     <div id="morningList"></div>
+    <div id="morningDone"></div>
     <div class="intention-wrap">
       <div class="row" style="cursor:default">
         <div class="label" style="flex:0 0 auto;color:var(--ink-soft);font-size:14px">One intention</div>
@@ -495,6 +547,7 @@ const DEFAULT_LISTS = {
 /* ---------- State ---------- */
 let state = load() || freshState();
 let editing = false;
+let showDoneMorning = false;   // when true, done morning items stay expanded
 
 function freshState() {
   return {
@@ -591,6 +644,12 @@ function renderList(which) {
     row.className = "row" + (done ? " done" : "");
     row.dataset.id = item.id;
 
+    // Morning items gently collapse once done (not in edit mode, not while
+    // "show done" is on). CSS animates the slide.
+    if (which === "morning" && done && !editing && !showDoneMorning) {
+      row.classList.add("collapsed");
+    }
+
     // drag handle (edit mode only via CSS)
     const drag = document.createElement("span");
     drag.className = "drag";
@@ -642,6 +701,45 @@ function renderList(which) {
   });
 
   attachDrag(container, which);
+
+  if (which === "morning") renderMorningDone();
+}
+
+/* Quiet footer under the morning list: a "show done" toggle when some items
+   are tucked away, or a soft "morning, done" when everything is complete. */
+function renderMorningDone() {
+  const box = $("#morningDone");
+  if (!box) return;
+  box.innerHTML = "";
+
+  const list = state.settings.lists.morning;
+  const rec = dayRecord();
+  const total = list.length;
+  const doneCount = list.filter((it) => rec.checks[it.id]).length;
+
+  if (total > 0 && doneCount === total && !editing) {
+    const msg = document.createElement("div");
+    msg.className = "morning-all-done";
+    msg.textContent = "Morning, done. 🌤️";
+    box.append(msg);
+    return;
+  }
+
+  if (doneCount > 0 && !editing) {
+    const wrap = document.createElement("div");
+    wrap.className = "morning-done-toggle";
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = showDoneMorning
+      ? "Hide done items"
+      : `Show ${doneCount} done item${doneCount > 1 ? "s" : ""}`;
+    btn.addEventListener("click", () => {
+      showDoneMorning = !showDoneMorning;
+      renderList("morning");
+    });
+    wrap.append(btn);
+    box.append(wrap);
+  }
 }
 
 function mkIcon(txt, title, onClick) {
