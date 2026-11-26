@@ -440,28 +440,24 @@
     letter-spacing: 0.02em;
   }
 
-  /* ---------- Tool kit quick link ---------- */
+  /* ---------- Tool kit quick link (small square) ---------- */
   .toolkit-link {
     display: flex;
     align-items: center;
-    gap: 12px;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
     margin: 16px auto 4px;
-    max-width: 300px;
-    min-height: 52px;
-    padding: 10px 16px;
-    border-radius: 14px;
+    border-radius: 12px;
     background: var(--accent-soft);
     border: 1px solid var(--accent);
     color: var(--ink);
     text-decoration: none;
-    font-size: 16px;
-    font-weight: 500;
+    font-size: 20px;
+    line-height: 1;
     transition: background 0.15s ease, transform 0.05s ease;
   }
-  .toolkit-link:active { background: var(--card); transform: scale(0.98); }
-  .toolkit-link .tk-icon { font-size: 20px; line-height: 1; }
-  .toolkit-link .tk-text { flex: 1; }
-  .toolkit-link .tk-arrow { color: var(--accent); font-size: 16px; }
+  .toolkit-link:active { background: var(--card); transform: scale(0.94); }
 
   /* add-item row in edit mode */
   .add-row {
@@ -760,10 +756,9 @@
   </footer>
 
   <a class="toolkit-link" id="toolkitLink" href="https://thecalmafter.vercel.app/"
-     target="_blank" rel="noopener" aria-label="Open The Calm After tool kit in a new tab">
-    <span class="tk-icon" aria-hidden="true">🧰</span>
-    <span class="tk-text">Tool kit</span>
-    <span class="tk-arrow" aria-hidden="true">↗</span>
+     target="_blank" rel="noopener" aria-label="Open The Calm After tool kit in a new tab"
+     title="Tool kit">
+    <span aria-hidden="true">⛈️</span>
   </a>
 
   <p class="hint" style="text-align:center">Tip: swipe a row right to tick it, left to untick.</p>
@@ -799,7 +794,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v9";
+const VERSION = "v10";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
