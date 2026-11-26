@@ -24,19 +24,19 @@
   :root {
     color-scheme: light;
     /* One warm surface, one ink hierarchy, one action colour. */
-    --bg: #f4ecdf;
-    --card: #fcf8f0;
+    --bg: #f7f1e6;
+    --card: #ffffff;
     --field: #fffef9;
-    --ink: #2a221d;
-    --ink-soft: #6e6154;
-    --line: #e4d7c5;
-    --control-line: #e3d6c4;
-    --accent: #6a8f74;
-    --accent-deep: #3d5f47;
-    --accent-soft: #dde9df;
-    --sun: #c08545;
+    --ink: #1f1a16;
+    --ink-soft: #5a4f45;
+    --line: #d8cbb8;
+    --control-line: #d8cbb8;
+    --accent: #2f6f4f;
+    --accent-deep: #1f4f35;
+    --accent-soft: #e3efe7;
+    --sun: #a86a2a;
     --sun-soft: #f1e0c6;
-    --evening: #7b6f9c;
+    --evening: #6a5a9a;
     --evening-soft: #e8e1f0;
     --on-accent: #ffffff;
     --glow: transparent;
@@ -95,9 +95,9 @@
 
   /* Visible keyboard/switch-control focus — never removed, only styled calmly. */
   :focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 6px;
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 8px;
   }
 
   /* Respect "Reduce Motion": calm the transitions right down.
@@ -1943,7 +1943,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v60";
+const VERSION = "v61";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
