@@ -207,11 +207,12 @@
   }
   .today-intro .greeting {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: clamp(32px, 9vw, 42px);
-    font-weight: 400;
-    line-height: 1.08;
-    letter-spacing: -0.02em;
+    font-size: clamp(40px, 10vw, 54px);
+    font-weight: 300;
+    line-height: 1.02;
+    letter-spacing: -0.025em;
     margin: var(--s4) 0 var(--s2);
+    color: var(--ink);
   }
   .today-intro .rot-intention {
     margin: 0 0 var(--s2);
@@ -262,11 +263,17 @@
   /* One invitation, grouped without a full card. */
   .invitation {
     margin: 0 0 var(--s5);
-    padding: var(--s4);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+  }
+  .idea-card {
+    background: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: var(--accent-soft);
-    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
     box-shadow: var(--shadow);
+    padding: var(--s3) var(--s4);
   }
   .invitation .idea-entry { margin: 0; }
   .invitation .idea-entry .btn {
@@ -448,16 +455,16 @@
   .shelf-actions .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 11px; font-size: 13px; }
   .shelf-item-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
   .shelf-item-actions .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 11px; font-size: 13px; }
-  .loan-tag {
-    display: inline-block;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-style: normal;
-    font-size: 11px;
-    color: var(--shelf-deep, var(--ink-soft));
-    background: var(--shelf-soft, var(--sun-soft));
-    border-radius: 999px;
-    padding: 2px 8px;
-    margin-top: 4px;
+  .loan-dot {
+    flex: 0 0 auto;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--shelf, var(--accent));
+    margin-left: var(--s2);
+  }
+  .morning .row.loan-row {
+    border-left: 3px solid var(--shelf, var(--accent));
+    padding-left: calc(var(--s2) + 2px);
   }
   .shelf-picker {
     display: grid;
@@ -744,13 +751,15 @@
 
   /* ---------- Section cards ---------- */
   .card {
-    background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: var(--s4);
-    margin-bottom: var(--s4);
-    border: 1px solid var(--line);
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+    padding: var(--s4) 0;
+    margin-bottom: var(--s6);
+    border-top: 1px solid var(--line);
   }
+  .card:first-child { border-top: 0; }
   .card > h2, .card > .card-heading h2 {
     font-size: var(--t-card);
     font-weight: 600;
@@ -837,13 +846,7 @@
                 opacity 0.22s ease, padding 0.28s ease, border-color 0.2s ease;
   }
   .morning .row.collapsed {
-    max-height: 0;
-    min-height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    border-top-color: transparent;
-    pointer-events: none;
+    display: none;
   }
   body.editing .morning .row.collapsed {
     max-height: 90px;
@@ -1086,17 +1089,17 @@
 
   /* Sleep numbers: one quiet row, no scores. */
   .trend-metrics {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--s2);
-    padding-bottom: var(--s3);
-    margin-bottom: var(--s3);
-    border-bottom: 1px solid var(--line);
+    display: block;
+    border: 0;
+    padding: 0;
+    margin: 0 0 var(--s2);
     font-size: var(--t-small);
+    color: var(--ink-soft);
+    font-weight: 400;
   }
-  .trend-metrics .metric-label { display: block; color: var(--ink-soft); margin-bottom: 2px; }
-  .trend-metrics .metric-value { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .trend-metrics .btn { grid-column: 1 / -1; justify-self: start; }
+  .trend-metrics .metric-label { display: inline; margin: 0 4px 0 0; color: inherit; font-weight: 400; }
+  .trend-metrics .metric-value { font-weight: 400; font-variant-numeric: normal; color: var(--ink); }
+  .trend-metrics .btn { justify-self: auto; }
   .sleep-mood-line { font-size: var(--t-small); color: var(--ink-soft); margin-top: var(--s3); }
 
   /* ---------- Week view ---------- */
@@ -1132,9 +1135,9 @@
     max-width: 44px;
   }
   .adot {
-    width: 8px; height: 8px; border-radius: 50%;
+    width: 6px; height: 6px; border-radius: 50%;
     background: var(--accent);
-    opacity: 0.85;
+    opacity: 0.5;
   }
 
   /* ---------- Sleep trends ---------- */
@@ -1142,8 +1145,8 @@
   .trend-chart {
     display: flex;
     align-items: flex-end;
-    gap: 5px;
-    height: 88px;
+    gap: 7px;
+    height: 56px;
     padding-top: 6px;
   }
   .trend-day {
@@ -1157,13 +1160,13 @@
   }
   .trend-bar {
     width: 100%;
-    max-width: 22px;
+    max-width: 10px;
     min-height: 3px;
-    border-radius: 6px 6px 3px 3px;
+    border-radius: 999px;
     background: var(--evening);
-    opacity: 0.75;
+    opacity: 0.38;
   }
-  .trend-bar.missing { background: var(--line); opacity: 0.6; }
+  .trend-bar.missing { background: transparent; border-bottom: 1px solid var(--line); opacity: 0.5; }
   .trend-label { font-size: 11px; color: var(--ink-soft); }
   .trend-keys {
     display: flex;
@@ -1479,11 +1482,13 @@
   </div>
 
   <section class="card today-intro" id="todayCard">
+    <h2 class="greeting" id="greeting">A quiet day.</h2>
+    <div class="rot-intention" id="rotIntention">A gentle word will wait here.</div>
+    <p class="hint" id="morningLine" aria-live="polite"></p>
+    <p class="hint" id="quietDayHint" aria-live="polite"></p>
     <div class="wake-strip">
       <button type="button" class="wake-btn" id="homeWakeBtn">Log wake</button>
     </div>
-    <h2 class="greeting" id="greeting">A quiet day.</h2>
-    <div class="rot-intention" id="rotIntention">A gentle word will wait here.</div>
   </section>
 
   <div class="time-edit" id="wakeEdit" hidden>
@@ -1494,7 +1499,7 @@
   </div>
 
   <section class="invitation" id="inviteCard" aria-label="When you don't know what to do">
-    <div class="idea-entry" id="ideaEntry">
+    <div class="idea-card" id="ideaEntry">
       <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
     </div>
     <button type="button" class="see-shelf program-home-nudge" id="programHomeNudge" hidden>A quiet 30 days is here, if you want it.</button>
@@ -1520,12 +1525,15 @@
     <p class="program-invite" id="programInvite"></p>
     <a class="btn small program-nick" id="programNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programOptional" hidden></p>
+     <textarea class="program-note" id="programNote" placeholder="A line about this step (optional)…"
+               autocorrect="off" autocapitalize="sentences" rows="2"></textarea>
     <details class="program-smaller" id="programSmaller">
       <summary>Even smaller</summary>
       <p id="programSmallerText"></p>
     </details>
     <div class="btn-row">
       <button type="button" class="btn small" id="programDone">That's enough</button>
+      <button type="button" class="btn small" id="programNotToday">Not today</button>
     </div>
     <p class="program-close" id="programClose" hidden></p>
     <textarea class="program-reflect" id="programReflect" rows="2"
@@ -1580,12 +1588,15 @@
     <p class="program-invite" id="programEveInvite"></p>
     <a class="btn small program-nick" id="programEveNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programEveOptional" hidden></p>
+     <textarea class="program-note" id="programEveNote" placeholder="A line about this step (optional)…"
+               autocorrect="off" autocapitalize="sentences" rows="2"></textarea>
     <details class="program-smaller" id="programEveSmaller">
       <summary>Even smaller</summary>
       <p id="programEveSmallerText"></p>
     </details>
     <div class="btn-row">
       <button type="button" class="btn small" id="programEveDone">That's enough</button>
+      <button type="button" class="btn small" id="programEveNotToday">Not today</button>
     </div>
     <p class="program-close" id="programEveClose" hidden></p>
     <textarea class="program-reflect" id="programEveReflect" rows="2"
@@ -1647,6 +1658,7 @@
         <button type="button" class="mood btn" data-mood="okay" aria-pressed="false">Okay</button>
         <button type="button" class="mood btn" data-mood="good" aria-pressed="false">Good</button>
       </div>
+      <p class="hint" id="moodContext" aria-live="polite"></p>
       <textarea id="eveningNote" placeholder="A line about today (optional)…"
                 autocorrect="off" autocapitalize="sentences"></textarea>
     </div>
@@ -1663,7 +1675,7 @@
     <details class="waking-note">
       <summary>A note on waking</summary>
       <ul>
-        <li>Keep wake time roughly the same each day — a steady cue helps the body clock, even after a rough night.</li>
+        <li>A roughly similar wake time can feel kinder than a perfect one.</li>
         <li>Step into daylight within the first hour. Morning light anchors the rhythm better than anything else.</li>
         <li>If you wake at 3am, don't check the clock. Low light, no problem-solving — leave it until morning.</li>
       </ul>
@@ -1674,7 +1686,7 @@
   <section class="card" id="weekCard">
     <h2><span class="dot"></span>This week</h2>
     <div class="week" id="weekView"></div>
-    <p class="hint">Soft dots are anchors that happened. Empty days are just empty — no catching up needed.</p>
+    <p class="hint">A dot means something happened. Blank days need nothing.</p>
   </section>
 
   <p class="hint screen-hint centered-hint">Evenings are for lowering the lights. Nothing here needs finishing.</p>
@@ -1912,7 +1924,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v41";
+const VERSION = "v42";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -1938,11 +1950,11 @@ const DEFAULT_LISTS = {
     { id: "a_offscreen", text: "One off-screen thing (tidy, stretch, piano)" },
   ],
   instead: [
-    { id: "i_journal", text: "Open the journal and write three lines" },
-    { id: "i_read",    text: "Read 10 pages of whatever's on the table" },
-    { id: "i_walk",    text: "Walk around the block, no phone" },
-    { id: "i_tidy",    text: "Tidy one surface — just one" },
-    { id: "i_piano",   text: "Five minutes of piano, for fun" },
+    { id: "i_journal", text: "Open the journal and write three lines", tag: "gentle" },
+    { id: "i_read",    text: "Read 10 pages of whatever's on the table", tag: "winddown" },
+    { id: "i_walk",    text: "Walk around the block, no phone", tag: "move" },
+    { id: "i_tidy",    text: "Tidy one surface — just one", tag: "gentle" },
+    { id: "i_piano",   text: "Five minutes of piano, for fun", tag: "gentle" },
   ],
 };
 
@@ -2004,10 +2016,10 @@ const DEFAULT_SHELVES = [
    Nick listening grows from 30 seconds to eight minutes with repeat days. */
 const PROGRAM30 = [
   { id: "d01", title: "Press play once", invitation: "If you want, press play on the Nick Moss meditation and hear how it starts.", nick: "first 30 seconds", kind: "nick", optional: "You can stop at any point. That is still enough." },
-  { id: "d02", title: "One quiet breath", invitation: "Notice one slow breath, then let it go. That's the whole invitation.", nick: null, kind: "rest", optional: null },
+  { id: "d02", title: "One quiet breath", invitation: "Notice one slow breath, then let it go. That's the whole invitation.", nick: null, kind: "rest", optional: "If you like, take one more, then stop." },
   { id: "d03", title: "Nothing to play", invitation: "Today's invitation is to leave the meditation closed. One quiet breath is enough.", nick: null, kind: "rest", optional: null },
   { id: "d04", title: "One gentle stretch", invitation: "Reach up once, slowly, and let your arms come down again.", nick: null, kind: "body", optional: "If you like, follow it with one more stretch, at your pace." },
-  { id: "d05", title: "A little longer", invitation: "If you want, press play and stay for a minute and a half.", nick: "through the first minute and a half", kind: "nick", optional: "If you like, let it reach two minutes, then stop whenever." },
+  { id: "d05", title: "A little longer", invitation: "If you want, press play and stay for a minute and a half.", nick: "through the first minute and a half", kind: "nick", optional: "Or stop now — a minute is plenty." },
   { id: "d06", title: "Log waking up", invitation: "If you want, note the time you woke, just as it was.", nick: null, kind: "sleep", optional: "If you like, add a line about how the night felt." },
   { id: "d07", title: "One small anchor", invitation: "Pick one anchor you fancy and give it a minute or two.", nick: null, kind: "day", optional: "If you want, follow it with one more small anchor." },
   { id: "d08", title: "A short pause", invitation: "If you like, sit for half a minute without playing anything. Stopping early is fine.", nick: null, kind: "rest", optional: null },
@@ -2374,7 +2386,8 @@ function migrate(s) {
     if (typeof p.startedAt !== "string") p.startedAt = "";
     if (typeof p.lastDoneAt !== "string") p.lastDoneAt = "";
     if (!p.done || typeof p.done !== "object" || Array.isArray(p.done)) p.done = {};
-    if (typeof p.reflection !== "string") p.reflection = "";
+    if (!p.notes || typeof p.notes !== "object" || Array.isArray(p.notes)) p.notes = {};
+     if (typeof p.reflection !== "string") p.reflection = "";
   }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
@@ -2414,6 +2427,20 @@ function save() {
 function saveQuiet() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
   catch (e) { console.warn("Could not save state:", e); }
+}
+function markDeleted(key) {
+  state.settings.deleted = state.settings.deleted || {};
+  state.settings.deleted[key] = Date.now();
+}
+function unmarkDeleted(key) {
+  if (state.settings.deleted) delete state.settings.deleted[key];
+}
+function mergeDeleted(a, b) {
+  const out = { ...(a || {}), ...(b || {}) };
+  Object.keys(b || {}).forEach((k) => {
+    if (!out[k] || (b[k] || 0) > (out[k] || 0)) out[k] = b[k];
+  });
+  return out;
 }
 
 /* One place for the tiny confirmation buzz. Browsers refuse vibration before
@@ -2479,6 +2506,8 @@ function renderAll() {
   applySunday();
   renderHeader();
   renderGreeting();
+  renderMorningLine();
+  renderQuietDayHint();
   renderProgress();
   renderRotIntention();
   renderList("morning");
@@ -2724,6 +2753,41 @@ function renderGreeting() {
   const el = $("#greeting");
   if (el) el.textContent = text;
 }
+function renderQuietDayHint() {
+  const el = $("#quietDayHint");
+  if (!el) return;
+  const d = new Date(); d.setDate(d.getDate() - 1);
+  const rec = state.days[todayKey(d)];
+  const anchorIds = state.settings.lists.anchors.map((a) => a.id)
+    .concat((state.settings.loans || []).filter((l) => l.list === "anchors").map((l) => l.id));
+  const hadAnchor = !!rec && anchorIds.some((id) => rec.checks && rec.checks[id]);
+  el.textContent = rec && !hadAnchor ? "Yesterday was quiet. Today can start with one." : "";
+  el.hidden = !el.textContent;
+}
+function renderMorningLine() {
+  const el = $("#morningLine");
+  if (!el) return;
+  const night = sleepNightFor(todayKey());
+  let text = "";
+  if (night && night.mins !== null && night.mins < 360) {
+    text = "Short night. The list can be small today.";
+  } else {
+    const now = new Date();
+    const mins = [];
+    for (let i = 3; i >= 1; i--) {
+      const d = new Date(now); d.setDate(now.getDate() - i);
+      const n = sleepNightFor(todayKey(d));
+      if (n && n.mins !== null) mins.push(n.mins);
+    }
+    if (mins.length >= 3) {
+      const avg = mins.reduce((a, b) => a + b, 0) / mins.length;
+      const spread = Math.max(...mins) - Math.min(...mins);
+      if (spread <= 45) text = "Your nights have been fairly even lately.";
+    }
+  }
+  el.textContent = text;
+  el.hidden = !text;
+}
 
 /* The count/progress bar are gone from Home. Kept as a no-op so old callers
    stay harmless; no numbers are shown anywhere in the daily rhythm. */
@@ -2898,8 +2962,9 @@ function renderList(which) {
     label.className = "label";
     label.append(document.createTextNode(item.text));
     const tag = document.createElement("span");
-    tag.className = "loan-tag";
-    tag.textContent = String(shelf.name || "").toLowerCase();
+    tag.className = "loan-dot";
+    tag.setAttribute("aria-hidden", "true");
+    tag.title = shelf.name;
     label.append(tag);
     toggle.append(check, label);
     row.append(toggle);
@@ -3130,12 +3195,14 @@ function removeItem(which, id) {
   const i = list.findIndex((x) => x.id === id);
   if (i < 0) return;
   const [removed] = list.splice(i, 1);
+  markDeleted("list:" + which + ":" + removed.id);
   save();
   renderList(which);
   // Reversible delete — a spike of "did I just lose that?" shouldn't be
   // permanent. Offer a quiet Undo for a few seconds.
   showSnackbar(`Removed “${trimLabel(removed.text)}”`, () => {
     state.settings.lists[which].splice(i, 0, removed);
+    unmarkDeleted("list:" + which + ":" + removed.id);
     save();
     renderList(which);
   });
@@ -3271,6 +3338,8 @@ function renderMood() {
     b.classList.toggle("sel", selected);
     b.setAttribute("aria-pressed", selected ? "true" : "false");
   });
+  const ctx = $("#moodContext");
+  if (ctx) ctx.textContent = rec.mood === "low" ? "Low is allowed. The day can be smaller." : "";
   const note = $("#eveningNote");
   if (document.activeElement !== note) note.value = rec.note || "";
 }
@@ -3519,10 +3588,10 @@ function renderTrends() {
       wrap.append(l, v);
       return wrap;
     };
-    stats.append(
-      cell("Bed", latest && latest.bed ? fmtClock(latest.bed) : "—"),
-      cell("Up", latest && latest.wake ? fmtClock(latest.wake) : "—"),
-      cell("About", latest && latest.mins ? fmtDuration(latest.mins) : "—"));
+    stats.textContent = latest && (latest.bed || latest.wake)
+      ? `Last night, as logged: ${fmtClock(latest.bed) || "—"} → ${fmtClock(latest.wake) || "—"}.`
+        + (latest.mins ? ` About ${fmtDuration(latest.mins)}.` : "")
+      : "Last night, as logged: no times yet.";
     const adjust = document.createElement("button");
     adjust.type = "button";
     adjust.className = "btn quiet";
@@ -3543,28 +3612,26 @@ function renderTrends() {
   const summary = $("#trendSummary");
   const logged = values.filter((v) => v !== null);
   if (summary) {
+    let soft = "";
+    const bedMins = nights.filter((n) => n && n.bed).map((n) => {
+      const [h, m] = n.bed.split(":").map(Number); return h * 60 + m;
+    });
+    if (bedMins.length >= 5) {
+      const mean = bedMins.reduce((a, b) => a + b, 0) / bedMins.length;
+      const sd = Math.sqrt(bedMins.reduce((a, b) => a + (b - mean) ** 2, 0) / bedMins.length);
+      soft = sd < 30
+        ? " Bedtimes have been fairly consistent."
+        : " Bedtimes have varied a lot lately — that's information, not a problem.";
+    }
     summary.textContent = logged.length < 3
       ? "Log a few bed + wake times to see a pattern here."
-      : "A few nights, softly observed.";
-    if (logged.length >= 3) {
-      summary.title = "Most nights here were close to " + fmtDuration(median(logged))
-        + ", with the middle half between " + fmtDuration(percentile(logged, 0.25))
-        + " and " + fmtDuration(percentile(logged, 0.75)) + ".";
-    } else {
-      summary.removeAttribute("title");
-    }
+      : "A few nights, loosely gathered here. Nothing to aim for." + soft;
+    summary.removeAttribute("title");
   }
 
   const moodLine = $("#sleepMoodLine");
   if (moodLine) {
-    const noted = nights.filter((n) => n && n.mood).map((n) => n.mood);
-    if (noted.length >= 3) {
-      const tally = noted.reduce((m, x) => ((m[x] = (m[x] || 0) + 1), m), {});
-      const top = Object.keys(tally).sort((a, b) => tally[b] - tally[a])[0];
-      moodLine.textContent = "On these nights you most often noted “" + top + ".”";
-    } else {
-      moodLine.textContent = "";
-    }
+    moodLine.textContent = "";
   }
 }
 
@@ -3582,8 +3649,18 @@ function pickSuggestion() {
   }
   // Avoid repeating the same idea twice in a row — random that feels broken
   // is worse than random that feels fair (an OCD/ADHD irritant).
+  const rec = dayRecord();
+  const hour = new Date().getHours();
   let pool = list;
   if (list.length > 1) pool = list.filter((it) => it.id !== lastSuggestionId);
+  // Gentle weighting: low mood or late hour prefers gentle/wind-down items.
+  if (rec.mood === "low" || hour >= 21) {
+    const preferred = pool.filter((it) => it.tag === "gentle" || it.tag === "winddown");
+    if (preferred.length) pool = preferred;
+  } else if (hour >= 17) {
+    const preferred = pool.filter((it) => it.tag === "winddown" || it.tag === "gentle");
+    if (preferred.length) pool = preferred;
+  }
   const pick = pool[Math.floor(Math.random() * pool.length)];
   lastSuggestionId = pick.id;
   box.className = "suggestion";
@@ -3653,14 +3730,17 @@ function renderSync() {
   if (g && document.activeElement !== g) g.value = syncCfg.gistId || "";
   if (!s) return;
   if (!syncCfg.gistId) {
-    s.textContent = "Not set up yet — enter your pairing code.";
+    s.textContent = "Not set up yet. Enter the same six-character code on each device.";
     s.title = "";
     return;
   }
   const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
-  s.textContent = syncError
-    ? "Sync paused · last successful" + when + "."
-    : (automatic ? "Syncing automatically" : "Gist " + syncCfg.gistId) + when + ".";
+  if (syncError === "rate-limit") s.textContent = "The bridge is busy just now. Nothing is lost here; I'll try again.";
+  else if (syncError === "offline") s.textContent = "Not connected. Your changes are saved here and will go across when you're back.";
+  else if (syncError === "clock-skew") s.textContent = "Your device is behind the other one. Check the date and time, then try again.";
+  else if (syncError) s.textContent = "Sync paused — your data is safe on this device." + when + ".";
+  else if (automatic) s.textContent = (syncCfg.lastSync ? "Set up — changes go across on their own" : "Set up") + when + ".";
+  else s.textContent = "Gist " + syncCfg.gistId + when + ".";
   s.title = syncError || "";
 }
 /* New devices pair once with a six-character code; the GitHub token never
@@ -3748,8 +3828,11 @@ async function syncFetch(method, url, body) {
   });
   if (!res.ok) {
     let detail = "";
-    try { const j = await res.json(); if (j.message) detail = " — " + j.message; } catch (e) {}
-    throw new Error((automatic ? "Sync " : "GitHub ") + res.status + detail);
+    try { const j = await res.json(); if (j.error || j.message) detail = " — " + (j.error || j.message); } catch (e) {}
+    const err = new Error((automatic ? "Sync " : "GitHub ") + res.status + detail);
+    err.status = res.status;
+    err.retryAfter = res.headers.get("Retry-After");
+    throw err;
   }
   return res.json();
 }
@@ -3801,6 +3884,7 @@ async function syncNow(opts = {}) {
   if (!automatic) { syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg); }
   syncBusy = true;
   syncError = null;
+  syncCfg.pendingSync = true; saveSync(syncCfg);
   if (!silent) syncStatus("Checking your sync…");
   try {
     let remote = null;
@@ -3814,6 +3898,9 @@ async function syncNow(opts = {}) {
     }
     const localStamp = Number(state.settings.updatedAt) || 0;
     const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
+    if (remote && Math.abs(remoteStamp - Date.now()) > 5 * 60 * 1000) {
+      throw Object.assign(new Error("clock-skew"), { status: 0 });
+    }
     if (remote && remoteStamp > localStamp) {
       applyingRemote = true;
       const merged = mergeState(state, remote);
@@ -3839,15 +3926,32 @@ async function syncNow(opts = {}) {
     } else {
       if (!silent) syncStatus("Already in step.");
     }
+    syncCfg.pendingSync = false;
     syncCfg.lastSync = new Date().toISOString();
     saveSync(syncCfg);
     if (silent) renderSync();
     else setTimeout(renderSync, 2500);   // let the plain-language message settle first
     if (!silent) haptic(8);
   } catch (e) {
-    syncError = e.message;
+    const msg = e && e.message || "";
+    if (e && (e.status === 429 || /rate limit/i.test(msg))) {
+      syncError = "rate-limit";
+      const wait = (Number(e.retryAfter) || 60) * 1000;
+      setTimeout(() => syncNow({ silent: true }), wait);
+    } else if (/Failed to fetch|NetworkError/i.test(msg)) {
+      syncError = "offline";
+    } else if (msg === "clock-skew" || msg.indexOf("clock-skew") >= 0) {
+      syncError = "clock-skew";
+    } else {
+      syncError = msg;
+    }
     renderSync();
-    if (!silent) syncStatus("Sync paused — your data is safe on this device.");
+    if (!silent) {
+      if (syncError === "rate-limit") syncStatus("The bridge is busy just now. Nothing is lost here; I'll try again.");
+      else if (syncError === "offline") syncStatus("Not connected. Your changes are saved here and will go across when you're back.");
+      else if (syncError === "clock-skew") syncStatus("Your device is behind the other one. Check the date and time, then try again.");
+      else syncStatus("Sync paused — your data is safe on this device.");
+    }
   } finally {
     syncBusy = false;
     if (syncAgain) {
@@ -4249,9 +4353,11 @@ function returnLoan(loanId) {
   const idx = loans.findIndex((l) => l.id === loanId);
   if (idx < 0) return;
   const [loan] = loans.splice(idx, 1);
+  markDeleted("loan:" + loan.id);
   save(); refreshAfterShelfChange();
   showSnackbar("Back on the shelf", () => {
     state.settings.loans.splice(idx, 0, loan);
+    unmarkDeleted("loan:" + loan.id);
     save(); refreshAfterShelfChange();
   });
   haptic(8);
@@ -4309,10 +4415,14 @@ function removeGentleItem(shelfId, itemId) {
   const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
   let loan = null;
   if (loanIdx >= 0) loan = state.settings.loans.splice(loanIdx, 1)[0];
+  markDeleted("shelf:" + shelfId + ":" + gone.id);
+  if (loan) markDeleted("loan:" + loan.id);
   save(); refreshAfterShelfChange();
   showSnackbar("Removed " + gone.text, () => {
     shelf.items.splice(idx, 0, gone);
     if (loan) state.settings.loans.splice(loanIdx, 0, loan);
+    unmarkDeleted("shelf:" + shelfId + ":" + gone.id);
+    if (loan) unmarkDeleted("loan:" + loan.id);
     save(); refreshAfterShelfChange();
   });
 }
@@ -4337,10 +4447,12 @@ function removeShelf(shelfId) {
   const shelf = shelves()[idx];
   if ((shelf.items || []).length) { showSnackbar("Move its items first"); return; }
   shelves().splice(idx, 1);
+  markDeleted("shelf:" + shelfId);
   if (activeShelfId === shelfId) activeShelfId = shelves()[0].id;
   save(); renderShelves();
   showSnackbar("Removed empty shelf", () => {
     shelves().splice(idx, 0, shelf);
+    unmarkDeleted("shelf:" + shelfId);
     activeShelfId = shelfId;
     save(); renderShelves();
   });
@@ -4350,7 +4462,13 @@ function removeShelf(shelfId) {
 function smallStartsPool() {
   const shelf = findShelf("sh_smallstarts");
   if (!shelf) return [];
-  return (shelf.items || []).filter((item) => item && !loanFor(item.id));
+  const base = (shelf.items || []).filter((item) => item && !loanFor(item.id));
+  const hour = new Date().getHours();
+  const prefer = hour < 12
+    ? (it) => /push|walk|stretch|move/i.test((it.note || "") + " " + (it.text || ""))
+    : (it) => /tidy|read|reply|email|message/i.test((it.note || "") + " " + (it.text || ""));
+  const filtered = base.filter(prefer);
+  return filtered.length >= 2 ? filtered : base;
 }
 function chooseSmallStart() {
   const pool = smallStartsPool();
@@ -4435,7 +4553,7 @@ function fillProgramCard(prefix, p, step, at) {
   card.hidden = !p.loaded || !step;
   if (card.hidden) return;
   const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
-  if (meta) meta.textContent = "Step " + at + " of " + PROGRAM30.length;
+  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + ", at your pace";
   const gap = q("Gap");
   if (gap) {
     const days = daysSinceKey(p.lastDoneAt);
@@ -4486,11 +4604,11 @@ function renderProgram() {
   const nudge = $("#programHomeNudge");
   if (nudge) nudge.hidden = !!p.loaded;
   if (more) {
-    const marks = Object.keys(p.done || {}).length;
+    const marks = Object.keys(p.done || {}).filter((k) => p.done[k]).length;
     more.textContent = p.loaded
-      ? "Thirty small invitations, at your pace. Loading out hides the card; your place is kept."
+      ? "Your place is kept."
       : (marks || p.startedAt)
-        ? "Kept at step " + at + " of " + PROGRAM30.length + ". Loading in resumes there — nothing is lost."
+        ? "Kept where you left it. Loading in resumes there — nothing is lost."
         : "Thirty small invitations, at your pace. Nothing to catch up on.";
   }
   if (load) load.textContent = p.loaded ? "Load out" : "Load in";
@@ -4525,12 +4643,12 @@ function completeProgramStep() {
   renderProgram();
   haptic(8);
   // An accidental tap is easy to make when you're tired — let it be undone.
-  showSnackbar("Kept. The next invitation is ready.", () => {
+  showSnackbar("Kept. The next one is here whenever you want it.", () => {
     p.step = before.step;
     p.startedAt = before.startedAt;
     p.lastDoneAt = before.lastDoneAt;
     if (before.hadMark) p.done[step.id] = before.mark;
-    else delete p.done[step.id];
+    else p.done[step.id] = null;
     save();
     renderProgram();
   });
@@ -4634,39 +4752,48 @@ function importJSON(file) {
 
 /* Collections are merged by id so a pull or import can never quietly drop a
    row the other device added. Later values win for the same id. */
-function mergeCollection(localList, incomingList) {
+function mergeCollection(localList, incomingList, deleted, prefix) {
+  prefix = prefix || "";
   const byId = new Map();
   [localList, incomingList].forEach((list) => {
     (Array.isArray(list) ? list : []).forEach((item) => {
       if (!item || typeof item !== "object") return;
-      byId.set(String(item.id || JSON.stringify(item)), item);
+      const key = prefix + String(item.id || JSON.stringify(item));
+      if (deleted && deleted[key]) return;
+      byId.set(key, item);
     });
   });
-  return [...byId.values()];
+  return [...byId.values()].filter((item) =>
+    !deleted || !deleted[prefix + String(item.id || JSON.stringify(item))]);
 }
-function mergeShelves(localShelves, incomingShelves) {
+function mergeShelves(localShelves, incomingShelves, deleted) {
   const byId = new Map();
   [localShelves, incomingShelves].forEach((list) => {
     (Array.isArray(list) ? list : []).forEach((shelf) => {
       if (!shelf || typeof shelf !== "object" || !shelf.id) return;
+      if (deleted && deleted["shelf:" + shelf.id]) return;
       const previous = byId.get(shelf.id);
       byId.set(shelf.id, previous
-        ? { ...previous, ...shelf, items: mergeCollection(previous.items, shelf.items) }
-        : { ...shelf, items: mergeCollection([], shelf.items) });
+        ? { ...previous, ...shelf, items: mergeCollection(previous.items, shelf.items, deleted, "shelf:" + shelf.id + ":") }
+        : { ...shelf, items: mergeCollection([], shelf.items, deleted, "shelf:" + shelf.id + ":") });
     });
   });
-  return [...byId.values()];
+  return [...byId.values()].filter((shelf) => !deleted || !deleted["shelf:" + shelf.id]);
 }
-function mergeDay(localDay, incomingDay) {
+function mergeDay(localDay, incomingDay, incomingWins) {
   const a = localDay && typeof localDay === "object" ? localDay : {};
   const b = incomingDay && typeof incomingDay === "object" ? incomingDay : {};
   const out = { ...freshDay(), ...a };
-  // Blank fields on the incoming side never erase a real value on this device.
   Object.keys(b).forEach((key) => {
     const value = b[key];
-    if (key === "checks" || key === "note" || key === "intention") {
-      if (value !== undefined && value !== null) out[key] = value;
-    } else if (value !== undefined && value !== null && value !== "") {
+    if (value === undefined || value === null) return;
+    if (key === "checks") return;
+    if (key === "note" || key === "intention") {
+      if (incomingWins) out[key] = value;
+      else if (value !== "" && (a[key] === "" || a[key] == null)) out[key] = value;
+    } else if (incomingWins) {
+      if (value !== "") out[key] = value;
+    } else if (value !== "" && (a[key] === "" || a[key] == null)) {
       out[key] = value;
     }
   });
@@ -4680,35 +4807,44 @@ function mergeState(local, incoming) {
   const a = local.settings || {};
   const b = incoming.settings || {};
   const mergedSettings = Object.assign({}, base, a, b);
+  const incomingWins = (Number(b.updatedAt) || 0) > (Number(a.updatedAt) || 0);
   // The 30-day marks are a union on import/sync: the newer device wins the
   // scalar fields, but no device's gentle marks are erased.
   if (a.program30 || b.program30) {
     const pa = a.program30 || {}, pb = b.program30 || {};
     const num = (v, fallback) => (typeof v === "number" && isFinite(v) ? v : fallback);
+    const done = { ...(pa.done || {}), ...(pb.done || {}) };
+    let consecutive = 0;
+    while (consecutive < PROGRAM30.length && done[PROGRAM30[consecutive].id]) consecutive++;
+    const winner = (pb.lastDoneAt || "") > (pa.lastDoneAt || "") ? pb : pa;
+    const other = winner === pb ? pa : pb;
+    const step = Math.max(0, Math.min(PROGRAM30.length - 1,
+      Math.max(num(winner.step, 0), num(other.step, 0), consecutive)));
     mergedSettings.program30 = {
-      loaded: typeof pb.loaded === "boolean" ? pb.loaded
-        : (typeof pa.loaded === "boolean" ? pa.loaded : false),
-      step: Math.max(0, Math.min(PROGRAM30.length - 1,
-        Math.round(num(pb.step, num(pa.step, 0))))),
-      startedAt: pb.startedAt || pa.startedAt || "",
-      lastDoneAt: pb.lastDoneAt || pa.lastDoneAt || "",
-      done: { ...(pa.done || {}), ...(pb.done || {}) },
-      // A line someone wrote is never wiped by a newer device arriving empty.
-      reflection: pb.reflection || pa.reflection || "",
+      loaded: typeof winner.loaded === "boolean" ? winner.loaded
+        : (typeof other.loaded === "boolean" ? other.loaded : false),
+      step,
+      startedAt: winner.startedAt || other.startedAt || "",
+      lastDoneAt: winner.lastDoneAt || other.lastDoneAt || "",
+      done,
+      notes: { ...(pa.notes || {}), ...(pb.notes || {}) },
+      reflection: typeof winner.reflection === "string" ? winner.reflection
+        : (winner.reflection || other.reflection || ""),
     };
   }
   ["morning", "anchors", "instead"].forEach((key) => {
     mergedSettings.lists = mergedSettings.lists || {};
     mergedSettings.lists[key] = mergeCollection(
-      (a.lists || {})[key], (b.lists || {})[key]);
+      (a.lists || {})[key], (b.lists || {})[key], mergedSettings.deleted, "");
   });
-  mergedSettings.shelves = mergeShelves(a.shelves, b.shelves);
-  mergedSettings.loans = mergeCollection(a.loans, b.loans);
-  mergedSettings.myLinks = mergeCollection(a.myLinks, b.myLinks);
+  mergedSettings.deleted = mergeDeleted(a.deleted, b.deleted);
+  mergedSettings.shelves = mergeShelves(a.shelves, b.shelves, mergedSettings.deleted);
+  mergedSettings.loans = mergeCollection(a.loans, b.loans, mergedSettings.deleted, "loan:");
+  mergedSettings.myLinks = mergeCollection(a.myLinks, b.myLinks, mergedSettings.deleted, "");
 
   const days = { ...(local.days || {}) };
   Object.keys(incoming.days || {}).forEach((key) => {
-    days[key] = mergeDay(days[key], incoming.days[key]);
+    days[key] = mergeDay(days[key], incoming.days[key], incomingWins);
   });
   const merged = { settings: mergedSettings, days };
   unifyNick(merged);   // repair the union, not just each side
@@ -4863,6 +4999,18 @@ function wire() {
   $("#programHomeNudge").addEventListener("click", () => setProgramLoaded(true));
   $("#programDone").addEventListener("click", completeProgramStep);
   $("#programEveDone").addEventListener("click", completeProgramStep);
+  function skipProgramStep() {
+    const p = state.settings.program30;
+    if (!p || !p.loaded) return;
+    const step = currentProgramStep();
+    const gap = $("#programGap");
+    if (gap) { gap.hidden = false; gap.textContent = "Left right where it is."; }
+    const eveGap = $("#programEveGap");
+    if (eveGap) { eveGap.hidden = false; eveGap.textContent = "Left right where it is."; }
+    renderProgram();
+  }
+  $("#programNotToday").addEventListener("click", skipProgramStep);
+  $("#programEveNotToday").addEventListener("click", skipProgramStep);
   // One optional closing line, mirrored across both cards without a re-render.
   ["#programReflect", "#programEveReflect"].forEach((sel) => {
     const el = $(sel);
@@ -4870,6 +5018,19 @@ function wire() {
     el.addEventListener("input", () => {
       state.settings.program30.reflection = el.value;
       const other = $(sel === "#programReflect" ? "#programEveReflect" : "#programReflect");
+      if (other && other !== el && document.activeElement !== other) other.value = el.value;
+      save();
+    });
+  });
+  ["#programNote", "#programEveNote"].forEach((sel) => {
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      const step = currentProgramStep();
+      if (!step) return;
+      state.settings.program30.notes = state.settings.program30.notes || {};
+      state.settings.program30.notes[step.id] = el.value;
+      const other = $(sel === "#programNote" ? "#programEveNote" : "#programNote");
       if (other && other !== el && document.activeElement !== other) other.value = el.value;
       save();
     });
@@ -4933,16 +5094,25 @@ renderAll();
 showTab(initialTab());
 // if sync is set up: pull once on open, and flush any pending change when you
 // leave the app (best effort on mobile — GitHub may cut off a hidden page)
+if (syncCfg.pendingSync) setTimeout(() => syncNow({ silent: true }), 300);
 if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) setTimeout(() => syncNow({ silent: true }), 800);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden" && syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
+    syncCfg.pendingSync = true; saveSync(syncCfg);
     clearTimeout(syncTimer);
     syncNow({ silent: true });
   }
 });
 window.addEventListener("pagehide", () => {
   if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
+    syncCfg.pendingSync = true; saveSync(syncCfg);
     clearTimeout(syncTimer);
+    syncNow({ silent: true });
+  }
+});
+document.addEventListener("freeze", () => {
+  if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
+    syncCfg.pendingSync = true; saveSync(syncCfg);
     syncNow({ silent: true });
   }
 });
