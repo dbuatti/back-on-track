@@ -243,6 +243,33 @@
   }
   .link-item .copy-btn { flex: 0 0 40px; min-height: 40px; font-size: 16px; }
   .copy-btn:active { background: var(--accent-soft); }
+  .my-link-row { display: flex; align-items: stretch; gap: 6px; margin-bottom: 8px; }
+  .my-link-row .link-chip { flex: 1; overflow-wrap: anywhere; }
+  .remove-link {
+    flex: 0 0 40px;
+    min-height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 17px;
+    cursor: pointer;
+  }
+  .remove-link:active { background: var(--accent-soft); }
+  .link-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .link-form[hidden] { display: none; }
+  .link-form input {
+    flex: 1 1 100%;
+    font: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .link-form input[type="url"] { flex: 1 1 60%; }
+  .link-form .btn { flex: 0 0 auto; }
   .more-row { display: flex; align-items: center; gap: 14px; }
   .more-row .toolkit-link { margin: 0; flex: 0 0 auto; }
   .more-copy { display: flex; flex-direction: column; flex: 1; }
@@ -267,6 +294,56 @@
     color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
   }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  .menu-btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    font-size: 19px;
+    line-height: 1;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .menu-btn:active { background: var(--accent-soft); }
+
+  /* ---------- The quiet ☰ page ---------- */
+  body.gentle-open .bottom-nav { display: none; }
+  body.gentle-open .wrap { padding-bottom: 32px; }
+  .gentle-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .gentle-item:last-child { border-bottom: none; }
+  .gentle-item .gi-mark { font-size: 17px; line-height: 1.4; }
+  .gentle-item .gi-body { flex: 1; min-width: 0; }
+  .gentle-item .gi-name { font-size: 16px; font-weight: 600; }
+  .gentle-item .gi-note { font-size: 13px; color: var(--ink-soft); margin-top: 2px; }
+  .gentle-item .gi-small {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 14px;
+    color: var(--accent-deep);
+    margin-top: 6px;
+  }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 14px;
+  }
+  .stat-row span:first-child { color: var(--ink-soft); }
+  .stat-row span:last-child { text-align: right; font-weight: 600; }
+  .stat-dots { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 14px; }
+  .stat-dots .adot { opacity: 0.28; }
+  .stat-dots .adot.on { opacity: 0.9; }
 
   /* ---------- Section cards ---------- */
   .card {
@@ -888,7 +965,11 @@
 
   <header class="top">
     <h1>Back on Track</h1>
-    <span class="date" id="todayLabel"></span>
+    <span class="header-right">
+      <span class="date" id="todayLabel"></span>
+      <button type="button" class="menu-btn" id="menuBtn"
+              aria-label="Open the not-feeling-it page" title="Not feeling it">☰</button>
+    </span>
   </header>
 
   <div class="focus-bar" id="focusBar">
@@ -1085,6 +1166,20 @@
       <p class="hint">Tap ⧉ to copy any link. FNH Hub and Comm Analytics live on the MacBook Pro — if it's asleep, these won't open. The Door itself runs on the mini.</p>
     </section>
 
+    <section class="card" id="myLinksCard">
+      <h2><span class="dot"></span>My links</h2>
+      <div id="myLinksList"></div>
+      <button type="button" class="btn small" id="myLinksAddBtn">+ Add a link</button>
+      <div class="link-form" id="myLinksForm" hidden>
+        <input type="text" id="newLinkName" placeholder="Name, e.g. FNH notes" enterkeyhint="next"
+               autocorrect="off" autocapitalize="words" />
+        <input type="url" id="newLinkUrl" placeholder="https://…" enterkeyhint="done"
+               autocorrect="off" autocapitalize="off" spellcheck="false" />
+        <button type="button" class="btn small" id="newLinkSave">Add</button>
+      </div>
+      <p class="hint">Any site you use often — tap to open, ⧉ to copy.</p>
+    </section>
+
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
       <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it. Once set up it syncs by itself — Sync now is there if you want it straight away.</p>
@@ -1127,6 +1222,35 @@
       <p class="hint">Everything stays on this device. Export to move it to another one.</p>
     </section>
   </div><!-- /screen-links -->
+
+  <!-- ============ NOT FEELING IT (reached by ☰, no bottom tab) ============ -->
+  <div class="screen" id="screen-gentle" hidden>
+    <section class="card" id="gentleIntro">
+      <h2><span class="dot"></span>Not feeling it</h2>
+      <p class="hint">Good things you're not in the mood for right now. They can wait here, quietly — nothing to do, nothing to fail.</p>
+      <button type="button" class="btn small" id="gentleBack">← Back to today</button>
+    </section>
+
+    <section class="card" id="gentlePractices">
+      <h2><span class="dot"></span>On the shelf</h2>
+      <div id="gentleList"></div>
+      <button type="button" class="btn small" id="gentleAddBtn" style="margin-top:12px">+ Add something</button>
+      <div class="link-form" id="gentleForm" hidden>
+        <input type="text" id="gentleName" placeholder="What is it?" enterkeyhint="next"
+               autocorrect="off" autocapitalize="words" />
+        <input type="text" id="gentleNote" placeholder="e.g. not feeling it" enterkeyhint="done"
+               autocorrect="off" autocapitalize="sentences" />
+        <button type="button" class="btn small" id="gentleSave">Add</button>
+      </div>
+      <p class="hint">Tap a name to see a much smaller version. No need to do the whole thing.</p>
+    </section>
+
+    <section class="card" id="gentleStats">
+      <h2><span class="dot"></span>A quiet look back</h2>
+      <div id="gentleStatsBody"></div>
+      <p class="hint">Patterns, not scores.</p>
+    </section>
+  </div>
 
   <div class="version" id="versionTag">v10</div>
 </div>
@@ -1176,12 +1300,11 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v16";
+const VERSION = "v17";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
   morning: [
-    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)" },
     { id: "m_breakfast", text: "Breakfast outside, quiet" },
     { id: "m_sun",     text: "Sun movements + sun salute + om" },
     { id: "m_nick",    text: "Nick Moss daily meditation", url: "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260" },
@@ -1200,6 +1323,16 @@ const DEFAULT_LISTS = {
     { id: "i_piano",   text: "Five minutes of piano, for fun" },
   ],
 };
+
+/* Practices that are good but not always wanted. They live on their own quiet
+   page, away from the morning checklist. "small" is the tiny version offered
+   when the full thing feels like too much. */
+const GENTLE_PRACTICES = [
+  { id: "g_sangha", text: "Sangha meditation", note: "Not feeling it", small: "One breath, eyes closed." },
+  { id: "g_kriya",  text: "Kriya meditation",  note: "Never feeling it", small: "Three slow breaths, hands still." },
+  { id: "g_sun",    text: "Sun movements",     note: "Heavy mornings", small: "One stretch toward the light." },
+  { id: "g_nick",   text: "Nick Moss meditation", note: "Later is fine", small: "Play it and hear the first minute." },
+];
 
 /* A quiet rotating intention — a gentle word or line, never a task.
    Yours to edit. Tapping the card in the morning cycles through these. */
@@ -1234,6 +1367,8 @@ function freshState() {
       targetBed: "22:30",
       intentionIndex: 0,   // rotates through INTENTIONS; persisted so it's stable per day
       intentionDay: "",    // the YYYY-MM-DD the current intention was chosen for
+      myLinks: [],         // your own sites: { id, name, url }
+      gentleItems: JSON.parse(JSON.stringify(GENTLE_PRACTICES)), // on the ☰ page
       updatedAt: 0,        // last change, used to decide which device wins a sync
     },
     days: {},
@@ -1279,6 +1414,14 @@ function migrate(s) {
   // new settings fields (time-of-day + rotating intention)
   if (typeof s.settings.intentionIndex !== "number") s.settings.intentionIndex = 0;
   if (typeof s.settings.intentionDay !== "string") s.settings.intentionDay = "";
+  if (!Array.isArray(s.settings.myLinks)) s.settings.myLinks = [];
+  if (!Array.isArray(s.settings.gentleItems)) {
+    s.settings.gentleItems = JSON.parse(JSON.stringify(GENTLE_PRACTICES));
+  }
+  // Sangha has moved off the Home checklist and onto the quiet ☰ page.
+  if (Array.isArray(s.settings.lists.morning)) {
+    s.settings.lists.morning = s.settings.lists.morning.filter((it) => it.id !== "m_sangha");
+  }
 }
 
 function save() {
@@ -1365,6 +1508,8 @@ function renderAll() {
   renderSleepBanner();
   renderMood();
   renderWeek();
+  renderMyLinks();
+  renderGentle();
   renderSync();
   if (focusOn) renderFocus();
 }
@@ -2310,6 +2455,245 @@ async function syncNow(opts = {}) {
   }
 }
 
+/* ---------- Your own links ---------- */
+function normaliseURL(raw) {
+  let url = (raw || "").trim();
+  if (!url) return "";
+  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
+  if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(url)) return "";
+  return url;
+}
+
+function renderMyLinks() {
+  const box = $("#myLinksList");
+  if (!box) return;
+  box.innerHTML = "";
+  const links = state.settings.myLinks || [];
+  if (!links.length) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Nothing here yet.";
+    box.append(p);
+    return;
+  }
+  links.forEach((link) => {
+    const row = document.createElement("div");
+    row.className = "my-link-row";
+    const a = document.createElement("a");
+    a.className = "link-chip";
+    a.href = link.url;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = link.name;
+    const copy = document.createElement("button");
+    copy.type = "button";
+    copy.className = "copy-btn";
+    copy.dataset.copy = link.url;
+    copy.setAttribute("aria-label", "Copy " + link.name + " link");
+    copy.title = "Copy link";
+    copy.textContent = "⧉";
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "remove-link";
+    del.setAttribute("aria-label", "Remove " + link.name);
+    del.title = "Remove";
+    del.textContent = "×";
+    del.addEventListener("click", () => removeMyLink(link.id));
+    row.append(a, copy, del);
+    box.append(row);
+  });
+}
+
+function addMyLink() {
+  const nameEl = $("#newLinkName"), urlEl = $("#newLinkUrl");
+  const name = ((nameEl && nameEl.value) || "").trim();
+  const url = normaliseURL(urlEl && urlEl.value);
+  if (!name || !url) { showSnackbar("Add a name and a valid web address"); return; }
+  state.settings.myLinks.unshift({ id: "lnk_" + Date.now().toString(36), name, url });
+  if (nameEl) nameEl.value = "";
+  if (urlEl) urlEl.value = "";
+  const form = $("#myLinksForm");
+  if (form) form.hidden = true;
+  save(); renderMyLinks();
+  haptic(8);
+}
+
+function removeMyLink(id) {
+  const links = state.settings.myLinks || [];
+  const idx = links.findIndex((l) => l.id === id);
+  if (idx < 0) return;
+  const [gone] = links.splice(idx, 1);
+  save(); renderMyLinks();
+  showSnackbar("Removed " + gone.name, () => {
+    state.settings.myLinks.splice(idx, 0, gone);
+    save(); renderMyLinks();
+  });
+}
+
+/* ---------- The quiet ☰ page: good things, not right now ---------- */
+let gentleReturn = "home";
+
+function openGentle() {
+  if (focusOn) toggleFocus(false);
+  gentleReturn = activeTab || "home";
+  Object.keys(TAB_SCREENS).forEach((k) => {
+    const el = $("#" + TAB_SCREENS[k]);
+    if (el) el.hidden = true;
+  });
+  const page = $("#screen-gentle");
+  if (page) page.hidden = false;
+  document.body.classList.add("gentle-open");
+  if (window.scrollTo) window.scrollTo(0, 0);
+  renderGentle();
+}
+function closeGentle() {
+  const page = $("#screen-gentle");
+  if (page) page.hidden = true;
+  document.body.classList.remove("gentle-open");
+  showTab(gentleReturn);
+}
+
+function renderGentle() {
+  renderGentleList();
+  renderGentleStats();
+}
+
+function renderGentleList() {
+  const box = $("#gentleList");
+  if (!box) return;
+  box.innerHTML = "";
+  const items = state.settings.gentleItems || [];
+  if (!items.length) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Nothing on the shelf right now.";
+    box.append(p);
+    return;
+  }
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "gentle-item";
+    const mark = document.createElement("span");
+    mark.className = "gi-mark";
+    mark.setAttribute("aria-hidden", "true");
+    mark.textContent = "🌿";
+    const body = document.createElement("div");
+    body.className = "gi-body";
+    const name = document.createElement("div");
+    name.className = "gi-name";
+    name.textContent = item.text;
+    name.setAttribute("role", "button");
+    name.setAttribute("tabindex", "0");
+    const note = document.createElement("div");
+    note.className = "gi-note";
+    note.textContent = item.note || "";
+    const small = document.createElement("div");
+    small.className = "gi-small";
+    small.textContent = item.small || "The smallest version is enough.";
+    small.hidden = true;
+    const toggleSmall = () => { small.hidden = !small.hidden; };
+    name.addEventListener("click", toggleSmall);
+    name.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSmall(); }
+    });
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "remove-link";
+    del.setAttribute("aria-label", "Remove " + item.text);
+    del.title = "Remove";
+    del.textContent = "×";
+    del.addEventListener("click", () => removeGentleItem(item.id));
+    body.append(name, note, small);
+    row.append(mark, body, del);
+    box.append(row);
+  });
+}
+
+function addGentleItem() {
+  const nameEl = $("#gentleName"), noteEl = $("#gentleNote");
+  const text = ((nameEl && nameEl.value) || "").trim();
+  if (!text) { showSnackbar("Give it a name first"); return; }
+  state.settings.gentleItems.unshift({
+    id: "g_" + Date.now().toString(36),
+    text,
+    note: ((noteEl && noteEl.value) || "").trim(),
+    small: "The smallest version is enough.",
+  });
+  if (nameEl) nameEl.value = "";
+  if (noteEl) noteEl.value = "";
+  const form = $("#gentleForm");
+  if (form) form.hidden = true;
+  save(); renderGentleList();
+  haptic(8);
+}
+
+function removeGentleItem(id) {
+  const items = state.settings.gentleItems || [];
+  const idx = items.findIndex((x) => x.id === id);
+  if (idx < 0) return;
+  const [gone] = items.splice(idx, 1);
+  save(); renderGentleList();
+  showSnackbar("Removed " + gone.text, () => {
+    state.settings.gentleItems.splice(idx, 0, gone);
+    save(); renderGentleList();
+  });
+}
+
+function renderGentleStats() {
+  const box = $("#gentleStatsBody");
+  if (!box) return;
+  box.innerHTML = "";
+  const rows = [];
+  const nights = [];
+  const now = new Date();
+  for (let i = 0; i < 21; i++) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const m = sleepMinutesFor(todayKey(d));
+    if (m) nights.push(m);
+  }
+  if (nights.length >= 2) {
+    rows.push(["Sleep", "About " + fmtDuration(nights.reduce((a, b) => a + b, 0) / nights.length) + " over " + nights.length + " nights"]);
+  }
+  let active = 0;
+  const dots = document.createElement("div");
+  dots.className = "stat-dots";
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(now.getDate() - i);
+    const rec = state.days[todayKey(d)];
+    const on = !!(rec && rec.checks && Object.keys(rec.checks).some((k) => rec.checks[k]));
+    if (on) active++;
+    const dot = document.createElement("span");
+    dot.className = "adot" + (on ? " on" : "");
+    dot.title = d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    dots.append(dot);
+  }
+  rows.push(["Showing up", active + " of the last 30 days had one gentle step"]);
+  const counts = {};
+  Object.keys(state.days).forEach((k) => {
+    const rec = state.days[k];
+    Object.keys(rec.checks || {}).forEach((id) => { if (rec.checks[id]) counts[id] = (counts[id] || 0) + 1; });
+  });
+  const topId = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
+  if (topId) {
+    const all = [].concat(state.settings.lists.morning || [], state.settings.lists.anchors || []);
+    const item = all.find((x) => x.id === topId);
+    rows.push(["Often", item ? item.text : topId]);
+  }
+  rows.forEach((row) => {
+    const line = document.createElement("div");
+    line.className = "stat-row";
+    const l = document.createElement("span");
+    l.textContent = row[0];
+    const v = document.createElement("span");
+    v.textContent = row[1];
+    line.append(l, v);
+    box.append(line);
+  });
+  if (active) box.append(dots);
+}
+
 /* ---------- Copy any link to the clipboard ---------- */
 async function copyLink(url, label) {
   let ok = false;
@@ -2475,13 +2859,40 @@ function wire() {
     });
   });
 
-  // copy any link on the Links screen
-  $$("[data-copy]").forEach((b) => {
-    b.addEventListener("click", () => {
-      const label = (b.getAttribute("aria-label") || "site")
-        .replace(/^Copy\s+/, "").replace(/\s+link$/, "");
-      copyLink(b.dataset.copy, label);
-    });
+  // copy any link — delegated, so links added later work too
+  document.addEventListener("click", (e) => {
+    const b = e.target && e.target.closest && e.target.closest("[data-copy]");
+    if (!b) return;
+    const label = (b.getAttribute("aria-label") || "site")
+      .replace(/^Copy\s+/, "").replace(/\s+link$/, "");
+    copyLink(b.dataset.copy, label);
+  });
+
+  // your own links
+  $("#myLinksAddBtn").addEventListener("click", () => {
+    const form = $("#myLinksForm");
+    form.hidden = !form.hidden;
+    if (!form.hidden) $("#newLinkName").focus();
+  });
+  $("#newLinkSave").addEventListener("click", addMyLink);
+  $$("#myLinksForm input").forEach((input) => {
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") addMyLink(); });
+  });
+
+  // the quiet ☰ page
+  $("#menuBtn").addEventListener("click", openGentle);
+  $("#gentleBack").addEventListener("click", closeGentle);
+  $("#gentleAddBtn").addEventListener("click", () => {
+    const form = $("#gentleForm");
+    form.hidden = !form.hidden;
+    if (!form.hidden) $("#gentleName").focus();
+  });
+  $("#gentleSave").addEventListener("click", addGentleItem);
+  $$("#gentleForm input").forEach((input) => {
+    input.addEventListener("keydown", (e) => { if (e.key === "Enter") addGentleItem(); });
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && document.body.classList.contains("gentle-open")) closeGentle();
   });
 
   // export / import
