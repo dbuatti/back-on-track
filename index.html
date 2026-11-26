@@ -1018,8 +1018,15 @@
   }
   .btn:active { transform: scale(0.98); }
   .btn:active { background: var(--accent-soft); }
+  .btn.has-time {
+    background: var(--evening-soft);
+    border-color: var(--evening);
+    color: var(--evening);
+    font-weight: 600;
+  }
   @media (hover: hover) {
     .btn:hover { border-color: var(--accent); }
+    .btn.has-time:hover { border-color: var(--evening); }
   }
   .btn.primary {
     background: var(--accent-deep);
@@ -1938,7 +1945,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v50";
+const VERSION = "v51";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3332,6 +3339,16 @@ function renderBedtime() {
   const rec = dayRecord();
   $("#targetBed").value = state.settings.targetBed || "";
   updateWindNote();
+  const bedBtn = $("#logBed");
+  if (bedBtn) {
+    if (rec.bedTime) { bedBtn.textContent = "Bed " + rec.bedTime + "  \u270E"; bedBtn.classList.add("has-time"); }
+    else { bedBtn.textContent = "Log bed time"; bedBtn.classList.remove("has-time"); }
+  }
+  const wakeBtn = $("#logWake");
+  if (wakeBtn) {
+    if (rec.wakeTime) { wakeBtn.textContent = "Woke " + rec.wakeTime + "  \u270E"; wakeBtn.classList.add("has-time"); }
+    else { wakeBtn.textContent = "Log wake time"; wakeBtn.classList.remove("has-time"); }
+  }
 
   // bedSummary removed; sleep trends card shows the logged times.
 }
