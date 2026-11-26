@@ -24,44 +24,64 @@
   :root {
     color-scheme: light;
     /* One warm surface, one ink hierarchy, one action colour. */
-    --bg: #ece0d2;
-    --card: #f7efe5;
-    --field: #fffaf3;
-    --ink: #3a302a;
-    --ink-soft: #67594e;
-    --line: #d7c7b6;
-    --control-line: #d7c7b6;
-    --accent: #6f8f76;
-    --accent-deep: #3f5f47;
-    --accent-soft: #e0e9dc;
-    --sun: #b97c3d;
-    --sun-soft: #f0ddc2;
-    --evening: #7a6f9b;
-    --evening-soft: #e6dfee;
+    --bg: #f2ebe0;
+    --card: #fbf6ee;
+    --field: #fffdf8;
+    --ink: #2f2722;
+    --ink-soft: #6b5e52;
+    --line: #e2d5c4;
+    --control-line: #e2d5c4;
+    --accent: #6a8f74;
+    --accent-deep: #3d5f47;
+    --accent-soft: #dde9df;
+    --sun: #c08545;
+    --sun-soft: #f1e0c6;
+    --evening: #7b6f9c;
+    --evening-soft: #e8e1f0;
     --on-accent: #ffffff;
     --glow: transparent;
-    --shadow: none;
-    --shadow-nav: none;
-    --snack-bg: #3a302a;
-    --snack-ink: #f7efe5;
+    --shadow: 0 1px 2px rgba(47,39,34,0.04), 0 14px 34px rgba(47,39,34,0.07);
+    --shadow-nav: 0 -2px 16px rgba(47,39,34,0.08);
+    --snack-bg: #2f2722;
+    --snack-ink: #fbf6ee;
     --snack-accent: #ffd9a8;
     --swipe-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f7efe5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'/%3E%3C/svg%3E");
 
     /* 4 / 8 / 12 / 16 / 24 / 32 only */
     --s1: 4px; --s2: 8px; --s3: 12px;
     --s4: 16px; --s5: 24px; --s6: 32px;
-    --radius-sm: 12px;
-    --radius: 16px;
-    --radius-lg: 20px;
-    --tap: 44px;
-    --content: 560px;
+    --radius-sm: 14px;
+    --radius: 18px;
+    --radius-lg: 22px;
+    --tap: 46px;
+    --content: 580px;
     --t-cap: 12px;
     --t-small: 13px;
     --t-body: 16px;
     --t-lead: 17px;
     --t-card: 16px;
     --t-title: 20px;
+
+    /* Four quiet shelf colours. Known shelves keep their own; a shelf you add
+       simply borrows the next tone, so there is nothing to configure. */
+    --tone-clay: #a46363;
+    --tone-clay-deep: #7a4444;
+    --tone-clay-soft: #f3deda;
+    --tone-slate: #55779a;
+    --tone-slate-deep: #3b5a78;
+    --tone-slate-soft: #dde8f2;
+    --tone-green: #6f8f76;
+    --tone-green-deep: #3f5f47;
+    --tone-green-soft: #e0e9dc;
+    --tone-amber: #b97c3d;
+    --tone-amber-deep: #855425;
+    --tone-amber-soft: #f0ddc2;
   }
+
+  [data-tone="clay"]  { --shelf: var(--tone-clay);  --shelf-deep: var(--tone-clay-deep);  --shelf-soft: var(--tone-clay-soft); }
+  [data-tone="slate"] { --shelf: var(--tone-slate); --shelf-deep: var(--tone-slate-deep); --shelf-soft: var(--tone-slate-soft); }
+  [data-tone="green"] { --shelf: var(--tone-green); --shelf-deep: var(--tone-green-deep); --shelf-soft: var(--tone-green-soft); }
+  [data-tone="amber"] { --shelf: var(--tone-amber); --shelf-deep: var(--tone-amber-deep); --shelf-soft: var(--tone-amber-soft); }
 
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -114,19 +134,20 @@
   .screen[hidden] { display: none !important; }
   .bottom-nav {
     position: fixed;
-    left: 50%; bottom: 0;
+    left: 50%; bottom: 12px;
     transform: translateX(-50%);
-    width: 100%;
+    width: calc(100% - 24px);
     max-width: var(--content);
     z-index: 40;
     display: flex;
     justify-content: space-around;
     gap: var(--s1);
-    padding: var(--s2) var(--s2) calc(var(--s2) + env(safe-area-inset-bottom));
-    background: var(--card);
-    border: 0;
-    border-top: 1px solid var(--line);
-    border-radius: 0;
+    padding: 8px;
+    background: color-mix(in srgb, var(--card) 86%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid var(--line);
+    border-radius: 24px;
     box-shadow: var(--shadow-nav);
   }
   .nav-btn {
@@ -166,20 +187,93 @@
     .btn:not(.primary):hover { border-color: var(--accent); }
   }
 
-  /* ---------- Home: one greeting, one quiet line, one invitation ---------- */
+  /* ---------- Home: one large greeting, one quiet line, one invitation ---------- */
+  .today-intro {
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--s3) 0 var(--s5);
+  }
+  .today-intro::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--sun), var(--evening));
+    opacity: 0.4;
+  }
   .today-intro .greeting {
-    font-size: var(--t-title);
-    font-weight: 600;
-    margin: 0 0 var(--s1);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(32px, 9vw, 42px);
+    font-weight: 400;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: var(--s4) 0 var(--s2);
   }
   .today-intro .rot-intention {
-    margin: 0 0 var(--s4);
+    margin: 0 0 var(--s2);
     font-family: Georgia, "Times New Roman", serif;
     font-style: italic;
-    font-size: 15px;
+    font-size: 17px;
     color: var(--ink-soft);
-    line-height: 1.4;
+    line-height: 1.45;
   }
+  /* A cardless section: whitespace and a hairline do the dividing. */
+  .home-section {
+    background: transparent;
+    border: 0;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: none;
+    padding: var(--s5) 0 var(--s4);
+  }
+  /* Wake lives at the top, compact once logged but always editable. */
+  .wake-strip { display: flex; margin: 0; }
+  .wake-btn {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--field);
+    color: var(--ink);
+    font: inherit;
+    font-size: var(--t-small);
+    min-height: var(--tap);
+    padding: var(--s2) var(--s3);
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .wake-btn.has-time {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    color: var(--ink-soft);
+  }
+  .wake-btn time { font-variant-numeric: tabular-nums; color: var(--ink); }
+  .wake-btn .wake-edit {
+    color: var(--accent-deep);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  /* One invitation, grouped without a full card. */
+  .invitation {
+    margin: 0 0 var(--s5);
+    padding: var(--s4);
+    border-radius: var(--radius);
+    background: var(--accent-soft);
+    border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+    box-shadow: var(--shadow);
+  }
+  .invitation .idea-entry { margin: 0; }
+  .invitation .idea-entry .btn {
+    background: var(--card);
+    border-color: transparent;
+  }
+  .invitation .program-home-nudge { margin-top: var(--s2); }
   .idea-entry { display: flex; align-items: center; gap: var(--s2); }
   .idea-entry > .btn:first-child { flex: 1 1 auto; }
   .btn.quiet {
@@ -254,6 +348,7 @@
     margin: 0 0 var(--s2);
   }
   .program-kind::before { content: "· "; }
+  .program-kind[hidden], .program-smaller[hidden] { display: none; }
   .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.45; }
   .program-reflect { margin-top: var(--s2); font-size: var(--t-small); }
   .program-reflect[hidden] { display: none; }
@@ -291,21 +386,50 @@
     color: var(--ink);
     font: inherit;
     font-size: var(--t-small);
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: var(--s2);
     cursor: pointer;
   }
-  .shelf-chip[aria-pressed="true"] {
-    background: var(--card);
-    color: var(--accent-deep);
-    font-weight: 600;
+  .shelf-chip::before {
+    content: "";
+    flex: 0 0 auto;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--shelf, var(--accent));
   }
-  .shelf-block { margin-bottom: 18px; }
+  .shelf-chip[aria-pressed="true"] {
+    background: var(--shelf-soft, var(--card));
+    color: var(--shelf-deep, var(--accent-deep));
+    font-weight: 600;
+    box-shadow: inset 0 0 0 1px var(--shelf, var(--accent));
+  }
+  .shelf-block {
+    margin-bottom: 18px;
+    padding: var(--s3) var(--s3) var(--s3) var(--s4);
+    border-radius: var(--radius-sm);
+    background: var(--shelf-soft, transparent);
+    border-left: 3px solid var(--shelf, var(--accent));
+  }
   .shelf-block:last-child { margin-bottom: 0; }
   .shelf-head { margin: 0 0 8px; }
   .shelf-head h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 600;
-    color: var(--ink);
+    color: var(--shelf-deep, var(--ink));
+  }
+  .shelf-head h3::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--shelf, var(--accent));
+    margin-right: var(--s2);
+    vertical-align: middle;
   }
   .shelf-name-input {
     flex: 1;
@@ -329,8 +453,8 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-style: normal;
     font-size: 11px;
-    color: var(--ink-soft);
-    background: var(--sun-soft);
+    color: var(--shelf-deep, var(--ink-soft));
+    background: var(--shelf-soft, var(--sun-soft));
     border-radius: 999px;
     padding: 2px 8px;
     margin-top: 4px;
@@ -346,6 +470,7 @@
   .row .shelf-picker { grid-column: 1 / -1; }
   .shelf-picker[hidden], .gentle-item .drag-btn[hidden], .gentle-item .remove-link[hidden] { display: none; }
   .shelf-picker .btn { width: 100%; min-height: var(--tap); padding: var(--s2); font-size: var(--t-small); }
+  .shelf-picker .btn[data-tone] { border-left: 3px solid var(--shelf, var(--accent)); }
   .shelf-empty { font-size: 13px; color: var(--ink-soft); font-style: italic; padding: 4px 0; }
 
   /* ---------- Last night banner + editable times ---------- */
@@ -402,6 +527,7 @@
     color: var(--ink);
   }
   .time-edit .btn { flex: 0 0 auto; }
+  #wakeEdit { margin: 0 0 var(--s3); background: var(--card); }
 
   /* ---------- Links: one calm repeated row everywhere ---------- */
   .link-row {
@@ -491,20 +617,24 @@
   /* ---------- Header ---------- */
   header.top {
     display: block;
-    margin: 8px 4px 18px;
+    margin: 4px 4px var(--s5);
   }
   header.top h1 {
-    font-size: 22px;
-    font-weight: 600;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 23px;
+    font-weight: 500;
     letter-spacing: -0.01em;
     margin: 0;
   }
   header.top .date {
-    display: block;
-    font-size: 14px;
-    color: var(--ink-soft);
+    display: inline-block;
+    font-size: var(--t-small);
+    color: var(--accent-deep);
+    background: var(--accent-soft);
     font-variant-numeric: tabular-nums;
-    margin-top: 2px;
+    margin: var(--s2) 0 0;
+    padding: 4px 10px;
+    border-radius: 999px;
   }
 
   /* ---------- The quiet More page ---------- */
@@ -1260,6 +1390,7 @@
   body[data-sunday="true"] #anchorsCard,
   body[data-sunday="true"] #insteadCard,
   body[data-sunday="true"] #todayCard,
+  body[data-sunday="true"] #inviteCard,
   body[data-sunday="true"] #programCard,
   body[data-sunday="true"] #programEveCard,
   body[data-sunday="true"] .home-foot,
@@ -1288,6 +1419,8 @@
   @media (prefers-color-scheme: dark) {
     :root {
       color-scheme: dark;
+      --shadow: 0 1px 2px rgba(0,0,0,0.22), 0 10px 28px rgba(0,0,0,0.18);
+      --shadow-nav: 0 -1px 0 rgba(255,255,255,0.05);
       --bg: #201b18;
       --card: #2a2420;
       --field: #332c27;
@@ -1306,6 +1439,10 @@
       --snack-bg: #f4ece2;
       --snack-ink: #201b18;
       --snack-accent: #3f5f47;
+      --tone-clay: #e7b6b0;  --tone-clay-deep: #f0c9c3;  --tone-clay-soft: #3f2e2d;
+      --tone-slate: #a9c8e4; --tone-slate-deep: #c4ddf2; --tone-slate-soft: #2b3946;
+      --tone-green: #8fae95; --tone-green-deep: #bcd6c2; --tone-green-soft: #303f34;
+      --tone-amber: #d8a46a; --tone-amber-deep: #edc08c; --tone-amber-soft: #3c3025;
       --swipe-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a2420' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13'/%3E%3C/svg%3E");
     }
     body[data-phase="morning"] { --bg:#241d18; --card:#2e261f; --sun-soft:#463426; }
@@ -1342,11 +1479,23 @@
   </div>
 
   <section class="card today-intro" id="todayCard">
+    <div class="wake-strip">
+      <button type="button" class="wake-btn" id="homeWakeBtn">Log wake</button>
+    </div>
     <h2 class="greeting" id="greeting">A quiet day.</h2>
     <div class="rot-intention" id="rotIntention">A gentle word will wait here.</div>
+  </section>
+
+  <div class="time-edit" id="wakeEdit" hidden>
+    <label for="wakeInput">Woke at</label>
+    <input type="time" id="wakeInput" />
+    <button type="button" class="btn small" id="wakeSave">Save</button>
+    <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
+  </div>
+
+  <section class="invitation" id="inviteCard" aria-label="When you don't know what to do">
     <div class="idea-entry" id="ideaEntry">
       <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
-      <button type="button" class="btn small quiet-btn" id="homeWakeBtn">Log wake</button>
     </div>
     <button type="button" class="see-shelf program-home-nudge" id="programHomeNudge" hidden>A quiet 30 days is here, if you want it.</button>
     <div class="shelf-option" id="shelfOption" hidden>
@@ -1358,12 +1507,6 @@
         <button type="button" class="btn small" id="shelfOptionLater">Not now</button>
       </div>
       <button type="button" class="see-shelf" id="shelfOptionShelf">See the shelf</button>
-    </div>
-    <div class="time-edit" id="wakeEdit" hidden>
-      <label for="wakeInput">Woke at</label>
-      <input type="time" id="wakeInput" />
-      <button type="button" class="btn small" id="wakeSave">Save</button>
-      <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
     </div>
   </section>
 
@@ -1377,7 +1520,7 @@
     <p class="program-invite" id="programInvite"></p>
     <a class="btn small program-nick" id="programNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programOptional" hidden></p>
-    <details class="program-smaller">
+    <details class="program-smaller" id="programSmaller">
       <summary>Even smaller</summary>
       <p id="programSmallerText"></p>
     </details>
@@ -1391,7 +1534,7 @@
   </section>
 
   <!-- ============ MORNING ============ -->
-  <section class="card morning" id="morningCard">
+  <section class="card home-section morning" id="morningCard">
     <h2><span class="dot"></span>Morning</h2>
     <div id="morningList"></div>
     <div id="morningDone"></div>
@@ -1408,7 +1551,7 @@
   </section>
 
   <!-- ============ DAILY ANCHORS ============ -->
-  <section class="card" id="anchorsCard">
+  <section class="card home-section" id="anchorsCard">
     <h2><span class="dot"></span>Daily anchors</h2>
     <div id="anchorsList"></div>
     <div class="add-row" data-list="anchors">
@@ -1437,7 +1580,7 @@
     <p class="program-invite" id="programEveInvite"></p>
     <a class="btn small program-nick" id="programEveNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programEveOptional" hidden></p>
-    <details class="program-smaller">
+    <details class="program-smaller" id="programEveSmaller">
       <summary>Even smaller</summary>
       <p id="programEveSmallerText"></p>
     </details>
@@ -1769,7 +1912,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v40";
+const VERSION = "v41";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -1860,34 +2003,34 @@ const DEFAULT_SHELVES = [
    moves on when it is gently marked enough; a missed day leaves it waiting.
    Nick listening grows from 30 seconds to eight minutes with repeat days. */
 const PROGRAM30 = [
-  { id: "d01", title: "Press play once", invitation: "If you want, press play on the Nick Moss meditation and hear how it starts.", nick: "first 30 seconds", kind: "nick", optional: "If you like, let it run to the first minute, then stop whenever." },
-  { id: "d02", title: "Hear one minute", invitation: "Open the meditation again if you like and let the first minute play.", nick: "first minute", kind: "nick", optional: "If you want, sit with it through a minute and a half." },
-  { id: "d03", title: "A shorter listen", invitation: "Let it be a short listen — the first half minute is enough.", nick: "first 30 seconds", kind: "rest", optional: null },
+  { id: "d01", title: "Press play once", invitation: "If you want, press play on the Nick Moss meditation and hear how it starts.", nick: "first 30 seconds", kind: "nick", optional: "You can stop at any point. That is still enough." },
+  { id: "d02", title: "One quiet breath", invitation: "Notice one slow breath, then let it go. That's the whole invitation.", nick: null, kind: "rest", optional: null },
+  { id: "d03", title: "Nothing to play", invitation: "Today's invitation is to leave the meditation closed. One quiet breath is enough.", nick: null, kind: "rest", optional: null },
   { id: "d04", title: "One gentle stretch", invitation: "Reach up once, slowly, and let your arms come down again.", nick: null, kind: "body", optional: "If you like, follow it with one more stretch, at your pace." },
   { id: "d05", title: "A little longer", invitation: "If you want, press play and stay for a minute and a half.", nick: "through the first minute and a half", kind: "nick", optional: "If you like, let it reach two minutes, then stop whenever." },
   { id: "d06", title: "Log waking up", invitation: "If you want, note the time you woke, just as it was.", nick: null, kind: "sleep", optional: "If you like, add a line about how the night felt." },
   { id: "d07", title: "One small anchor", invitation: "Pick one anchor you fancy and give it a minute or two.", nick: null, kind: "day", optional: "If you want, follow it with one more small anchor." },
-  { id: "d08", title: "A softer repeat", invitation: "Let the meditation play again, only as far as feels easy.", nick: "first minute", kind: "rest", optional: null },
+  { id: "d08", title: "A short pause", invitation: "If you like, sit for half a minute without playing anything. Stopping early is fine.", nick: null, kind: "rest", optional: null },
   { id: "d09", title: "Two minutes of sound", invitation: "Press play when you like and let two minutes of it be enough.", nick: "through the first two minutes", kind: "nick", optional: "If you want, stay a little longer, then stop whenever." },
   { id: "d10", title: "One short message", invitation: "If you want, send one brief message to someone you like.", nick: null, kind: "connection", optional: "If you like, reply to one more, whenever suits." },
   { id: "d11", title: "Three quiet minutes", invitation: "Open the meditation if you like and listen for three gentle minutes.", nick: "through the first three minutes", kind: "nick", optional: "If you want, choose a shorter stretch instead — two minutes is plenty." },
   { id: "d12", title: "Feel your feet", invitation: "Notice your feet on the floor for a few slow breaths.", nick: null, kind: "body", optional: "If you like, press them gently into the floor, then let go." },
-  { id: "d13", title: "Step back gently", invitation: "Return to a shorter listen today — two minutes is enough.", nick: "through the first two minutes", kind: "rest", optional: null },
+  { id: "d13", title: "Come back to something easy", invitation: "If you want, return to any earlier invitation and take just its smallest version.", nick: null, kind: "rest", optional: null },
   { id: "d14", title: "A simple bedtime note", invitation: "If you want, log your bed time when you get there.", nick: null, kind: "sleep", optional: "If you like, add one word about the day before sleeping." },
   { id: "d15", title: "Four easy minutes", invitation: "Press play when it suits and let four minutes pass.", nick: "through the first four minutes", kind: "nick", optional: "If you want, rest your hands and stay a little longer." },
   { id: "d16", title: "Tidy one surface", invitation: "If you want, put three things back where they belong.", nick: null, kind: "day", optional: "If you like, clear one more corner, then stop whenever." },
   { id: "d17", title: "Walk to the corner", invitation: "Step outside if you like and walk to the nearest corner.", nick: null, kind: "body", optional: "If you want, go a little further, at your own pace." },
-  { id: "d18", title: "Return to three", invitation: "Let the meditation play for three minutes, then that's plenty.", nick: "through the first three minutes", kind: "rest", optional: null },
+  { id: "d18", title: "Let it be shorter", invitation: "If you want, listen to two minutes or less. Two is plenty.", nick: "through the first two minutes", kind: "rest", optional: null },
   { id: "d19", title: "Five minutes of rest", invitation: "If you want, press play and let five minutes be enough.", nick: "through the first five minutes", kind: "nick", optional: "If you like, stay for one more minute, then stop." },
   { id: "d20", title: "A kind check-in", invitation: "If you want, ask someone how they are and listen briefly.", nick: null, kind: "connection", optional: "If you like, tell them one small thing about your day." },
   { id: "d21", title: "Keep wake time soft", invitation: "Log your wake time if you like, even after a rough night.", nick: null, kind: "sleep", optional: "If you want, note one thing that made the morning easier." },
-  { id: "d22", title: "Six unhurried minutes", invitation: "Open the meditation when you like and let it run six minutes.", nick: "through the first six minutes", kind: "nick", optional: "If you want, turn it off early — five minutes counts too." },
-  { id: "d23", title: "A little less today", invitation: "Let today's listen be shorter, four minutes or less.", nick: "through the first four minutes", kind: "rest", optional: null },
+  { id: "d22", title: "Six unhurried minutes", invitation: "Open the meditation when you like and let it run six minutes.", nick: "through the first six minutes", kind: "nick", optional: "Turning it off early is fine. Five minutes is just as welcome." },
+  { id: "d23", title: "Quiet, not listening", invitation: "If you like, sit without sound for a minute. Nothing else is needed.", nick: null, kind: "rest", optional: null },
   { id: "d24", title: "Read one page", invitation: "Open whatever is on the table and read one page.", nick: null, kind: "day", optional: "If you like, read a few more pages, then stop whenever." },
   { id: "d25", title: "One long stretch", invitation: "Reach up slowly if you like and hold the stretch for a moment.", nick: null, kind: "body", optional: "If you want, stretch one more time, gently." },
   { id: "d26", title: "Seven calm minutes", invitation: "Press play when you like and stay for seven gentle minutes.", nick: "through the first seven minutes", kind: "nick", optional: "If you like, sit quietly for a moment after it ends." },
   { id: "d27", title: "Share a small thing", invitation: "If you want, tell someone one small thing you noticed.", nick: null, kind: "connection", optional: "If you like, let them answer whenever they can." },
-  { id: "d28", title: "Five is plenty", invitation: "Let the meditation be short today — five minutes is enough.", nick: "through the first five minutes", kind: "rest", optional: null },
+  { id: "d28", title: "Five, or none", invitation: "If you want, listen to five minutes. If not, five quiet breaths are just as welcome.", nick: "through the first five minutes", kind: "rest", optional: null },
   { id: "d29", title: "Lights low early", invitation: "If you want, lower the lights a little earlier tonight.", nick: null, kind: "sleep", optional: "If you like, log your bed time and leave the rest." },
   { id: "d30", title: "Eight minutes, if you want", invitation: "Press play when you like and listen for eight minutes.", nick: "through the first eight minutes", kind: "nick", optional: "If you want, stop early and just sit quietly for a moment." },
 ];
@@ -2610,6 +2753,7 @@ function renderList(which) {
     // "show done" is on). CSS animates the slide.
     if (which === "morning" && done && !editing && !showDoneMorning) {
       row.classList.add("collapsed");
+      row.hidden = true;
       collapsed = true;
     }
 
@@ -2694,6 +2838,7 @@ function renderList(which) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "btn small";
+      b.dataset.tone = toneForShelf(shelf);
       b.textContent = shelf.name;
       b.setAttribute("aria-label", "Move " + item.text + " to " + shelf.name);
       b.addEventListener("click", (e) => {
@@ -2730,13 +2875,22 @@ function renderList(which) {
     row.className = "row loan-row" + (done ? " done" : "");
     row.dataset.id = loan.id;
     row.dataset.loanId = loan.id;
+    row.dataset.tone = toneForShelf(shelf);
+
+    let collapsed = false;
+    if (which === "morning" && done && !editing && !showDoneMorning) {
+      row.classList.add("collapsed");
+      row.hidden = true;
+      collapsed = true;
+    }
 
     const toggle = document.createElement("button");
     toggle.type = "button";
     toggle.className = "check-toggle";
     toggle.setAttribute("role", "checkbox");
     toggle.setAttribute("aria-checked", done ? "true" : "false");
-    toggle.setAttribute("aria-label", item.text + ", from " + shelf.name);
+    toggle.setAttribute("aria-label", item.text + ", " + shelf.name);
+    toggle.tabIndex = collapsed ? -1 : 0;
 
     const check = document.createElement("div");
     check.className = "check";
@@ -2745,7 +2899,7 @@ function renderList(which) {
     label.append(document.createTextNode(item.text));
     const tag = document.createElement("span");
     tag.className = "loan-tag";
-    tag.textContent = ", from " + shelf.name;
+    tag.textContent = String(shelf.name || "").toLowerCase();
     label.append(tag);
     toggle.append(check, label);
     row.append(toggle);
@@ -3239,7 +3393,25 @@ function editSleepFromBanner() {
 
 function renderWakeLine() {
   const btn = $("#homeWakeBtn");
-  if (btn) btn.textContent = dayRecord().wakeTime ? "Update wake" : "Log wake";
+  if (!btn) return;
+  const t = dayRecord().wakeTime;
+  btn.innerHTML = "";
+  if (!t) {
+    btn.classList.remove("has-time");
+    btn.textContent = "Log wake";
+    btn.setAttribute("aria-label", "Log wake time");
+    return;
+  }
+  btn.classList.add("has-time");
+  const prefix = document.createElement("span");
+  prefix.textContent = "Woke ";
+  const time = document.createElement("time");
+  time.textContent = t;
+  const edit = document.createElement("span");
+  edit.className = "wake-edit";
+  edit.textContent = "Edit";
+  btn.append(prefix, time, edit);
+  btn.setAttribute("aria-label", "Woke at " + t + ". Edit wake time");
 }
 
 function fmtDuration(mins) {
@@ -3644,9 +3816,16 @@ async function syncNow(opts = {}) {
     const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
     if (remote && remoteStamp > localStamp) {
       applyingRemote = true;
-      state = mergeState(state, remote);
-      saveQuiet(); renderAll();
+      const merged = mergeState(state, remote);
+      // A pull can add local-only rows/days/marks to the remote's data.
+      // When it does, bump the stamp and push the union back, otherwise
+      // those additions stay on this device forever (see audit P0-1).
+      const changed = JSON.stringify({ d: merged.days, l: merged.settings.lists, s: merged.settings.shelves, o: merged.settings.loans, m: merged.settings.myLinks, p: merged.settings.program30 })
+        !== JSON.stringify({ d: remote.days, l: remote.settings && remote.settings.lists, s: remote.settings && remote.settings.shelves, o: remote.settings && remote.settings.loans, m: remote.settings && remote.settings.myLinks, p: remote.settings && remote.settings.program30 });
+      state = merged;
       applyingRemote = false;
+      if (changed) save(); else saveQuiet();
+      renderAll();
       if (!silent) syncStatus("Pulled newer data from your sync.");
     } else if (!remote || localStamp > remoteStamp) {
       if (automatic) {
@@ -3761,6 +3940,22 @@ function removeMyLink(id) {
 /* ---------- More: named shelves, not a dumping drawer ---------- */
 function shelves() { return state.settings.shelves || []; }
 function findShelf(id) { return shelves().find((s) => s.id === id) || null; }
+
+/* Four quiet shelf tones. Known shelves keep their own; a shelf you add
+   borrows the next tone in order, so there is nothing to configure. */
+const SHELF_TONES = {
+  sh_notfeeling: "clay",
+  sh_keepclose: "slate",
+  sh_movement: "green",
+  sh_smallstarts: "amber",
+};
+const SHELF_TONE_CYCLE = ["clay", "slate", "green", "amber"];
+function toneForShelf(shelf) {
+  if (!shelf) return "green";
+  if (SHELF_TONES[shelf.id]) return SHELF_TONES[shelf.id];
+  const i = shelves().indexOf(shelf);
+  return SHELF_TONE_CYCLE[(i < 0 ? 0 : i) % SHELF_TONE_CYCLE.length];
+}
 function findShelfItem(itemId) {
   for (const shelf of shelves()) {
     const item = (shelf.items || []).find((x) => x.id === itemId);
@@ -3815,6 +4010,7 @@ function renderShelves() {
     const b = document.createElement("button");
     b.type = "button";
     b.className = "shelf-chip";
+    b.dataset.tone = toneForShelf(shelf);
     b.textContent = shelf.name;
     b.setAttribute("aria-pressed", shelf.id === activeShelfId ? "true" : "false");
     b.addEventListener("click", () => {
@@ -3849,6 +4045,7 @@ function renderShelves() {
     const block = document.createElement("div");
     block.className = "shelf-block";
     block.dataset.shelfId = shelf.id;
+    block.dataset.tone = toneForShelf(shelf);
 
     const head = document.createElement("div");
     head.className = "shelf-head";
@@ -4418,7 +4615,13 @@ function importJSON(file) {
       if (!parsed || typeof parsed !== "object") throw new Error("bad shape");
       // merge: imported days/settings win where present, keep the rest
       migrate(parsed);
-      state = mergeState(state, parsed);
+      // Respect updatedAt: an older file may add records, but it must not
+      // roll back newer settings/scalars (see audit P0-2).
+      const localStamp = Number(state.settings.updatedAt) || 0;
+      const incomingStamp = Number(parsed.settings && parsed.settings.updatedAt) || 0;
+      state = incomingStamp > localStamp
+        ? mergeState(state, parsed)
+        : mergeState(parsed, state);
       save();
       renderAll();
       showSnackbar("Imported. Welcome back.");
@@ -4733,6 +4936,12 @@ showTab(initialTab());
 if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) setTimeout(() => syncNow({ silent: true }), 800);
 document.addEventListener("visibilitychange", () => {
   if (document.visibilityState === "hidden" && syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
+    clearTimeout(syncTimer);
+    syncNow({ silent: true });
+  }
+});
+window.addEventListener("pagehide", () => {
+  if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
     clearTimeout(syncTimer);
     syncNow({ silent: true });
   }
