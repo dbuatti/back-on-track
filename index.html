@@ -236,6 +236,8 @@
   /* A 30-day sequence: one invitation, no clock and no catching up. */
   .program-card[hidden] { display: none; }
   .program-meta { font-size: var(--t-cap); color: var(--ink-soft); margin: 0 0 var(--s1); }
+  .program-gap { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.45; }
+  .program-gap[hidden] { display: none; }
   .program-title {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 18px; font-weight: 500; line-height: 1.35;
@@ -1366,6 +1368,7 @@
   <section class="card program-card" id="programCard" hidden>
     <h2><span class="dot"></span>A quiet 30 days</h2>
     <p class="program-meta" id="programMeta"></p>
+    <p class="program-gap" id="programGap" hidden></p>
     <span class="program-kind" id="programKind"></span>
     <h3 class="program-title" id="programTitle"></h3>
     <p class="program-invite" id="programInvite"></p>
@@ -1425,6 +1428,7 @@
   <section class="card program-card" id="programEveCard" hidden>
     <h2><span class="dot"></span>A quiet 30 days</h2>
     <p class="program-meta" id="programEveMeta"></p>
+    <p class="program-gap" id="programEveGap" hidden></p>
     <span class="program-kind" id="programEveKind"></span>
     <h3 class="program-title" id="programEveTitle"></h3>
     <p class="program-invite" id="programEveInvite"></p>
@@ -1708,7 +1712,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v38</div>
+  <div class="version" id="versionTag">v39</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1762,7 +1766,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v38";
+const VERSION = "v39";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2282,6 +2286,15 @@ function todayKey(d = new Date()) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   return `${y}-${m}-${day}`;
+}
+
+/* Whole local days since a YYYY-MM-DD key; null when there is no usable date. */
+function daysSinceKey(key, d = new Date()) {
+  if (typeof key !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(key)) return null;
+  const then = new Date(key + "T00:00:00");
+  if (isNaN(then.getTime())) return null;
+  const now = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.round((now - then) / 86400000);
 }
 
 function freshDay() {
@@ -4223,6 +4236,12 @@ function fillProgramCard(prefix, p, step, at) {
   if (card.hidden) return;
   const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
   if (meta) meta.textContent = "Step " + at + " of " + PROGRAM30.length;
+  const gap = q("Gap");
+  if (gap) {
+    const days = daysSinceKey(p.lastDoneAt);
+    gap.hidden = !(p.loaded && days !== null && days >= 2);
+    if (!gap.hidden) gap.textContent = "Your step is right where you left it. Nothing to catch up on.";
+  }
   if (kind) kind.textContent = PROGRAM_KIND_LABELS[step.kind] || "";
   if (title) title.textContent = step.title;
   if (invite) invite.textContent = step.invitation;

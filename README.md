@@ -40,6 +40,11 @@ disclosure with a genuinely minimal version — for Nick steps, *"Just open the
 page. No listening needed — that's enough."* — so a tired or anxious day still has
 a way in. It is permission to stop, never a second task, and adds no state.
 
+**v39** acknowledges a gap without logging it. If two or more local days have
+passed since a step was last marked, both cards quietly say *"Your step is right
+where you left it. Nothing to catch up on."* It is derived from the existing
+`lastDoneAt` date — no new state, no counter, no reset.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
