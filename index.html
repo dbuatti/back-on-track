@@ -680,6 +680,14 @@
     min-height: 44px;
     color: var(--accent-deep);
   }
+  .field-static {
+    padding-top: 8px;
+    color: var(--ink-soft);
+    font-size: 15px;
+  }
+  #syncCard .field { margin-top: 10px; }
+  #syncCard .btn-row { margin-top: 12px; }
+  #gentleAddBtn { margin-top: 12px; }
   .windnote {
     font-size: 13px;
     color: var(--ink-soft);
@@ -1036,15 +1044,24 @@
      tuck the do-y things away, leaving rest + the bedtime log. */
   body[data-sunday="true"] #morningCard,
   body[data-sunday="true"] #anchorsCard,
-  body[data-sunday="true"] #insteadCard { display: none; }
+  body[data-sunday="true"] #insteadCard,
+  body[data-sunday="true"] #todayCard,
+  body[data-sunday="true"] .home-foot,
+  body[data-sunday="true"] #screen-home .screen-hint { display: none; }
   .sunday-note {
     display: none;
     text-align: center;
     font-size: 17px;
     color: var(--ink-soft);
-    padding: 20px 12px 6px;
-    line-height: 1.4;
+    background: var(--sun-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 26px 16px 22px;
+    margin-bottom: 14px;
+    line-height: 1.5;
   }
+  .sunday-note .btn { margin-top: 16px; }
   body[data-sunday="true"] .sunday-note { display: block; }
 
   @media (min-width: 480px) {
@@ -1072,7 +1089,10 @@
 
   <div class="sleep-banner" id="sleepBanner" hidden></div>
 
-  <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
+  <div class="sunday-note">
+    Rest is the practice. 🌿<br />Nothing to do today but log your sleep.
+    <button type="button" class="btn" id="sundaySleepBtn">Log sleep</button>
+  </div>
 
   <section class="card today-intro" id="todayCard">
     <div class="today-top">
@@ -1155,7 +1175,7 @@
       </div>
       <div class="field">
         <label>Wind-down nudge</label>
-        <div style="padding-top:8px;color:var(--ink-soft);font-size:15px">45 min before</div>
+        <div class="field-static">45 min before</div>
       </div>
     </div>
     <div class="windnote" id="windNote"></div>
@@ -1282,15 +1302,15 @@
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
       <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it. Once set up it syncs by itself — Sync now is there if you want it straight away.</p>
-      <div class="field" style="margin-top:10px">
+      <div class="field">
         <label for="syncToken">GitHub token — <a href="https://github.com/settings/tokens/new?scopes=gist&description=Back%20on%20Track%20sync" target="_blank" rel="noopener">make one with gist scope ↗</a></label>
         <input type="password" id="syncToken" placeholder="ghp_…" autocomplete="off" autocorrect="off" spellcheck="false" />
       </div>
-      <div class="field" style="margin-top:10px">
+      <div class="field">
         <label for="syncGist">Gist ID (same on every device)</label>
         <input type="text" id="syncGist" placeholder="From Set up" autocorrect="off" autocapitalize="off" spellcheck="false" />
       </div>
-      <div class="btn-row" style="margin-top:12px">
+      <div class="btn-row">
         <button type="button" class="btn small" id="syncSetup">Set up</button>
         <button type="button" class="btn small" id="syncNow">Sync now</button>
       </div>
@@ -1332,7 +1352,7 @@
     <section class="card" id="gentlePractices">
       <h2><span class="dot"></span>On the shelf</h2>
       <div id="gentleList"></div>
-      <button type="button" class="btn small" id="gentleAddBtn" style="margin-top:12px">+ Add something</button>
+      <button type="button" class="btn small" id="gentleAddBtn">+ Add something</button>
       <div class="link-form" id="gentleForm" hidden>
         <input type="text" id="gentleName" placeholder="What is it?" enterkeyhint="next"
                autocorrect="off" autocapitalize="words" />
@@ -1350,7 +1370,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v27</div>
+  <div class="version" id="versionTag">v28</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1401,7 +1421,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v27";
+const VERSION = "v28";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2999,6 +3019,7 @@ function wire() {
   });
 
   // home shortcuts: plain-language labels, no guessing what they do
+  $("#sundaySleepBtn").addEventListener("click", () => showTab("winddown"));
   $("#homeFocusBtn").addEventListener("click", () => handleTab("focus"));
   $("#homeWakeBtn").addEventListener("click", () => openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
   $("#wakeSave").addEventListener("click", () => saveTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));

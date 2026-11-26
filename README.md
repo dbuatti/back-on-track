@@ -132,8 +132,9 @@ the sync fails silently and the Links card still shows the last successful time.
 - Kind by default: missed days render as empty dots, never red X's or streaks.
 - Big tap targets, few choices per screen, collapsible-by-done morning items.
 - Swipe a row right to tick it, left to untick; a plain tap still works.
-- Sunday is a protected rest day: morning/anchors/"instead of gaming" are hidden,
-  leaving the bedtime log and a "rest is the practice" note.
+- Sunday is a protected rest day: morning/anchors/"instead of gaming" and the
+  progress/edit controls are hidden, leaving a soft "rest is the practice" card
+  with one **Log sleep** button, plus the bedtime log and week view.
 - Reduced-motion is respected; tiny haptics only fire after a real tap.
 - Everything editable: add, remove, reorder any list. Undo is offered on delete.
 - Export / Import JSON for backup and merging into the anchor planner. Imports
