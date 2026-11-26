@@ -451,6 +451,16 @@
 
   .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
 
+  .list-empty {
+    font-size: 15px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 18px 8px;
+  }
+
+  /* checklist rows are checkboxes; a slightly fuller focus ring reads better */
+  .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
   /* ---------- Time-of-day shift ----------
      The whole page warms toward ochre in the morning and cools to dusk
      lavender near bedtime. JS sets data-phase on <body>; colours transition
@@ -707,7 +717,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v6";
+const VERSION = "v7";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -916,6 +926,10 @@ function whisper() {
 /* ---------- Undo snackbar ---------- */
 let snackTimer = null;
 let snackAction = null;
+
+/* Guard against an accidental second tap undoing a tick you just made.
+   Same item within 400ms is ignored — short enough not to feel laggy. */
+let lastToggle = { key: "", at: 0 };
 function showSnackbar(text, onUndo) {
   const bar = $("#snackbar");
   const label = $("#snackText");
@@ -954,10 +968,18 @@ function renderList(which) {
     row.className = "row" + (done ? " done" : "");
     row.dataset.id = item.id;
 
+    // Keyboard / screen-reader friendly: it's a checkbox, focusable, with a
+    // clear accessible name and state. (Visible focus ring comes from CSS.)
+    row.setAttribute("role", "checkbox");
+    row.setAttribute("aria-checked", done ? "true" : "false");
+    row.setAttribute("aria-label", item.text);
+    row.tabIndex = 0;
+
     // Morning items gently collapse once done (not in edit mode, not while
     // "show done" is on). CSS animates the slide.
     if (which === "morning" && done && !editing && !showDoneMorning) {
       row.classList.add("collapsed");
+      row.tabIndex = -1;   // hidden from keyboard focus while tucked away
     }
 
     // drag handle (edit mode only via CSS)
@@ -1020,9 +1042,26 @@ function renderList(which) {
       if (e.target.closest(".row-edit")) return;
       toggleCheck(which, item.id);
     });
+    // keyboard: Enter / Space toggle, matching native checkbox behaviour
+    row.addEventListener("keydown", (e) => {
+      if (editing) return;
+      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
+        e.preventDefault();
+        toggleCheck(which, item.id);
+      }
+    });
 
     container.append(row);
   });
+
+  if (list.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "list-empty";
+    empty.textContent = editing
+      ? "Add your first item below."
+      : "Nothing here yet — that's okay.";
+    container.append(empty);
+  }
 
   attachDrag(container, which);
 
@@ -1076,11 +1115,18 @@ function mkIcon(txt, title, onClick) {
 }
 
 function toggleCheck(which, id) {
+  const now = Date.now();
+  const key = which + ":" + id;
+  if (lastToggle.key === key && now - lastToggle.at < 400) return; // ignore double-fire
+  lastToggle = { key, at: now };
+
   const rec = dayRecord();
   rec.checks[id] = !rec.checks[id];
   save();
   renderList(which);
   renderWeek();
+  // tiny haptic confirmation where supported (Android/PWA; iOS ignores it)
+  try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
   // quiet celebration when an anchor is completed (not when un-ticking)
   if (which === "anchors" && rec.checks[id]) whisper();
 }
@@ -1248,6 +1294,7 @@ function renderWeek() {
 /* =====================================================================
    "INSTEAD OF GAMING"
    ===================================================================== */
+let lastSuggestionId = null;
 function pickSuggestion() {
   const list = state.settings.lists.instead;
   const box = $("#suggestion");
@@ -1256,9 +1303,16 @@ function pickSuggestion() {
     box.textContent = "Your off-screen list is empty — add a few ideas in Edit mode.";
     return;
   }
-  const pick = list[Math.floor(Math.random() * list.length)];
+  // Avoid repeating the same idea twice in a row — random that feels broken
+  // is worse than random that feels fair (an OCD/ADHD irritant).
+  let pool = list;
+  if (list.length > 1) pool = list.filter((it) => it.id !== lastSuggestionId);
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  lastSuggestionId = pick.id;
   box.className = "suggestion";
   box.textContent = pick.text;
+  box.setAttribute("aria-live", "polite");
+  try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) {}
 }
 
 /* =====================================================================
