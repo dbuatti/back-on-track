@@ -795,6 +795,10 @@
   }
   .row + .row { border-top: 1px solid var(--line); }
   .row:active { background: var(--accent-soft); }
+  body.done-for-today .row-edit,
+  body.done-for-today .edit-toggle,
+  body.done-for-today .add-row,
+  body.done-for-today .shelf-picker { display: none !important; }
   @media (hover: hover) {
     .row:hover { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
   }
@@ -1536,7 +1540,14 @@
     </div>
   </section>
 
-  <!-- ============ 30-DAY SEQUENCE (hidden until loaded in) ============ -->
+  <!-- ============ DONE FOR TODAY ============ -->
+   <section class="card done-today-card" id="doneTodayCard">
+     <h2><span class="dot"></span>Done for today</h2>
+     <p class="hint">Nothing to change right now. Come back tomorrow.</p>
+     <button type="button" class="btn small" id="doneTodayBtn">That's enough for today</button>
+   </section>
+
+   <!-- ============ 30-DAY SEQUENCE (hidden until loaded in) ============ -->
   <section class="card program-card" id="programCard" hidden>
     <h2><span class="dot"></span>A quiet 30 days</h2>
     <p class="program-meta" id="programMeta"></p>
@@ -1948,7 +1959,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v52";
+const VERSION = "v53";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2123,6 +2134,7 @@ function freshState() {
         reflection: "",      // one optional closing line, never shown as a score
       },
       updatedAt: 0,        // last change, used to decide which device wins a sync
+       doneForToday: "",    // YYYY-MM-DD; when set, edit controls hide for the day
     },
     days: {},
   };
@@ -2415,6 +2427,7 @@ function migrate(s) {
   }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
+if (typeof s.settings.doneForToday !== "string") s.settings.doneForToday = "";
   // Sangha has moved off the Home checklist and onto the quiet ☰ page.
   if (Array.isArray(s.settings.lists.morning)) {
     s.settings.lists.morning = s.settings.lists.morning.filter((it) => it.id !== "m_sangha");
@@ -2530,6 +2543,7 @@ function renderAll() {
   applySunday();
   renderHeader();
   renderGreeting();
+  renderDoneForToday();
   renderMorningLine();
   renderQuietDayHint();
   renderProgress();
@@ -2768,6 +2782,13 @@ function renderHeader() {
 }
 
 /* A soft, non-judgy read on the day — no streaks, no red marks. */
+function renderDoneForToday() {
+  const card = $("#doneTodayCard");
+  if (!card) return;
+  const done = state.settings.doneForToday === todayKey();
+  card.hidden = done;
+  document.body.classList.toggle("done-for-today", done);
+}
 function renderGreeting() {
   const h = new Date().getHours();
   const text = h < 11 ? "Good morning."
@@ -3949,6 +3970,13 @@ function wire() {
 
   // edit toggle
   $("#editToggle").addEventListener("click", () => setEditing(!editing));
+  const doneTodayBtn = $("#doneTodayBtn");
+  if (doneTodayBtn) doneTodayBtn.addEventListener("click", () => {
+    state.settings.doneForToday = todayKey();
+    saveQuiet();
+    renderDoneForToday();
+    haptic(8);
+  });
 
   // add item buttons
   $$("[data-add]").forEach((btn) => {
