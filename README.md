@@ -60,10 +60,11 @@ The bottom menu keeps each screen light:
   correct the time), greeting with a quiet today count, a little
   italic note for the day, a soft progress strip, **Start focus mode**, **Log wake**,
   morning checklist, daily anchors.
-- **Wind down** — "instead of gaming", bedtime/wake + mood, a sleep-trend strip
-  (last 21 nights with an average and usual wake time), a short note on waking,
-  and the soft-dot week. All log buttons open a small time picker, prefilled with
-  *now* but editable, so a late log can still record the real time.
+- **Wind down** — "instead of gaming", bedtime/wake + mood (with gentle word
+  captions), a sleep-trend strip (21 clearly-labelled nights with an average and
+  usual wake time), a short note on waking, and the soft-dot week. All log buttons
+  open a small time picker, prefilled with *now* but editable, so a late log can
+  still record the real time.
 - **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
   onto its screen, and skips hidden sections on Sunday.
 - **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`); direct
@@ -99,8 +100,8 @@ Nothing pulses or slides for anyone who has asked iOS to reduce motion. Text mee
 WCAG AA contrast in every time-of-day phase; checklist items are real buttons whose
 spoken name matches the visible label. Mood buttons and *Edit lists* expose their
 on/off state to screen readers, sync and focus status announce quietly, keyboard
-users get a clear focus ring, small trend labels stay at 11px, and the Home count
-and wake prompt update in place. A Lighthouse run
+users get a clear focus ring, small trend labels stay at 11px, the Home count and
+wake prompt update in place, and sleep bars carry readable night labels. A Lighthouse run
 scores 100 for accessibility and best practices. Desktop gets a gentle hover tint;
 touch devices keep only the instant press feedback.
 
