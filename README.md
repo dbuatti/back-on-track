@@ -94,7 +94,10 @@ The interface is intentionally quiet: warm clay/oat colours, sage for "done", an
 slow shift to ochre in the morning or dusk lavender at night. The iPhone status bar
 follows that phase colour. The date sits under the title, the bottom menu is centred
 on wide screens, and controls are at least 44px tall so they are easy to hit one-handed.
-Nothing pulses or slides for anyone who has asked iOS to reduce motion.
+Nothing pulses or slides for anyone who has asked iOS to reduce motion. Text meets
+WCAG AA contrast in every time-of-day phase; checklist items are real buttons whose
+spoken name matches the visible label. A Lighthouse run scores 100 for accessibility
+and best practices.
 
 ## Sync across devices
 

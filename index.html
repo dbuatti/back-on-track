@@ -10,16 +10,17 @@
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icon-192.png" />
 <title>Back on Track</title>
+<meta name="description" content="A calm daily rhythm for sleep, gentle anchors and small next steps." />
 <style>
   /* ---------- Design tokens: calm, warm, low-contrast ---------- */
   :root {
     --bg: #e9dccd;          /* warm clay — colour, not white */
     --card: #f3e8da;        /* soft oat, a shade lighter than the page */
     --ink: #43372f;         /* deep warm brown, easier on the eyes */
-    --ink-soft: #7a6a5d;    /* muted text */
+    --ink-soft: #6f6054;    /* muted text — dark enough to stay readable */
     --line: #d9c5b1;        /* hairline dividers */
-    --accent: #6f8f76;      /* sage green */
-    --accent-deep: #55735c; /* darker sage for text on green */
+    --accent: #6f8f76;      /* sage green — fills and dots */
+    --accent-deep: #48634e; /* darker sage — text, links and primary buttons */
     --accent-soft: #dce7da; /* sage tint for done states */
     --sun: #c48744;         /* warm ochre for sun/morning */
     --sun-soft: #f3ddba;
@@ -117,7 +118,7 @@
     cursor: pointer;
   }
   .nav-btn .nav-icon { font-size: 19px; line-height: 1; }
-  .nav-btn.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .nav-btn.active { color: var(--accent-deep); background: var(--accent-soft); font-weight: 600; }
   .nav-btn:active { background: var(--accent-soft); }
 
   /* ---------- Home: a lighter "today" strip ---------- */
@@ -211,7 +212,7 @@
   .link-copy { flex: 1; display: flex; flex-direction: column; }
   .link-copy strong { font-size: 16px; font-weight: 600; }
   .link-copy small { font-size: 13px; color: var(--ink-soft); }
-  .link-arrow { color: var(--accent); font-size: 17px; }
+  .link-arrow { color: var(--accent-deep); font-size: 17px; }
   .link-section-label {
     font-size: 12px;
     text-transform: uppercase;
@@ -376,6 +377,27 @@
   }
   .row + .row { border-top: 1px solid var(--line); }
   .row:active { background: rgba(0,0,0,0.02); }
+  .check-toggle {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: var(--tap);
+    padding: 0;
+    text-align: left;
+    cursor: pointer;
+  }
+  .check-toggle:focus-visible {
+    outline: 2px solid var(--accent-deep);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
 
   .check {
     flex: 0 0 auto;
@@ -467,12 +489,13 @@
     align-items: center;
     gap: 4px;
     font-size: 14px;
-    color: var(--accent);
+    color: var(--accent-deep);
     text-decoration: none;
     padding: 8px 10px;
     border-radius: 10px;
     white-space: nowrap;
   }
+  .row .item-link::after { content: " ↗"; }
   .row .item-link:active { background: var(--accent-soft); }
   body.editing .row .item-link { display: none; }
 
@@ -863,7 +886,7 @@
     --bg: #ded7e6; --card: #ece6f1; --evening: #7d72a0; --evening-soft: #e3dcee;
   }
   body[data-phase="night"] {
-    --bg: #d6d2e1; --card: #e5e0ec; --ink: #3e384a; --ink-soft: #6f687d;
+    --bg: #d6d2e1; --card: #e5e0ec; --ink: #3e384a; --ink-soft: #665f72;
   }
 
   /* ---------- Rotating intention: a little note, not a label ---------- */
@@ -978,7 +1001,7 @@
 </style>
 </head>
 <body>
-<div class="wrap">
+<main class="wrap">
 
   <header class="top">
     <h1>Back on Track</h1>
@@ -1264,8 +1287,8 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v20</div>
-</div>
+  <div class="version" id="versionTag">v21</div>
+</main>
 
 <nav class="bottom-nav" aria-label="Main menu">
   <button type="button" class="nav-btn active" data-tab="home" aria-current="page">
@@ -1315,7 +1338,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v20";
+const VERSION = "v21";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1792,25 +1815,37 @@ function renderList(which) {
     row.className = "row" + (done ? " done" : "");
     row.dataset.id = item.id;
 
-    // Keyboard / screen-reader friendly: it's a checkbox, focusable, with a
-    // clear accessible name and state. (Visible focus ring comes from CSS.)
-    row.setAttribute("role", "checkbox");
-    row.setAttribute("aria-checked", done ? "true" : "false");
-    row.setAttribute("aria-label", item.text);
-    row.tabIndex = 0;
+    // The label and check live in their own button, so the checkbox's
+    // accessible name is exactly the text a person sees — the Open link and
+    // edit controls sit outside it and can't muddy the screen-reader label.
+    let collapsed = false;
 
     // Morning items gently collapse once done (not in edit mode, not while
     // "show done" is on). CSS animates the slide.
     if (which === "morning" && done && !editing && !showDoneMorning) {
       row.classList.add("collapsed");
-      row.tabIndex = -1;   // hidden from keyboard focus while tucked away
+      collapsed = true;
     }
 
-    // drag handle (edit mode only via CSS)
-    const drag = document.createElement("span");
-    drag.className = "drag";
-    drag.textContent = "⠿";
-    drag.title = "Drag to reorder";
+    // drag handle only exists in edit mode, so it never adds stray visible
+    // text to the checkbox's accessible name
+    const rowParts = [];
+    if (editing) {
+      const drag = document.createElement("span");
+      drag.className = "drag";
+      drag.textContent = "⠿";
+      drag.title = "Drag to reorder";
+      drag.setAttribute("aria-hidden", "true");
+      rowParts.push(drag);
+    }
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "check-toggle";
+    toggle.setAttribute("role", "checkbox");
+    toggle.setAttribute("aria-checked", done ? "true" : "false");
+    toggle.setAttribute("aria-label", item.text);
+    toggle.tabIndex = collapsed ? -1 : 0;
 
     const check = document.createElement("div");
     check.className = "check";
@@ -1819,7 +1854,9 @@ function renderList(which) {
     label.className = "label";
     label.textContent = item.text;
 
-    row.append(drag, check, label);
+    toggle.append(check, label);
+    rowParts.push(toggle);
+    row.append(...rowParts);
 
     // optional tap-to-open link (e.g. the guided meditation in Kajabi)
     if (item.url) {
@@ -1828,7 +1865,7 @@ function renderList(which) {
       a.href = item.url;
       a.target = "_blank";
       a.rel = "noopener";
-      a.textContent = "Open ↗";
+      a.textContent = "Open";
       a.addEventListener("click", (e) => e.stopPropagation());
       row.append(a);
     }
@@ -1842,6 +1879,7 @@ function renderList(which) {
       min.inputMode = "numeric";
       min.enterKeyHint = "done";
       min.placeholder = "min";
+      min.setAttribute("aria-label", "Reading minutes");
       min.value = rec.readingMinutes ?? "";
       min.addEventListener("click", (e) => e.stopPropagation());
       min.addEventListener("change", () => {
@@ -1867,15 +1905,6 @@ function renderList(which) {
       if (e.target.closest(".row-edit")) return;
       toggleCheck(which, item.id);
     });
-    // keyboard: Enter / Space toggle, matching native checkbox behaviour
-    row.addEventListener("keydown", (e) => {
-      if (editing) return;
-      if (e.key === "Enter" || e.key === " " || e.key === "Spacebar") {
-        e.preventDefault();
-        toggleCheck(which, item.id);
-      }
-    });
-
     // swipe: right = complete, left = untick. Direction-locked so vertical
     // scrolling still works; suppressed in edit mode and over inputs/links.
     attachSwipe(row, which, item.id, () => !!rec.checks[item.id]);
