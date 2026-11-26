@@ -461,6 +461,48 @@
   /* checklist rows are checkboxes; a slightly fuller focus ring reads better */
   .row:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
+  /* ---------- Swipe to complete ----------
+     Swipe a row right to tick it, left to untick. The row slides a little and
+     tints so the gesture has feedback; a tap still works as before. */
+  .row { position: relative; transition: background 0.15s ease, transform 0.18s ease; }
+  .row.swiping { transition: none; }
+  .row.swipe-right { background: var(--accent-soft); }
+  .row.swipe-left { background: var(--sun-soft); }
+
+  /* ---------- Focus mode ----------
+     One section at a time, nothing else on screen (ADHD: few choices). */
+  body[data-focus="true"] .wrap > .card { display: none; }
+  body[data-focus="true"] .wrap > .card.focused { display: block; }
+  body[data-focus="true"] header.top .date { opacity: 0.5; }
+  .focus-bar {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto 16px;
+    max-width: 640px;
+    padding: 0 16px;
+  }
+  body[data-focus="true"] .focus-bar { display: flex; }
+  .focus-bar button {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    font: inherit;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .focus-bar button:active { background: var(--accent-soft); }
+  .focus-bar .focus-label {
+    flex: 1;
+    text-align: center;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+
   /* ---------- Time-of-day shift ----------
      The whole page warms toward ochre in the morning and cools to dusk
      lavender near bedtime. JS sets data-phase on <body>; colours transition
@@ -593,6 +635,13 @@
 
   <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
 
+  <div class="focus-bar" id="focusBar">
+    <button type="button" id="focusPrev" aria-label="Previous section">‹</button>
+    <span class="focus-label" id="focusLabel"></span>
+    <button type="button" id="focusNext" aria-label="Next section">›</button>
+    <button type="button" id="focusExit">Done</button>
+  </div>
+
   <!-- ============ MORNING ============ -->
   <section class="card morning" id="morningCard">
     <h2><span class="dot"></span>Morning</h2>
@@ -680,11 +729,13 @@
 
   <!-- ============ CONTROLS ============ -->
   <footer class="controls">
+    <button class="btn small" id="focusBtn">Focus</button>
     <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
     <button class="btn small" id="exportBtn">Export</button>
     <button class="btn small" id="importBtn">Import</button>
     <input type="file" id="importFile" accept="application/json" hidden />
   </footer>
+  <p class="hint" style="text-align:center">Tip: swipe a row right to tick it, left to untick.</p>
   <div class="version" id="versionTag">v3</div>
 </div>
 
@@ -717,7 +768,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v7";
+const VERSION = "v8";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -873,6 +924,50 @@ function applyPhase() {
 /* ---------- Sunday mode: protected rest day ---------- */
 function applySunday() {
   document.body.dataset.sunday = (new Date().getDay() === 0) ? "true" : "false";
+}
+
+/* ---------- Focus mode: one section at a time ---------- */
+const FOCUS_SECTIONS = [
+  { id: "morningCard", label: "Morning" },
+  { id: "anchorsCard", label: "Daily anchors" },
+  { id: "insteadCard", label: "Instead of gaming" },
+  { id: "bedCard", label: "Bedtime" },
+  { id: "weekCard", label: "This week" },
+];
+let focusOn = false;
+let focusIdx = 0;
+
+function focusableSections() {
+  // Sunday tucks some cards away — skip those in focus mode too.
+  const sunday = new Date().getDay() === 0;
+  return FOCUS_SECTIONS.filter((s) =>
+    !sunday || s.id === "bedCard" || s.id === "weekCard");
+}
+function toggleFocus(on) {
+  focusOn = (typeof on === "boolean") ? on : !focusOn;
+  document.body.dataset.focus = focusOn ? "true" : "false";
+  $("#focusBtn").textContent = focusOn ? "Exit focus" : "Focus";
+  if (focusOn) {
+    const n = focusableSections().length;
+    if (focusIdx >= n) focusIdx = 0;
+    renderFocus();
+    try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) {}
+  } else {
+    FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
+  }
+}
+function moveFocus(dir) {
+  const n = focusableSections().length;
+  focusIdx = (focusIdx + dir + n) % n;
+  renderFocus();
+  try { if (navigator.vibrate) navigator.vibrate(5); } catch (e) {}
+}
+function renderFocus() {
+  const sections = focusableSections();
+  FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
+  const current = sections[focusIdx];
+  if (current) $("#" + current.id)?.classList.add("focused");
+  $("#focusLabel").textContent = current ? current.label : "";
 }
 
 /* ---------- Rotating intention ---------- */
@@ -1036,9 +1131,10 @@ function renderList(which) {
     editWrap.append(up, down, del);
     row.append(editWrap);
 
-    // tap to toggle (ignore when editing)
+    // tap to toggle (ignore when editing, and ignore the click after a swipe)
     row.addEventListener("click", (e) => {
       if (editing) return;
+      if (row.dataset.swiped) return;
       if (e.target.closest(".row-edit")) return;
       toggleCheck(which, item.id);
     });
@@ -1050,6 +1146,10 @@ function renderList(which) {
         toggleCheck(which, item.id);
       }
     });
+
+    // swipe: right = complete, left = untick. Direction-locked so vertical
+    // scrolling still works; suppressed in edit mode and over inputs/links.
+    attachSwipe(row, which, item.id, () => !!rec.checks[item.id]);
 
     container.append(row);
   });
@@ -1103,6 +1203,56 @@ function renderMorningDone() {
     wrap.append(btn);
     box.append(wrap);
   }
+}
+
+/* Pointer-based swipe-to-complete. Right completes, left unticks. We lock to
+   the dominant axis so a normal vertical scroll is never hijacked. */
+function attachSwipe(row, which, id, isDone) {
+  let startX = null, startY = null, axis = null, swiped = false;
+  const THRESHOLD = 48;
+
+  row.addEventListener("pointerdown", (e) => {
+    if (editing || e.pointerType === "mouse") return;   // touch/pen only
+    if (e.target.closest(".item-link, input, .row-edit, .drag")) return;
+    startX = e.clientX; startY = e.clientY; axis = null; swiped = false;
+  });
+
+  row.addEventListener("pointermove", (e) => {
+    if (startX === null || editing) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    if (!axis) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      if (axis === "x") row.classList.add("swiping");
+    }
+    if (axis !== "x") return;
+    // rubber-band the row a little for tactile feedback
+    const shift = Math.max(-70, Math.min(70, dx));
+    row.style.transform = `translateX(${shift}px)`;
+    row.classList.toggle("swipe-right", dx > 0);
+    row.classList.toggle("swipe-left", dx < 0);
+    if (Math.abs(dx) > THRESHOLD) swiped = true;
+  });
+
+  function finish(e) {
+    if (startX === null) return;
+    const dx = e.clientX - startX;
+    const wasHorizontal = axis === "x";
+    row.style.transform = "";
+    row.classList.remove("swiping", "swipe-right", "swipe-left");
+    startX = startY = axis = null;
+    if (!wasHorizontal || !swiped) return;
+    e.preventDefault();
+    // suppress the click that follows a swipe so it doesn't double-toggle
+    row.dataset.swiped = "1";
+    setTimeout(() => { delete row.dataset.swiped; }, 350);
+    const wantDone = dx > 0;
+    if (wantDone !== isDone()) toggleCheck(which, id);
+    swiped = false;
+  }
+  row.addEventListener("pointerup", finish);
+  row.addEventListener("pointercancel", finish);
 }
 
 function mkIcon(txt, title, onClick) {
@@ -1379,6 +1529,12 @@ function wire() {
     if (snackAction) snackAction();
     hideSnackbar();
   });
+
+  // focus mode
+  $("#focusBtn").addEventListener("click", () => toggleFocus());
+  $("#focusPrev").addEventListener("click", () => moveFocus(-1));
+  $("#focusNext").addEventListener("click", () => moveFocus(1));
+  $("#focusExit").addEventListener("click", () => toggleFocus(false));
 
   // intention
   $("#intentionInput").addEventListener("input", (e) => {
