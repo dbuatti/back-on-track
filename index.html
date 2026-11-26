@@ -1799,38 +1799,16 @@
       <div class="btn-row">
         <button type="button" class="btn small" id="syncNow">Sync now</button>
       </div>
-      <div class="hint" id="syncStatus" aria-live="polite">Not set up yet — enter your pairing code.</div>
-      <details class="disclosure setup-only" id="syncSetupDetails">
-        <summary>Set up sync</summary>
-        <div class="field">
-          <label for="syncPairCode">Six-character pairing code</label>
-          <input type="text" id="syncPairCode" placeholder="6 characters" maxlength="6"
-                 pattern="[A-Z0-9]{6}" inputmode="text" autocapitalize="characters"
-                 autocorrect="off" spellcheck="false" />
-        </div>
-        <p class="hint">A home-screen app keeps its own storage, so enter the same code there too.</p>
-        <div class="btn-row">
-          <button type="button" class="btn small" id="syncPair">Pair this device</button>
-        </div>
-        <details class="disclosure">
-          <summary>Using a token instead</summary>
-          <div id="syncLegacy">
-            <div class="field">
-              <label for="syncToken">GitHub token with gist scope</label>
-              <input type="password" id="syncToken" placeholder="Token" autocomplete="off"
-                     autocorrect="off" spellcheck="false" />
-            </div>
-            <div class="field">
-              <label for="syncGist">Gist ID (same on every device)</label>
-              <input type="text" id="syncGist" placeholder="From your own Gist"
-                     autocorrect="off" autocapitalize="off" spellcheck="false" />
-            </div>
-            <div class="btn-row">
-              <button type="button" class="btn small" id="syncSetup">Set up</button>
-            </div>
-          </div>
-        </details>
-      </details>
+      <div class="hint" id="syncStatus" aria-live="polite">Not signed in. Enter your email below to sync.</div>
+      <div class="field">
+        <label for="syncPairCode">Email</label>
+        <input type="email" id="syncPairCode" placeholder="you@example.com"
+               autocorrect="off" autocapitalize="off" spellcheck="false" />
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn small" id="syncPair">Send sign-in link</button>
+        <button type="button" class="btn small" id="syncSetup">Sign out</button>
+      </div>
     </section>
 
     <section class="card" id="dataCard">
@@ -1849,11 +1827,6 @@
 
   <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
-    <section class="card" id="gentleIntro">
-      <h2><span class="dot"></span>The shelves</h2>
-      <p class="hint">Good things you know you're good at, but aren't pulling into the day right now. Each shelf has its own name. Nothing here is a task.</p>
-    </section>
-
     <section class="card" id="programMoreCard">
       <h2><span class="dot"></span>A quiet 30 days</h2>
       <p class="hint" id="programMoreText"></p>
@@ -1919,7 +1892,7 @@
     Links
   </button>
   <button type="button" class="nav-btn" data-tab="more">
-    More
+    Shelves
   </button>
 </nav>
 
@@ -1959,7 +1932,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v55";
+const VERSION = "v56";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
