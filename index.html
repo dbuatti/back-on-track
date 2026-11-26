@@ -984,15 +984,16 @@
         <span class="link-arrow" aria-hidden="true">↗</span>
       </a>
 
-      <div class="link-section-label">Go straight there</div>
+      <div class="link-section-label">Open on this device</div>
       <div class="link-chips">
-        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=comm-analytics" target="_blank" rel="noopener">Comm Analytics</a>
-        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=when-free" target="_blank" rel="noopener">When Free</a>
-        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=fnh-study-hub" target="_blank" rel="noopener">FNH Study Hub</a>
-        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=kinesiology-app" target="_blank" rel="noopener">Kinesiology</a>
-        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=kinesiology" target="_blank" rel="noopener">Search “kinesiology”</a>
+        <a class="link-chip" href="https://macbook-pro-6.tailab1fd5.ts.net:8778" target="_blank" rel="noopener">FNH Study Hub</a>
+        <a class="link-chip" href="https://macbook-pro-6.tailab1fd5.ts.net:8445" target="_blank" rel="noopener">Comm Analytics</a>
       </div>
-      <p class="hint">Links open on your Tailnet — if the Mac mini is asleep, The Door won't open. Use the search field there for anything not listed.</p>
+      <div class="link-section-label">Or find it in The Door</div>
+      <div class="link-chips">
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=fnh" target="_blank" rel="noopener">Search “fnh”</a>
+      </div>
+      <p class="hint">FNH Hub and Comm Analytics live on the MacBook Pro — if it's asleep, these won't open. The Door itself runs on the mini. Other apps have no direct URL in the registry, so find them through The Door.</p>
     </section>
 
     <section class="card" id="syncCard">
@@ -1084,7 +1085,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v13";
+const VERSION = "v14";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {

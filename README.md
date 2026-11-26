@@ -61,9 +61,16 @@ The bottom menu keeps each screen light:
   and the soft-dot week.
 - **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
   onto its screen, and skips hidden sections on Sunday.
-- **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`) with
-  `?app=` / `?search=` shortcuts (ids come from `~/Projects/the-door/apps.yaml`),
-  device sync, the ⛈️ Tool kit button (`thecalmafter.vercel.app`), and Export/Import.
+- **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`); direct
+  links to FNH Study Hub and Comm Analytics (URLs from `~/Projects/the-door/apps.yaml`,
+  so they open in the browser on this device rather than launching on the mini);
+  a `?search=fnh` shortcut for everything else; device sync; the ⛈️ Tool kit button
+  (`thecalmafter.vercel.app`); and Export/Import.
+
+  Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
+  doesn't show anything on an iPhone. That's why the useful shortcuts here use the
+  registry's `url` field instead. Apps with no `url` in the registry are reached via
+  The Door's search. Apps hosted on the MacBook Pro need it awake.
 
 ## Sync across devices
 
