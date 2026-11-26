@@ -1338,7 +1338,7 @@
         <button type="button" class="btn small" id="importBtn">Import</button>
         <input type="file" id="importFile" accept="application/json" hidden />
       </div>
-      <p class="hint">Everything stays on this device. Export to move it to another one.</p>
+      <p class="hint">Everything stays on this device. Export to back it up or move it; importing adds to what's already here and never erases it.</p>
     </section>
   </div><!-- /screen-links -->
 
@@ -1370,7 +1370,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v28</div>
+  <div class="version" id="versionTag">v29</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1421,7 +1421,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v28";
+const VERSION = "v29";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2967,6 +2967,7 @@ function exportJSON() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+  showSnackbar("Backup saved to Downloads");
 }
 
 function importJSON(file) {
@@ -2980,9 +2981,9 @@ function importJSON(file) {
       state = mergeState(state, parsed);
       save();
       renderAll();
-      alert("Imported. Welcome back.");
+      showSnackbar("Imported. Welcome back.");
     } catch (e) {
-      alert("That file doesn't look like a Back on Track export.");
+      showSnackbar("That file doesn't look like a Back on Track export.");
     }
   };
   reader.readAsText(file);

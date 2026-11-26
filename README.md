@@ -138,7 +138,9 @@ the sync fails silently and the Links card still shows the last successful time.
 - Reduced-motion is respected; tiny haptics only fire after a real tap.
 - Everything editable: add, remove, reorder any list. Undo is offered on delete.
 - Export / Import JSON for backup and merging into the anchor planner. Imports
-  fill in missing fields and keep any settings the export didn't know about.
+  fill in missing fields, keep any settings the export didn't know about, and
+  never erase local data. Export/import feedback uses the calm in-app snackbar
+  rather than a native alert.
 
 ## Merging into your anchor planner
 
