@@ -802,6 +802,7 @@
     font-size: 15px;
   }
   #syncCard .field { margin-top: 10px; }
+  #syncCard .field[hidden], #syncSetup[hidden] { display: none; }
   #syncCard .btn-row { margin-top: 12px; }
   #gentleAddBtn { margin-top: 12px; }
   .windnote {
@@ -1428,7 +1429,7 @@
 
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
-      <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it. Once set up it syncs by itself — Sync now is there if you want it straight away.</p>
+      <p class="hint">Your devices stay in step through a private bridge to a GitHub Gist. The token stays on the server, not on your device. It syncs by itself; Sync now is there if you want it straight away.</p>
       <div class="field">
         <label for="syncToken">GitHub token — <a href="https://github.com/settings/tokens/new?scopes=gist&description=Back%20on%20Track%20sync" target="_blank" rel="noopener">make one with gist scope ↗</a></label>
         <input type="password" id="syncToken" placeholder="ghp_…" autocomplete="off" autocorrect="off" spellcheck="false" />
@@ -1503,7 +1504,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v31</div>
+  <div class="version" id="versionTag">v32</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1554,7 +1555,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v31";
+const VERSION = "v32";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2882,20 +2883,53 @@ function syncStatus(text) {
   const el = $("#syncStatus");
   if (el) el.textContent = text;
 }
+function syncIsAutomatic() {
+  return !!(syncCfg.endpoint && syncCfg.syncKey && syncCfg.gistId);
+}
 function renderSync() {
   const t = $("#syncToken"), g = $("#syncGist"), s = $("#syncStatus");
+  const automatic = syncIsAutomatic();
+  const card = $("#syncCard");
+  if (card) card.classList.toggle("automatic", automatic);
+  $$("#syncCard .field, #syncSetup").forEach((el) => { el.hidden = automatic; });
   if (t && document.activeElement !== t) t.value = syncCfg.token || "";
   if (g && document.activeElement !== g) g.value = syncCfg.gistId || "";
   if (s && syncCfg.gistId && !s.textContent.startsWith("Couldn't") && !s.textContent.startsWith("Set up")) {
     const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
-    s.textContent = "Gist " + syncCfg.gistId + when + ".";
+    s.textContent = (automatic ? "Syncing automatically" : "Gist " + syncCfg.gistId) + when + ".";
   }
 }
+/* New devices pair once through a short link; the GitHub token never leaves
+   the server. Older builds can still use the direct-token fields. */
+function consumePairHash() {
+  const hash = location.hash || "";
+  if (hash.indexOf("#sync=") !== 0) return;
+  try {
+    const cfg = JSON.parse(decodeURIComponent(hash.slice(6)));
+    if (cfg && cfg.endpoint && cfg.syncKey && cfg.gistId) {
+      syncCfg = {
+        endpoint: cfg.endpoint,
+        syncKey: cfg.syncKey,
+        gistId: cfg.gistId,
+        lastSync: syncCfg.lastSync || null,
+      };
+      saveSync(syncCfg);
+      syncStatus("Sync connected.");
+    }
+  } catch (e) {
+    console.warn("Ignored an invalid sync link:", e);
+  }
+  try { history.replaceState(null, "", location.pathname + location.search); }
+  catch (e) { location.hash = ""; }
+}
 async function syncFetch(method, url, body) {
-  const headers = {
-    Authorization: "token " + (syncCfg.token || ""),
-    Accept: "application/vnd.github+json",
-  };
+  const automatic = method === "GET" || method === "PUT" ? syncIsAutomatic() : false;
+  const headers = automatic
+    ? { "x-sync-key": syncCfg.syncKey || "", Accept: "application/json" }
+    : {
+        Authorization: "token " + (syncCfg.token || ""),
+        Accept: "application/vnd.github+json",
+      };
   if (body !== undefined) headers["Content-Type"] = "application/json";
   const res = await fetch(url, {
     method, headers,
@@ -2904,7 +2938,7 @@ async function syncFetch(method, url, body) {
   if (!res.ok) {
     let detail = "";
     try { const j = await res.json(); if (j.message) detail = " — " + j.message; } catch (e) {}
-    throw new Error("GitHub " + res.status + detail);
+    throw new Error((automatic ? "Sync " : "GitHub ") + res.status + detail);
   }
   return res.json();
 }
@@ -2912,7 +2946,7 @@ async function syncFetch(method, url, body) {
 /* Background sync: pull once on open, then push quietly a moment after any
    real change. Failures are silent here — Links still shows the last time. */
 function scheduleSync() {
-  if (!syncCfg.gistId || !syncCfg.token || applyingRemote) return;
+  if (!syncCfg.gistId || (!syncIsAutomatic() && !syncCfg.token) || applyingRemote) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(runAutoSync, 1500);
 }
@@ -2945,18 +2979,27 @@ async function syncSetup() {
 }
 async function syncNow(opts = {}) {
   const silent = !!opts.silent;
+  const automatic = syncIsAutomatic();
   const token = (($("#syncToken") && $("#syncToken").value) || "").trim() || syncCfg.token;
   const id = (($("#syncGist") && $("#syncGist").value) || "").trim() || syncCfg.gistId;
-  if (!token || !id) { if (!silent) syncStatus("Add a token and a gist ID first."); return; }
+  if (!id || (!automatic && !token)) {
+    if (!silent) syncStatus("Add a token and a gist ID first.");
+    return;
+  }
   if (syncBusy) { syncAgain = true; return; }
-  syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg);
+  if (!automatic) { syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg); }
   syncBusy = true;
-  if (!silent) syncStatus("Checking your gist…");
+  if (!silent) syncStatus("Checking your sync…");
   try {
-    const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
-    const file = gist.files && gist.files["back-on-track.json"];
     let remote = null;
-    if (file && file.content) remote = JSON.parse(file.content);
+    if (automatic) {
+      const reply = await syncFetch("GET", syncCfg.endpoint);
+      remote = reply && reply.state ? reply.state : null;
+    } else {
+      const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
+      const file = gist.files && gist.files["back-on-track.json"];
+      if (file && file.content) remote = JSON.parse(file.content);
+    }
     const localStamp = Number(state.settings.updatedAt) || 0;
     const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
     if (remote && remoteStamp > localStamp) {
@@ -2964,12 +3007,16 @@ async function syncNow(opts = {}) {
       state = mergeState(state, remote);
       saveQuiet(); renderAll();
       applyingRemote = false;
-      if (!silent) syncStatus("Pulled newer data from your gist.");
+      if (!silent) syncStatus("Pulled newer data from your sync.");
     } else if (!remote || localStamp > remoteStamp) {
-      await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
-        files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
-      });
-      if (!silent) syncStatus("Pushed this device's data to your gist.");
+      if (automatic) {
+        await syncFetch("PUT", syncCfg.endpoint, state);
+      } else {
+        await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
+          files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
+        });
+      }
+      if (!silent) syncStatus("Pushed this device's data to your sync.");
     } else {
       if (!silent) syncStatus("Already in step.");
     }
@@ -3800,15 +3847,16 @@ function wire() {
 }
 
 /* ---------- Boot ---------- */
+consumePairHash();
 $("#versionTag").textContent = VERSION;
 wire();
 renderAll();
 showTab(initialTab());
 // if sync is set up: pull once on open, and flush any pending change when you
 // leave the app (best effort on mobile — GitHub may cut off a hidden page)
-if (syncCfg.gistId && syncCfg.token) setTimeout(() => syncNow({ silent: true }), 800);
+if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) setTimeout(() => syncNow({ silent: true }), 800);
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden" && syncCfg.gistId && syncCfg.token) {
+  if (document.visibilityState === "hidden" && syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
     clearTimeout(syncTimer);
     syncNow({ silent: true });
   }

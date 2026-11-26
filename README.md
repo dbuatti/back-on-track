@@ -118,22 +118,25 @@ touch devices keep only the instant press feedback.
 
 ## Sync across devices
 
-The Links screen can keep devices in step using a **private GitHub Gist**:
+The Links screen keeps devices in step through a **private GitHub Gist** behind a
+small Vercel bridge (`../back-on-track-sync/`). As of v32 sync is automatic and
+needs nothing from you:
 
-1. On one device, make a classic GitHub token with only `gist` scope
-   (the link on the Sync card opens the right page) and paste it in.
-2. Tap **Set up**. The app creates a secret gist and shows its ID.
-3. On each other device, paste the same token and gist ID. After that you can
-   forget about it — syncing happens on its own.
+- The GitHub token lives only in the Vercel function's encrypted env, never in
+  the browser, the app source or an export.
+- Each device holds a low-value random pairing key plus the gist id in
+  `localStorage` (`bot.sync.v1`). A new device pairs once by opening a short
+  `#sync=…` link; the app consumes the hash and cleans the address bar.
+- The older token + gist id fields on the Sync card still work for a manual
+  setup, but are hidden when automatic sync is configured.
 
-The token and gist ID live only in that browser's `localStorage` (`bot.sync.v1`),
-never in exports or the app source. Once configured, the app pulls once on open
-and pushes quietly about 1.5 seconds after any real change, and flushes pending
-changes when you leave the app. **Sync now** just does it immediately. Sync is
-last-change-wins using `settings.updatedAt`; cosmetic touches like the daily note
-use a quiet save so opening the app never claims to be newer data. Sleep and mood
-trends are computed from the shared records on each device. If GitHub is offline,
-the sync fails silently and the Links card still shows the last successful time.
+Once configured, the app pulls once on open and pushes quietly about 1.5 seconds
+after any real change, and flushes pending changes when you leave the app.
+**Sync now** just does it immediately. Sync is last-change-wins using
+`settings.updatedAt`; cosmetic touches like the daily note use a quiet save so
+opening the app never claims to be newer data. Sleep and mood trends are computed
+from the shared records on each device. If the bridge or GitHub is offline, sync
+fails silently and the Links card still shows the last successful time.
 
 ## Design notes
 
