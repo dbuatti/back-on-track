@@ -69,17 +69,16 @@ The bottom menu keeps each screen light:
   a `?search=fnh` shortcut for everything else; device sync; the ⛈️ Tool kit button
   (`thecalmafter.vercel.app`); and Export/Import. Every link has a small **⧉** button
   to copy its URL to the clipboard (with a fallback for older browsers). A **My links**
-  card holds your own sites — add, remove and copy any URL there.
-
-- **Not feeling it** — reached by the labelled **☰ More** button in the sticky header
-  (always visible, even when scrolled), not a bottom tab.
-  A shelf for good things you're not in the mood for: Sangha meditation (*not feeling
-  it*), Kriya meditation (*never feeling it*), sun movements and Nick Moss. Tap a name
-  for a much smaller version ("one breath, eyes closed"). Editable like the other
-  lists. Sangha has been removed from the Home checklist. The page also holds a quiet
-  stats panel: average sleep, days with one gentle step in the last 30, most-often
-  done item and a soft dot grid — patterns, not scores. Hide the bottom nav while
-  here; **← Back to today** or Escape returns.
+  card holds your own sites — add, remove and copy any URL there. From the iPhone
+  home-screen app, external links use iOS's `x-safari-` hand-off so they open in
+  real Safari and iCloud Keychain autofill works (notably for Kajabi).
+- **More** — the fifth bottom tab. A shelf for good things you're not in the mood
+  for: Sangha meditation (*not feeling it*), Kriya meditation (*never feeling it*),
+  sun movements and Nick Moss. Tap a name for a much smaller version ("one breath,
+  eyes closed"). Editable like the other lists. Sangha has been removed from the
+  Home checklist. The page also holds a quiet stats panel: average sleep, days with
+  one gentle step in the last 30, most-often done item and a soft dot grid —
+  patterns, not scores. **← Back to today** or Escape returns.
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the

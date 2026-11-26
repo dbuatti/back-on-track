@@ -74,7 +74,7 @@
   .wrap {
     max-width: 640px;
     margin: 0 auto;
-    padding: 0 16px calc(112px + env(safe-area-inset-bottom));
+    padding: 20px 16px calc(112px + env(safe-area-inset-bottom));
   }
 
   /* ---------- Screens + bottom menu ----------
@@ -99,9 +99,9 @@
     background: transparent;
     color: var(--ink-soft);
     font: inherit;
-    font-size: 11px;
+    font-size: 10.5px;
     line-height: 1.1;
-    min-width: 66px;
+    min-width: 56px;
     min-height: 52px;
     display: flex;
     flex-direction: column;
@@ -111,7 +111,7 @@
     border-radius: 12px;
     cursor: pointer;
   }
-  .nav-btn .nav-icon { font-size: 21px; line-height: 1; }
+  .nav-btn .nav-icon { font-size: 19px; line-height: 1; }
   .nav-btn.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
   .nav-btn:active { background: var(--accent-soft); }
 
@@ -278,19 +278,11 @@
 
   /* ---------- Header ---------- */
   header.top {
-    position: sticky;
-    top: 0;
-    z-index: 30;
     display: flex;
-    align-items: center;
+    align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
-    margin: 0 -16px 16px;
-    padding: 14px 16px 12px;
-    background: var(--bg);
-    box-shadow: 0 2px 12px rgba(60,55,45,0.05);
+    margin: 8px 4px 18px;
   }
-  .header-title { display: flex; flex-direction: column; min-width: 0; }
   header.top h1 {
     font-size: 22px;
     font-weight: 600;
@@ -298,35 +290,12 @@
     margin: 0;
   }
   header.top .date {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
-    margin-top: 1px;
   }
-  .menu-btn {
-    appearance: none;
-    border: 1px solid var(--line);
-    background: var(--card);
-    color: var(--ink);
-    font: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    line-height: 1;
-    min-height: 44px;
-    padding: 0 12px;
-    border-radius: 12px;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    white-space: nowrap;
-  }
-  .menu-btn .menu-icon { font-size: 19px; line-height: 1; }
-  .menu-btn:active { background: var(--accent-soft); }
 
-  /* ---------- The quiet ☰ page ---------- */
-  body.gentle-open .bottom-nav { display: none; }
-  body.gentle-open .wrap { padding-bottom: 32px; }
+  /* ---------- The quiet More page ---------- */
   .gentle-item {
     display: flex;
     align-items: flex-start;
@@ -979,14 +948,8 @@
 <div class="wrap">
 
   <header class="top">
-    <div class="header-title">
-      <h1>Back on Track</h1>
-      <span class="date" id="todayLabel"></span>
-    </div>
-    <button type="button" class="menu-btn" id="menuBtn"
-            aria-label="Open the not-feeling-it page" title="Not feeling it">
-      <span class="menu-icon" aria-hidden="true">☰</span>More
-    </button>
+    <h1>Back on Track</h1>
+    <span class="date" id="todayLabel"></span>
   </header>
 
   <div class="focus-bar" id="focusBar">
@@ -1144,6 +1107,7 @@
 
   <!-- ============ LINKS ============ -->
   <div class="screen" id="screen-links" hidden>
+    <p class="hint" style="margin:-2px 4px 12px">From the iPhone home-screen app, links open in Safari so saved passwords work.</p>
     <section class="card" id="doorCard">
       <h2><span class="dot"></span>The Door</h2>
       <div class="link-row">
@@ -1285,6 +1249,9 @@
   <button type="button" class="nav-btn" data-tab="links">
     <span class="nav-icon" aria-hidden="true">🔗</span><span>Links</span>
   </button>
+  <button type="button" class="nav-btn" data-tab="more">
+    <span class="nav-icon" aria-hidden="true">☰</span><span>More</span>
+  </button>
 </nav>
 
 <div id="whisper" role="status" aria-live="polite"></div>
@@ -1317,7 +1284,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v18";
+const VERSION = "v19";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1567,6 +1534,7 @@ const TAB_SCREENS = {
   home: "screen-home",
   winddown: "screen-winddown",
   links: "screen-links",
+  more: "screen-gentle",
 };
 let activeTab = "home";
 
@@ -2547,29 +2515,7 @@ function removeMyLink(id) {
   });
 }
 
-/* ---------- The quiet ☰ page: good things, not right now ---------- */
-let gentleReturn = "home";
-
-function openGentle() {
-  if (focusOn) toggleFocus(false);
-  gentleReturn = activeTab || "home";
-  Object.keys(TAB_SCREENS).forEach((k) => {
-    const el = $("#" + TAB_SCREENS[k]);
-    if (el) el.hidden = true;
-  });
-  const page = $("#screen-gentle");
-  if (page) page.hidden = false;
-  document.body.classList.add("gentle-open");
-  if (window.scrollTo) window.scrollTo(0, 0);
-  renderGentle();
-}
-function closeGentle() {
-  const page = $("#screen-gentle");
-  if (page) page.hidden = true;
-  document.body.classList.remove("gentle-open");
-  showTab(gentleReturn);
-}
-
+/* ---------- More: good things, not right now ---------- */
 function renderGentle() {
   renderGentleList();
   renderGentleStats();
@@ -2709,6 +2655,30 @@ function renderGentleStats() {
     box.append(line);
   });
   if (active) box.append(dots);
+}
+
+/* ---------- Open external links in real Safari on iPhone ----------
+   A home-screen PWA uses a separate web view, so iCloud Keychain autofill
+   doesn't reach sites like Kajabi. iOS 17+ understands the x-safari- scheme
+   and hands the URL to Safari. Everywhere else, the normal link is used. */
+function standaloneIOS() {
+  const ua = navigator.userAgent || "";
+  const ios = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!ios) return false;
+  return navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+}
+
+function openExternalInSafari(e) {
+  if (!standaloneIOS()) return;
+  const a = e.target && e.target.closest && e.target.closest("a[href]");
+  if (!a) return;
+  const url = a.href;
+  if (!/^https?:\/\//i.test(url)) return;
+  if (url.indexOf(location.origin) === 0) return;
+  e.preventDefault();
+  window.location.href = "x-safari-" + url;
 }
 
 /* ---------- Copy any link to the clipboard ---------- */
@@ -2876,6 +2846,9 @@ function wire() {
     });
   });
 
+  // on an iPhone home-screen app, hand external links to Safari for autofill
+  document.addEventListener("click", openExternalInSafari);
+
   // copy any link — delegated, so links added later work too
   document.addEventListener("click", (e) => {
     const b = e.target && e.target.closest && e.target.closest("[data-copy]");
@@ -2896,9 +2869,8 @@ function wire() {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addMyLink(); });
   });
 
-  // the quiet ☰ page
-  $("#menuBtn").addEventListener("click", openGentle);
-  $("#gentleBack").addEventListener("click", closeGentle);
+  // More — a normal bottom tab now
+  $("#gentleBack").addEventListener("click", () => showTab("home"));
   $("#gentleAddBtn").addEventListener("click", () => {
     const form = $("#gentleForm");
     form.hidden = !form.hidden;
@@ -2909,7 +2881,7 @@ function wire() {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addGentleItem(); });
   });
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && document.body.classList.contains("gentle-open")) closeGentle();
+    if (e.key === "Escape" && activeTab === "more") showTab("home");
   });
 
   // export / import
