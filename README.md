@@ -71,7 +71,8 @@ The bottom menu keeps each screen light:
   to copy its URL to the clipboard (with a fallback for older browsers). A **My links**
   card holds your own sites — add, remove and copy any URL there.
 
-- **Not feeling it** — reached by the **☰** button in the header, not a bottom tab.
+- **Not feeling it** — reached by the labelled **☰ More** button in the sticky header
+  (always visible, even when scrolled), not a bottom tab.
   A shelf for good things you're not in the mood for: Sangha meditation (*not feeling
   it*), Kriya meditation (*never feeling it*), sun movements and Nick Moss. Tap a name
   for a much smaller version ("one breath, eyes closed"). Editable like the other

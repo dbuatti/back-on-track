@@ -74,7 +74,7 @@
   .wrap {
     max-width: 640px;
     margin: 0 auto;
-    padding: 20px 16px calc(112px + env(safe-area-inset-bottom));
+    padding: 0 16px calc(112px + env(safe-area-inset-bottom));
   }
 
   /* ---------- Screens + bottom menu ----------
@@ -278,11 +278,19 @@
 
   /* ---------- Header ---------- */
   header.top {
+    position: sticky;
+    top: 0;
+    z-index: 30;
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    margin: 8px 4px 18px;
+    gap: 12px;
+    margin: 0 -16px 16px;
+    padding: 14px 16px 12px;
+    background: var(--bg);
+    box-shadow: 0 2px 12px rgba(60,55,45,0.05);
   }
+  .header-title { display: flex; flex-direction: column; min-width: 0; }
   header.top h1 {
     font-size: 22px;
     font-weight: 600;
@@ -290,23 +298,30 @@
     margin: 0;
   }
   header.top .date {
-    font-size: 14px;
+    font-size: 13px;
     color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
+    margin-top: 1px;
   }
-  .header-right { display: flex; align-items: center; gap: 8px; }
   .menu-btn {
     appearance: none;
     border: 1px solid var(--line);
     background: var(--card);
-    color: var(--ink-soft);
-    font-size: 19px;
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
     line-height: 1;
-    width: 44px;
-    height: 44px;
+    min-height: 44px;
+    padding: 0 12px;
     border-radius: 12px;
     cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    white-space: nowrap;
   }
+  .menu-btn .menu-icon { font-size: 19px; line-height: 1; }
   .menu-btn:active { background: var(--accent-soft); }
 
   /* ---------- The quiet ☰ page ---------- */
@@ -964,12 +979,14 @@
 <div class="wrap">
 
   <header class="top">
-    <h1>Back on Track</h1>
-    <span class="header-right">
+    <div class="header-title">
+      <h1>Back on Track</h1>
       <span class="date" id="todayLabel"></span>
-      <button type="button" class="menu-btn" id="menuBtn"
-              aria-label="Open the not-feeling-it page" title="Not feeling it">☰</button>
-    </span>
+    </div>
+    <button type="button" class="menu-btn" id="menuBtn"
+            aria-label="Open the not-feeling-it page" title="Not feeling it">
+      <span class="menu-icon" aria-hidden="true">☰</span>More
+    </button>
   </header>
 
   <div class="focus-bar" id="focusBar">
@@ -1300,7 +1317,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v17";
+const VERSION = "v18";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
