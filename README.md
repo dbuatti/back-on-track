@@ -35,6 +35,11 @@ no score or follow-up. It lives at `state.settings.program30.reflection`, stays
 through load-out, and survives import/sync — a newer device arriving with an empty
 line cannot wipe one you wrote.
 
+**v38** adds **Even smaller** to every invitation. Each step now has a quiet
+disclosure with a genuinely minimal version — for Nick steps, *"Just open the
+page. No listening needed — that's enough."* — so a tired or anxious day still has
+a way in. It is permission to stop, never a second task, and adds no state.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.

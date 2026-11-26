@@ -253,6 +253,13 @@
   .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.45; }
   .program-reflect { margin-top: var(--s2); font-size: var(--t-small); }
   .program-reflect[hidden] { display: none; }
+  /* A smaller path, never a second task. */
+  .program-smaller { border-top: 1px solid var(--line); margin-top: var(--s3); }
+  .program-smaller summary {
+    min-height: var(--tap); display: flex; align-items: center;
+    font-size: var(--t-small); color: var(--accent-deep); cursor: pointer;
+  }
+  .program-smaller p { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.45; }
   .program-nick { display: inline-flex; margin-bottom: var(--s2); }
   .program-nick[hidden] { display: none; }
   .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
@@ -1364,6 +1371,10 @@
     <p class="program-invite" id="programInvite"></p>
     <a class="btn small program-nick" id="programNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programOptional" hidden></p>
+    <details class="program-smaller">
+      <summary>Even smaller</summary>
+      <p id="programSmallerText"></p>
+    </details>
     <div class="btn-row">
       <button type="button" class="btn small" id="programDone">That's enough</button>
     </div>
@@ -1419,6 +1430,10 @@
     <p class="program-invite" id="programEveInvite"></p>
     <a class="btn small program-nick" id="programEveNick" target="_blank" rel="noopener" hidden></a>
     <p class="hint program-optional" id="programEveOptional" hidden></p>
+    <details class="program-smaller">
+      <summary>Even smaller</summary>
+      <p id="programEveSmallerText"></p>
+    </details>
     <div class="btn-row">
       <button type="button" class="btn small" id="programEveDone">That's enough</button>
     </div>
@@ -1693,7 +1708,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v37</div>
+  <div class="version" id="versionTag">v38</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1747,7 +1762,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v37";
+const VERSION = "v38";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -4190,6 +4205,16 @@ const PROGRAM_KIND_LABELS = {
   day: "Everyday",
   connection: "Connection",
 };
+/* When even the invitation feels like too much, there is a smaller way in.
+   Each line is permission to stop, never a second thing to do. */
+const PROGRAM_SMALLER = {
+  nick: "Just open the page. No listening needed — that's enough.",
+  rest: "One breath, then you can stop.",
+  sleep: "Just notice what time it is. That's all.",
+  body: "Just feel your feet for a moment.",
+  day: "Just look around once. No need to do anything.",
+  connection: "Just think of someone. No message needed.",
+};
 function fillProgramCard(prefix, p, step, at) {
   const q = (name) => $("#" + prefix + name);
   const card = q("Card");
@@ -4215,6 +4240,8 @@ function fillProgramCard(prefix, p, step, at) {
     optional.hidden = !step.optional;
     optional.textContent = step.optional || "";
   }
+  const smaller = q("SmallerText");
+  if (smaller) smaller.textContent = PROGRAM_SMALLER[step.kind] || "Just be here for one breath.";
   const last = p.step >= PROGRAM30.length - 1;
   const done = q("Done");
   if (done) done.textContent = last ? "Keep this step" : "That's enough";
