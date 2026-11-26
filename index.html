@@ -855,7 +855,7 @@
   .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
   /* Only the home-screen PWA needs to know about the Safari hand-off. */
   .safari-hint { display: none; }
-  body.standalone .safari-hint { display: block; }
+  body.standalone .safari-hint { display: block; margin: 0 2px 14px; }
   .centered-hint { text-align: center; }
 
   .list-empty {
@@ -1217,7 +1217,7 @@
 
   <!-- ============ LINKS ============ -->
   <div class="screen" id="screen-links" hidden>
-    <p class="hint safari-hint" style="margin:-2px 4px 12px">Links open in Safari here, so saved passwords work.</p>
+    <p class="hint safari-hint">Links open in Safari here, so saved passwords work.</p>
     <section class="card" id="doorCard">
       <h2><span class="dot"></span>The Door</h2>
       <div class="link-row">
@@ -1342,7 +1342,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v25</div>
+  <div class="version" id="versionTag">v26</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1393,7 +1393,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v25";
+const VERSION = "v26";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
