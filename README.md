@@ -79,12 +79,17 @@ The Links screen can keep devices in step using a **private GitHub Gist**:
 1. On one device, make a classic GitHub token with only `gist` scope
    (the link on the Sync card opens the right page) and paste it in.
 2. Tap **Set up**. The app creates a secret gist and shows its ID.
-3. On each other device, paste the same token and gist ID, then tap **Sync now**.
+3. On each other device, paste the same token and gist ID. After that you can
+   forget about it — syncing happens on its own.
 
 The token and gist ID live only in that browser's `localStorage` (`bot.sync.v1`),
-never in exports or the app source. Sync is last-change-wins, using
-`settings.updatedAt`; tap **Sync now** before switching devices. Sleep and mood
-trends are then computed from the shared records on each device.
+never in exports or the app source. Once configured, the app pulls once on open
+and pushes quietly about 1.5 seconds after any real change, and flushes pending
+changes when you leave the app. **Sync now** just does it immediately. Sync is
+last-change-wins using `settings.updatedAt`; cosmetic touches like the daily note
+use a quiet save so opening the app never claims to be newer data. Sleep and mood
+trends are computed from the shared records on each device. If GitHub is offline,
+the sync fails silently and the Links card still shows the last successful time.
 
 ## Design notes
 

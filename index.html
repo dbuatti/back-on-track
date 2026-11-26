@@ -998,7 +998,7 @@
 
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
-      <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it.</p>
+      <p class="hint">Keep your devices in step through a private GitHub Gist. Only you can see it. Once set up it syncs by itself — Sync now is there if you want it straight away.</p>
       <div class="field" style="margin-top:10px">
         <label for="syncToken">GitHub token — <a href="https://github.com/settings/tokens/new?scopes=gist&description=Back%20on%20Track%20sync" target="_blank" rel="noopener">make one with gist scope ↗</a></label>
         <input type="password" id="syncToken" placeholder="ghp_…" autocomplete="off" autocorrect="off" spellcheck="false" />
@@ -1085,7 +1085,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v14";
+const VERSION = "v15";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1194,10 +1194,19 @@ function save() {
   try {
     state.settings.updatedAt = Date.now();
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
+    scheduleSync();   // a real change — let other devices know soon
   } catch (e) {
     console.warn("Could not save state:", e);
     alert("Sorry — I couldn't save to this browser's storage. Your data is still here until you close the tab.");
   }
+}
+
+/* Persist without claiming a change. Used for cosmetic, device-local tweaks
+   (e.g. picking the daily note) so merely opening the app doesn't look like
+   newer data and overwrite what another device actually logged. */
+function saveQuiet() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
+  catch (e) { console.warn("Could not save state:", e); }
 }
 
 /* One place for the tiny confirmation buzz. Browsers refuse vibration before
@@ -1394,7 +1403,7 @@ function renderRotIntention() {
   if (state.settings.intentionDay !== today) {
     state.settings.intentionDay = today;
     state.settings.intentionIndex = pickDifferentIntention(state.settings.intentionIndex);
-    save();
+    saveQuiet();   // cosmetic only — don't claim a data change
   }
   const text = INTENTIONS[state.settings.intentionIndex % INTENTIONS.length];
   box.innerHTML = "";
@@ -1477,8 +1486,9 @@ function renderGreeting() {
     : h < 17 ? "A quiet afternoon."
     : h < 21 ? "Winding down."
     : "Late and gentle.";
+  const glyph = h < 11 ? "🌤 " : h < 17 ? "🌿 " : h < 21 ? "◐ " : "☾ ";
   const el = $("#greeting");
-  if (el) el.textContent = text;
+  if (el) el.textContent = glyph + text;
 }
 
 function renderProgress() {
@@ -2031,6 +2041,8 @@ function setEditing(on) {
    Credentials live in their own localStorage key so exports stay clean.
    Last-change-wins: simple, predictable, and easy to explain.
    ===================================================================== */
+let syncTimer = null, syncBusy = false, syncAgain = false, applyingRemote = false;
+
 function loadSync() {
   try { return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {}; }
   catch (e) { return {}; }
@@ -2069,6 +2081,20 @@ async function syncFetch(method, url, body) {
   }
   return res.json();
 }
+
+/* Background sync: pull once on open, then push quietly a moment after any
+   real change. Failures are silent here — Links still shows the last time. */
+function scheduleSync() {
+  if (!syncCfg.gistId || !syncCfg.token || applyingRemote) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(runAutoSync, 1500);
+}
+async function runAutoSync() {
+  if (syncBusy) { syncAgain = true; return; }
+  await syncNow({ silent: true });
+  if (syncAgain) { syncAgain = false; scheduleSync(); }
+}
+
 async function syncSetup() {
   const token = (($("#syncToken") && $("#syncToken").value) || "").trim();
   if (!token) { syncStatus("Add a token with gist scope first."); return; }
@@ -2084,18 +2110,21 @@ async function syncSetup() {
     syncCfg.lastSync = new Date().toISOString();
     saveSync(syncCfg);
     renderSync();
-    syncStatus("Set up. Copy the gist ID to your other devices, then tap Sync now there.");
+    syncStatus("Set up. Copy the gist ID to your other devices — they'll keep in step by themselves.");
     haptic(8);
   } catch (e) {
     syncStatus("Couldn't set up: " + e.message + ". Check the token has gist scope.");
   }
 }
-async function syncNow() {
+async function syncNow(opts = {}) {
+  const silent = !!opts.silent;
   const token = (($("#syncToken") && $("#syncToken").value) || "").trim() || syncCfg.token;
   const id = (($("#syncGist") && $("#syncGist").value) || "").trim() || syncCfg.gistId;
-  if (!token || !id) { syncStatus("Add a token and a gist ID first."); return; }
+  if (!token || !id) { if (!silent) syncStatus("Add a token and a gist ID first."); return; }
+  if (syncBusy) { syncAgain = true; return; }
   syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg);
-  syncStatus("Checking your gist…");
+  syncBusy = true;
+  if (!silent) syncStatus("Checking your gist…");
   try {
     const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
     const file = gist.files && gist.files["back-on-track.json"];
@@ -2104,23 +2133,27 @@ async function syncNow() {
     const localStamp = Number(state.settings.updatedAt) || 0;
     const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
     if (remote && remoteStamp > localStamp) {
+      applyingRemote = true;
       state = mergeState(state, remote);
-      save(); renderAll();
-      syncStatus("Pulled newer data from your gist.");
+      saveQuiet(); renderAll();
+      applyingRemote = false;
+      if (!silent) syncStatus("Pulled newer data from your gist.");
     } else if (!remote || localStamp > remoteStamp) {
       await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
         files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
       });
-      syncStatus("Pushed this device's data to your gist.");
+      if (!silent) syncStatus("Pushed this device's data to your gist.");
     } else {
-      syncStatus("Already in step.");
+      if (!silent) syncStatus("Already in step.");
     }
     syncCfg.lastSync = new Date().toISOString();
     saveSync(syncCfg);
     renderSync();
-    haptic(8);
+    if (!silent) haptic(8);
   } catch (e) {
     syncStatus("Couldn't sync: " + e.message);
+  } finally {
+    syncBusy = false;
   }
 }
 
@@ -2282,6 +2315,15 @@ function wire() {
 $("#versionTag").textContent = VERSION;
 wire();
 renderAll();
+// if sync is set up: pull once on open, and flush any pending change when you
+// leave the app (best effort on mobile — GitHub may cut off a hidden page)
+if (syncCfg.gistId && syncCfg.token) setTimeout(() => syncNow({ silent: true }), 800);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && syncCfg.gistId && syncCfg.token) {
+    clearTimeout(syncTimer);
+    syncNow({ silent: true });
+  }
+});
 // keep header, time-of-day phase, Sunday mode and the daily intention fresh
 // if the app is left open across a boundary (no timers needed otherwise)
 setInterval(() => {
