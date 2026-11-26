@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<meta name="theme-color" content="#f4efe6" />
+<meta name="theme-color" content="#e9dccd" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="default" />
 <meta name="apple-mobile-web-app-title" content="Back on Track" />
@@ -83,14 +83,19 @@
   .screen[hidden] { display: none !important; }
   .bottom-nav {
     position: fixed;
-    left: 0; right: 0; bottom: 0;
+    left: 50%; bottom: 0;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 640px;
     z-index: 40;
     display: flex;
     justify-content: space-around;
     gap: 2px;
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
     background: var(--card);
-    border-top: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
     box-shadow: 0 -2px 14px rgba(60,55,45,0.06);
   }
   .nav-btn {
@@ -157,7 +162,8 @@
     padding: 12px 14px;
     border-radius: 14px;
     background: var(--evening-soft);
-    border: 1px solid var(--evening);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--evening);
     color: var(--ink);
     font-size: 14px;
     line-height: 1.35;
@@ -217,7 +223,7 @@
   .link-chip {
     display: inline-flex;
     align-items: center;
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 12px;
     border: 1px solid var(--line);
     border-radius: 12px;
@@ -241,13 +247,13 @@
     font-size: 18px;
     cursor: pointer;
   }
-  .link-item .copy-btn { flex: 0 0 40px; min-height: 40px; font-size: 16px; }
+  .link-item .copy-btn { flex: 0 0 44px; min-height: 44px; font-size: 16px; }
   .copy-btn:active { background: var(--accent-soft); }
   .my-link-row { display: flex; align-items: stretch; gap: 6px; margin-bottom: 8px; }
   .my-link-row .link-chip { flex: 1; overflow-wrap: anywhere; }
   .remove-link {
-    flex: 0 0 40px;
-    min-height: 40px;
+    flex: 0 0 44px;
+    min-height: 44px;
     border: 1px solid var(--line);
     border-radius: 12px;
     background: var(--bg);
@@ -278,9 +284,7 @@
 
   /* ---------- Header ---------- */
   header.top {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
+    display: block;
     margin: 8px 4px 18px;
   }
   header.top h1 {
@@ -290,9 +294,11 @@
     margin: 0;
   }
   header.top .date {
+    display: block;
     font-size: 14px;
     color: var(--ink-soft);
     font-variant-numeric: tabular-nums;
+    margin-top: 2px;
   }
 
   /* ---------- The quiet More page ---------- */
@@ -434,7 +440,7 @@
     padding: 8px 12px;
     border-radius: 10px;
     cursor: pointer;
-    min-height: 40px;
+    min-height: 44px;
   }
   .morning-done-toggle button:active { background: rgba(0,0,0,0.04); }
   .morning-all-done {
@@ -484,7 +490,7 @@
     appearance: none;
     border: none;
     background: transparent;
-    width: 40px; height: 40px;
+    width: 44px; height: 44px;
     border-radius: 10px;
     font-size: 18px;
     color: var(--ink-soft);
@@ -500,6 +506,21 @@
     font-size: 16px;
     letter-spacing: -2px;
   }
+  /* a real button for the two smaller lists (My links / On the shelf) */
+  .drag-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    flex: 0 0 28px;
+    min-height: 44px;
+    padding: 0;
+    color: var(--ink-soft);
+    font-size: 18px;
+    line-height: 1;
+    cursor: grab;
+    touch-action: none;
+  }
+  .drag-btn:active { color: var(--accent-deep); cursor: grabbing; }
 
   /* ---------- Text / number inputs ---------- */
   input[type="text"], input[type="number"], input[type="time"], textarea {
@@ -515,6 +536,12 @@
   textarea { resize: vertical; min-height: 44px; }
 
   .intention-wrap { margin-top: 6px; }
+  .input-label {
+    display: block;
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 14px 2px 6px;
+  }
 
   .minutes-input {
     width: 76px !important;
@@ -545,7 +572,7 @@
     font-size: 17px;
   }
   .btn.ghost { background: transparent; }
-  .btn.small { min-height: 40px; padding: 8px 12px; font-size: 14px; }
+  .btn.small { min-height: 44px; padding: 8px 12px; font-size: 14px; }
 
   .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
 
@@ -694,7 +721,7 @@
     font-size: 14px;
     font-weight: 600;
     color: var(--ink-soft);
-    min-height: 36px;
+    min-height: 44px;
     display: flex;
     align-items: center;
   }
@@ -759,6 +786,10 @@
   .add-row input { flex: 1; }
 
   .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
+  /* Only the home-screen PWA needs to know about the Safari hand-off. */
+  .safari-hint { display: none; }
+  body.standalone .safari-hint { display: block; }
+  .centered-hint { text-align: center; }
 
   .list-empty {
     font-size: 15px;
@@ -783,6 +814,7 @@
   body[data-focus="true"] .screen .card { display: none; }
   body[data-focus="true"] .screen .card.focused { display: block; }
   body[data-focus="true"] .today-intro,
+  body[data-focus="true"] .sleep-banner,
   body[data-focus="true"] .home-foot,
   body[data-focus="true"] .screen-hint,
   body[data-focus="true"] .version { display: none; }
@@ -839,8 +871,9 @@
     margin: 0 0 16px;
     padding: 15px 17px 13px;
     border-radius: 14px;
-    background: linear-gradient(135deg, var(--sun-soft), var(--card));
-    border: 1px solid rgba(196,135,68,0.24);
+    background: var(--sun-soft);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--sun);
     color: var(--ink);
     transition: opacity 0.5s ease;
     cursor: pointer;
@@ -989,9 +1022,7 @@
     <div id="morningList"></div>
     <div id="morningDone"></div>
     <div class="intention-wrap">
-      <div class="row" style="cursor:default">
-        <div class="label" style="flex:0 0 auto;color:var(--ink-soft);font-size:14px">One intention</div>
-      </div>
+      <label class="input-label" for="intentionInput">One intention</label>
       <input type="text" id="intentionInput" placeholder="A word, a feeling, a direction…"
              autocorrect="off" autocapitalize="sentences" spellcheck="true" enterkeyhint="done" />
     </div>
@@ -1016,7 +1047,7 @@
   <footer class="controls home-foot">
     <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
   </footer>
-  <p class="hint screen-hint" style="text-align:center">Tip: swipe a row right to tick it, left to untick.</p>
+  <p class="hint screen-hint centered-hint">Tip: swipe a row right to tick it, left to untick.</p>
   </div><!-- /screen-home -->
 
   <!-- ============ WIND DOWN ============ -->
@@ -1102,12 +1133,12 @@
     <p class="hint">Soft dots are anchors that happened. Empty days are just empty — no catching up needed.</p>
   </section>
 
-  <p class="hint screen-hint" style="text-align:center">Evenings are for lowering the lights. Nothing here needs finishing.</p>
+  <p class="hint screen-hint centered-hint">Evenings are for lowering the lights. Nothing here needs finishing.</p>
   </div><!-- /screen-winddown -->
 
   <!-- ============ LINKS ============ -->
   <div class="screen" id="screen-links" hidden>
-    <p class="hint" style="margin:-2px 4px 12px">From the iPhone home-screen app, links open in Safari so saved passwords work.</p>
+    <p class="hint safari-hint" style="margin:-2px 4px 12px">Links open in Safari here, so saved passwords work.</p>
     <section class="card" id="doorCard">
       <h2><span class="dot"></span>The Door</h2>
       <div class="link-row">
@@ -1144,7 +1175,7 @@
                   aria-label="Copy the fnh search link" title="Copy link">⧉</button>
         </span>
       </div>
-      <p class="hint">Tap ⧉ to copy any link. FNH Hub and Comm Analytics live on the MacBook Pro — if it's asleep, these won't open. The Door itself runs on the mini.</p>
+      <p class="hint">Tap ⧉ to copy a link. The local links need those Macs awake; The Door runs on the mini.</p>
     </section>
 
     <section class="card" id="myLinksCard">
@@ -1158,7 +1189,7 @@
                autocorrect="off" autocapitalize="off" spellcheck="false" />
         <button type="button" class="btn small" id="newLinkSave">Add</button>
       </div>
-      <p class="hint">Any site you use often — tap to open, ⧉ to copy.</p>
+      <p class="hint">Any site you use often — tap to open, ⧉ to copy, ≡ to reorder.</p>
     </section>
 
     <section class="card" id="syncCard">
@@ -1179,8 +1210,8 @@
       <div class="hint" id="syncStatus">Not set up yet.</div>
     </section>
 
-    <section class="card" id="moreCard">
-      <h2><span class="dot"></span>More</h2>
+    <section class="card" id="toolkitCard">
+      <h2><span class="dot"></span>Tool kit</h2>
       <div class="more-row">
         <a class="toolkit-link" id="toolkitLink" href="https://thecalmafter.vercel.app/"
            target="_blank" rel="noopener" title="Tool kit"
@@ -1204,7 +1235,7 @@
     </section>
   </div><!-- /screen-links -->
 
-  <!-- ============ NOT FEELING IT (reached by ☰, no bottom tab) ============ -->
+  <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
     <section class="card" id="gentleIntro">
       <h2><span class="dot"></span>Not feeling it</h2>
@@ -1223,7 +1254,7 @@
                autocorrect="off" autocapitalize="sentences" />
         <button type="button" class="btn small" id="gentleSave">Add</button>
       </div>
-      <p class="hint">Tap a name to see a much smaller version. No need to do the whole thing.</p>
+      <p class="hint">Tap a name for a much smaller version; ≡ to reorder. No need to do the whole thing.</p>
     </section>
 
     <section class="card" id="gentleStats">
@@ -1233,7 +1264,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v10</div>
+  <div class="version" id="versionTag">v20</div>
 </div>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1284,7 +1315,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v19";
+const VERSION = "v20";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1506,8 +1537,23 @@ function currentPhase(d = new Date()) {
   if (h >= 17 && h < 21) return "evening";
   return "night";
 }
+function syncThemeColor() {
+  // Keep the iPhone status bar the same colour as the page, in every phase.
+  // Read the custom property, not backgroundColor: the body colour transitions
+  // slowly, but --bg changes immediately, so the status bar never lags.
+  if (!window.getComputedStyle) return;
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (!meta) return;
+  try {
+    const bg = window.getComputedStyle(document.body).getPropertyValue("--bg").trim();
+    if (bg) meta.setAttribute("content", bg);
+  } catch (e) {}
+}
+
 function applyPhase() {
   document.body.dataset.phase = currentPhase();
+  document.body.classList.toggle("standalone", standaloneIOS());
+  syncThemeColor();
 }
 
 /* ---------- Sunday mode: protected rest day ---------- */
@@ -2036,6 +2082,49 @@ function attachDrag(container, which) {
   });
 }
 
+/* Reorder the two smaller lists (My links / On the shelf) by their handle.
+   The drag id lives on the container so re-rendering rows never stacks
+   duplicate pointermove listeners. */
+function attachSimpleDrag(container, listKey, rowSelector, renderFn) {
+  if (!container) return;
+  const idKey = "_dragId";
+  container.querySelectorAll(rowSelector).forEach((row) => {
+    const handle = row.querySelector(".drag-btn");
+    if (!handle) return;
+    const start = (e) => {
+      e.preventDefault();
+      container[idKey] = row.dataset.id;
+      row.style.opacity = "0.55";
+      row.setPointerCapture?.(e.pointerId);
+    };
+    const end = () => {
+      container[idKey] = null;
+      row.style.opacity = "";
+    };
+    handle.addEventListener("pointerdown", start);
+    handle.addEventListener("pointerup", end);
+    handle.addEventListener("pointercancel", end);
+  });
+  if (container.dataset.dragWired) return;
+  container.dataset.dragWired = "1";
+  container.addEventListener("pointermove", (e) => {
+    const dragId = container[idKey];
+    if (!dragId) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const target = el && el.closest ? el.closest(rowSelector) : null;
+    if (!target || target.dataset.id === dragId) return;
+    const list = state.settings[listKey] || [];
+    const from = list.findIndex((x) => x.id === dragId);
+    const to = list.findIndex((x) => x.id === target.dataset.id);
+    if (from < 0 || to < 0) return;
+    const [moved] = list.splice(from, 1);
+    list.splice(to, 0, moved);
+    container[idKey] = null;
+    save();
+    renderFn();
+  });
+}
+
 function renderIntention() {
   const rec = dayRecord();
   const input = $("#intentionInput");
@@ -2464,6 +2553,13 @@ function renderMyLinks() {
   links.forEach((link) => {
     const row = document.createElement("div");
     row.className = "my-link-row";
+    row.dataset.id = link.id;
+    const drag = document.createElement("button");
+    drag.type = "button";
+    drag.className = "drag-btn";
+    drag.setAttribute("aria-label", "Drag to reorder " + link.name);
+    drag.title = "Drag to reorder";
+    drag.textContent = "≡";
     const a = document.createElement("a");
     a.className = "link-chip";
     a.href = link.url;
@@ -2484,9 +2580,10 @@ function renderMyLinks() {
     del.title = "Remove";
     del.textContent = "×";
     del.addEventListener("click", () => removeMyLink(link.id));
-    row.append(a, copy, del);
+    row.append(drag, a, copy, del);
     box.append(row);
   });
+  attachSimpleDrag(box, "myLinks", ".my-link-row", renderMyLinks);
 }
 
 function addMyLink() {
@@ -2536,6 +2633,13 @@ function renderGentleList() {
   items.forEach((item) => {
     const row = document.createElement("div");
     row.className = "gentle-item";
+    row.dataset.id = item.id;
+    const drag = document.createElement("button");
+    drag.type = "button";
+    drag.className = "drag-btn";
+    drag.setAttribute("aria-label", "Drag to reorder " + item.text);
+    drag.title = "Drag to reorder";
+    drag.textContent = "≡";
     const mark = document.createElement("span");
     mark.className = "gi-mark";
     mark.setAttribute("aria-hidden", "true");
@@ -2567,9 +2671,10 @@ function renderGentleList() {
     del.textContent = "×";
     del.addEventListener("click", () => removeGentleItem(item.id));
     body.append(name, note, small);
-    row.append(mark, body, del);
+    row.append(drag, mark, body, del);
     box.append(row);
   });
+  attachSimpleDrag(box, "gentleItems", ".gentle-item", renderGentleList);
 }
 
 function addGentleItem() {

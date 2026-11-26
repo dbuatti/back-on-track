@@ -49,6 +49,8 @@ The JS is organised in labelled sections inside one `<script>`:
   it's easy to merge into your anchor planner later.
 - **Rendering** — `renderAll()` and friends rebuild each section from state.
 - **Edit mode** — toggled by *Edit lists*; reveals add / remove / reorder (↑↓ and drag).
+  *My links* and the *On the shelf* items in More are always editable: tap **≡** and
+  drag to reorder, **×** to remove, with a five-second Undo.
 
 ## Screens
 
@@ -69,13 +71,14 @@ The bottom menu keeps each screen light:
   a `?search=fnh` shortcut for everything else; device sync; the ⛈️ Tool kit button
   (`thecalmafter.vercel.app`); and Export/Import. Every link has a small **⧉** button
   to copy its URL to the clipboard (with a fallback for older browsers). A **My links**
-  card holds your own sites — add, remove and copy any URL there. From the iPhone
+  card holds your own sites — add, remove, reorder (**≡**) and copy any URL there. From the iPhone
   home-screen app, external links use iOS's `x-safari-` hand-off so they open in
   real Safari and iCloud Keychain autofill works (notably for Kajabi).
 - **More** — the fifth bottom tab. A shelf for good things you're not in the mood
   for: Sangha meditation (*not feeling it*), Kriya meditation (*never feeling it*),
   sun movements and Nick Moss. Tap a name for a much smaller version ("one breath,
-  eyes closed"). Editable like the other lists. Sangha has been removed from the
+  eyes closed"). Add, remove and drag **≡** to reorder, just like the other lists.
+  Sangha has been removed from the
   Home checklist. The page also holds a quiet stats panel: average sleep, days with
   one gentle step in the last 30, most-often done item and a soft dot grid —
   patterns, not scores. **← Back to today** or Escape returns.
@@ -84,6 +87,14 @@ The bottom menu keeps each screen light:
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the
   registry's `url` field instead. Apps with no `url` in the registry are reached via
   The Door's search. Apps hosted on the MacBook Pro need it awake.
+
+## Design notes
+
+The interface is intentionally quiet: warm clay/oat colours, sage for "done", and a
+slow shift to ochre in the morning or dusk lavender at night. The iPhone status bar
+follows that phase colour. The date sits under the title, the bottom menu is centred
+on wide screens, and controls are at least 44px tall so they are easy to hit one-handed.
+Nothing pulses or slides for anyone who has asked iOS to reduce motion.
 
 ## Sync across devices
 
