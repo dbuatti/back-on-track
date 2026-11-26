@@ -105,9 +105,9 @@
     background: transparent;
     color: var(--ink-soft);
     font: inherit;
-    font-size: 10.5px;
+    font-size: 11px;
     line-height: 1.1;
-    min-width: 56px;
+    min-width: 58px;
     min-height: 52px;
     display: flex;
     flex-direction: column;
@@ -120,6 +120,12 @@
   .nav-btn .nav-icon { font-size: 19px; line-height: 1; }
   .nav-btn.active { color: var(--accent-deep); background: var(--accent-soft); font-weight: 600; }
   .nav-btn:active { background: var(--accent-soft); }
+  @media (hover: hover) {
+    .nav-btn:hover,
+    .link-chip:hover, .copy-btn:hover, .remove-link:hover,
+    .icon-btn:hover, .toolkit-link:hover, .sb-edit:hover { background: var(--accent-soft); }
+    .btn:not(.primary):hover { border-color: var(--accent); }
+  }
 
   /* ---------- Home: a lighter "today" strip ---------- */
   .today-intro {
@@ -171,6 +177,19 @@
   }
   .sleep-banner[hidden] { display: none; }
   .sleep-banner .sb-moon { font-size: 18px; line-height: 1; }
+  .sleep-banner .sb-edit {
+    appearance: none;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink-soft);
+    border-radius: 10px;
+    min-width: 44px;
+    min-height: 36px;
+    margin-left: auto;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  .sleep-banner .sb-edit:active { background: var(--accent-soft); color: var(--accent-deep); }
   .time-edit {
     display: flex;
     align-items: center;
@@ -774,7 +793,6 @@
     text-align: center;
     font-size: 12px;
     color: var(--ink-soft);
-    opacity: 0.7;
     margin-top: 14px;
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.02em;
@@ -1263,7 +1281,6 @@
     <section class="card" id="gentleIntro">
       <h2><span class="dot"></span>Not feeling it</h2>
       <p class="hint">Good things you're not in the mood for right now. They can wait here, quietly — nothing to do, nothing to fail.</p>
-      <button type="button" class="btn small" id="gentleBack">← Back to today</button>
     </section>
 
     <section class="card" id="gentlePractices">
@@ -1287,7 +1304,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v21</div>
+  <div class="version" id="versionTag">v22</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1338,7 +1355,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v21";
+const VERSION = "v22";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2315,8 +2332,26 @@ function renderSleepBanner() {
   moon.textContent = "🌙";
   const text = document.createElement("span");
   text.textContent = bits.join(" · ");
-  el.append(moon, text);
+  const edit = document.createElement("button");
+  edit.type = "button";
+  edit.className = "sb-edit";
+  edit.textContent = "✎";
+  edit.setAttribute("aria-label", wake ? "Edit wake time" : "Edit bedtime");
+  edit.title = edit.getAttribute("aria-label");
+  edit.addEventListener("click", editSleepFromBanner);
+  el.append(moon, text, edit);
   el.hidden = false;
+}
+
+/* The banner is a read-out, but a small pencil makes corrections obvious.
+   Wake lives on Home; bedtime lives on Wind down, so go where it can be edited. */
+function editSleepFromBanner() {
+  if (dayRecord().wakeTime) {
+    openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime");
+  } else {
+    showTab("winddown");
+    openTimeEditor("#bedEdit", "#bedInput", "bedTime");
+  }
 }
 
 function renderWakeLine() {
@@ -3003,8 +3038,7 @@ function wire() {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addMyLink(); });
   });
 
-  // More — a normal bottom tab now
-  $("#gentleBack").addEventListener("click", () => showTab("home"));
+  // More — a normal bottom tab; Home and Escape are already ways back
   $("#gentleAddBtn").addEventListener("click", () => {
     const form = $("#gentleForm");
     form.hidden = !form.hidden;

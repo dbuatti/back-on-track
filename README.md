@@ -56,7 +56,8 @@ The JS is organised in labelled sections inside one `<script>`:
 
 The bottom menu keeps each screen light:
 
-- **Home** — a "last night" banner (bedtime, wake and duration), greeting, a little
+- **Home** — a "last night" banner (bedtime, wake and duration, with a small ✎ to
+  correct the time), greeting, a little
   italic note for the day, a soft progress strip, **Start focus mode**, **Log wake**,
   morning checklist, daily anchors.
 - **Wind down** — "instead of gaming", bedtime/wake + mood, a sleep-trend strip
@@ -81,7 +82,7 @@ The bottom menu keeps each screen light:
   Sangha has been removed from the
   Home checklist. The page also holds a quiet stats panel: average sleep, days with
   one gentle step in the last 30, most-often done item and a soft dot grid —
-  patterns, not scores. **← Back to today** or Escape returns.
+  patterns, not scores. The Home tab or Escape takes you back; no extra button needed.
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the
@@ -97,7 +98,8 @@ on wide screens, and controls are at least 44px tall so they are easy to hit one
 Nothing pulses or slides for anyone who has asked iOS to reduce motion. Text meets
 WCAG AA contrast in every time-of-day phase; checklist items are real buttons whose
 spoken name matches the visible label. A Lighthouse run scores 100 for accessibility
-and best practices.
+and best practices. Desktop gets a gentle hover tint; touch devices keep only the
+instant press feedback.
 
 ## Sync across devices
 
