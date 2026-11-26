@@ -251,6 +251,8 @@
   }
   .program-kind::before { content: "· "; }
   .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.45; }
+  .program-reflect { margin-top: var(--s2); font-size: var(--t-small); }
+  .program-reflect[hidden] { display: none; }
   .program-nick { display: inline-flex; margin-bottom: var(--s2); }
   .program-nick[hidden] { display: none; }
   .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
@@ -1366,6 +1368,9 @@
       <button type="button" class="btn small" id="programDone">That's enough</button>
     </div>
     <p class="program-close" id="programClose" hidden></p>
+    <textarea class="program-reflect" id="programReflect" rows="2"
+              aria-label="One line about what you noticed, just for you"
+              placeholder="Just for you — nothing to score…" hidden></textarea>
   </section>
 
   <!-- ============ MORNING ============ -->
@@ -1418,6 +1423,9 @@
       <button type="button" class="btn small" id="programEveDone">That's enough</button>
     </div>
     <p class="program-close" id="programEveClose" hidden></p>
+    <textarea class="program-reflect" id="programEveReflect" rows="2"
+              aria-label="One line about what you noticed, just for you"
+              placeholder="Just for you — nothing to score…" hidden></textarea>
   </section>
 
   <!-- ============ INSTEAD OF GAMING ============ -->
@@ -1685,7 +1693,7 @@
 
   </div>
 
-  <div class="version" id="versionTag">v36</div>
+  <div class="version" id="versionTag">v37</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1739,7 +1747,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v36";
+const VERSION = "v37";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -1911,6 +1919,7 @@ function freshState() {
         startedAt: "",
         lastDoneAt: "",
         done: {},            // step id -> date, kept but never scored
+        reflection: "",      // one optional closing line, never shown as a score
       },
       updatedAt: 0,        // last change, used to decide which device wins a sync
     },
@@ -2193,13 +2202,14 @@ function migrate(s) {
   // clears the step, the dates or the gentle per-step marks.
   const p = s.settings.program30;
   if (!p || typeof p !== "object" || Array.isArray(p)) {
-    s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {} };
+    s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {}, reflection: "" };
   } else {
     p.loaded = !!p.loaded;
     p.step = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
     if (typeof p.startedAt !== "string") p.startedAt = "";
     if (typeof p.lastDoneAt !== "string") p.lastDoneAt = "";
     if (!p.done || typeof p.done !== "object" || Array.isArray(p.done)) p.done = {};
+    if (typeof p.reflection !== "string") p.reflection = "";
   }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
@@ -4211,7 +4221,15 @@ function fillProgramCard(prefix, p, step, at) {
   const close = q("Close");
   if (close) {
     close.hidden = !last;
-    if (last) close.textContent = "That's the thirty. Nothing to score — just notice what felt okay, if you want.";
+    if (last) close.textContent = "That's the thirty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
+  }
+  const reflect = q("Reflect");
+  if (reflect) {
+    reflect.hidden = !last;
+    // Never move the caret out from under someone who is writing.
+    if (last && document.activeElement !== reflect && reflect.value !== (p.reflection || "")) {
+      reflect.value = p.reflection || "";
+    }
   }
 }
 function renderProgram() {
@@ -4421,6 +4439,8 @@ function mergeState(local, incoming) {
       startedAt: pb.startedAt || pa.startedAt || "",
       lastDoneAt: pb.lastDoneAt || pa.lastDoneAt || "",
       done: { ...(pa.done || {}), ...(pb.done || {}) },
+      // A line someone wrote is never wiped by a newer device arriving empty.
+      reflection: pb.reflection || pa.reflection || "",
     };
   }
   ["morning", "anchors", "instead"].forEach((key) => {
@@ -4588,6 +4608,17 @@ function wire() {
   });
   $("#programDone").addEventListener("click", completeProgramStep);
   $("#programEveDone").addEventListener("click", completeProgramStep);
+  // One optional closing line, mirrored across both cards without a re-render.
+  ["#programReflect", "#programEveReflect"].forEach((sel) => {
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener("input", () => {
+      state.settings.program30.reflection = el.value;
+      const other = $(sel === "#programReflect" ? "#programEveReflect" : "#programReflect");
+      if (other && other !== el && document.activeElement !== other) other.value = el.value;
+      save();
+    });
+  });
   $("#ideaBtn").addEventListener("click", chooseSmallStart);
   $("#shelfOptionAnother").addEventListener("click", chooseSmallStart);
   $("#shelfOptionLater").addEventListener("click", () => {

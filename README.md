@@ -29,6 +29,12 @@ Everyday, Quiet repeat*) — no counts or grades. The final step closes with a
 gentle "nothing to score" line rather than a completion badge. Both cards share
 one renderer and one reversible mark, so they can never disagree.
 
+**v37** adds the optional closing line from that same "not a report card" idea:
+one small text box appears only on the final step, asking what you noticed, with
+no score or follow-up. It lives at `state.settings.program30.reflection`, stays
+through load-out, and survives import/sync — a newer device arriving with an empty
+line cannot wipe one you wrote.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
@@ -76,7 +82,8 @@ The JS is organised in labelled sections inside one `<script>`:
   the day without being deleted from the shelf. `state.settings.walkStartMinutes`
   only feeds the optional walking sketch — it is not a target or a log.
   `state.settings.program30` holds the optional sequence (`loaded`, `step`,
-  `startedAt`, `lastDoneAt`, `done`); its per-step marks are kept but never scored.
+  `startedAt`, `lastDoneAt`, `done`, `reflection`); its per-step marks are kept but
+  never scored, and the closing line is never shown as a grade.
   Export writes the same shape and Import merges it, so it's easy to fold into an
   anchor planner later.
 - **Rendering** — `renderAll()` and friends rebuild each section from state.
