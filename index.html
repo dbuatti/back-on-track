@@ -213,6 +213,7 @@
     letter-spacing: -0.025em;
     margin: var(--s4) 0 var(--s2);
     color: var(--ink);
+    text-wrap: balance;
   }
   .today-intro .rot-intention {
     margin: 0 0 var(--s2);
@@ -761,9 +762,10 @@
   }
   .card:first-child { border-top: 0; }
   .card > h2, .card > .card-heading h2 {
+    font-family: Georgia, "Times New Roman", serif;
     font-size: var(--t-card);
-    font-weight: 600;
-    letter-spacing: 0;
+    font-weight: 500;
+    letter-spacing: -0.01em;
     text-transform: none;
     color: var(--ink);
     margin: 0 0 var(--s3);
@@ -792,6 +794,9 @@
   }
   .row + .row { border-top: 1px solid var(--line); }
   .row:active { background: var(--accent-soft); }
+  @media (hover: hover) {
+    .row:hover { background: color-mix(in srgb, var(--accent-soft) 60%, transparent); }
+  }
   .check-toggle {
     appearance: none;
     border: 0;
@@ -1011,6 +1016,9 @@
     transition: background 0.16s ease;
   }
   .btn:active { background: var(--accent-soft); }
+  @media (hover: hover) {
+    .btn:hover { border-color: var(--accent); }
+  }
   .btn.primary {
     background: var(--accent-deep);
     border-color: var(--accent-deep);
@@ -1924,7 +1932,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v42";
+const VERSION = "v43";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
