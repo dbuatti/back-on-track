@@ -97,9 +97,11 @@ follows that phase colour. The date sits under the title, the bottom menu is cen
 on wide screens, and controls are at least 44px tall so they are easy to hit one-handed.
 Nothing pulses or slides for anyone who has asked iOS to reduce motion. Text meets
 WCAG AA contrast in every time-of-day phase; checklist items are real buttons whose
-spoken name matches the visible label. A Lighthouse run scores 100 for accessibility
-and best practices. Desktop gets a gentle hover tint; touch devices keep only the
-instant press feedback.
+spoken name matches the visible label. Mood buttons and *Edit lists* expose their
+on/off state to screen readers, sync and focus status announce quietly, keyboard
+users get a clear focus ring, and small trend labels stay at 11px. A Lighthouse run
+scores 100 for accessibility and best practices. Desktop gets a gentle hover tint;
+touch devices keep only the instant press feedback.
 
 ## Sync across devices
 

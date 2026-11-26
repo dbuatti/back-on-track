@@ -120,6 +120,12 @@
   .nav-btn .nav-icon { font-size: 19px; line-height: 1; }
   .nav-btn.active { color: var(--accent-deep); background: var(--accent-soft); font-weight: 600; }
   .nav-btn:active { background: var(--accent-soft); }
+  .nav-btn:focus-visible, .btn:focus-visible, .icon-btn:focus-visible,
+  .check-toggle:focus-visible, .mood:focus-visible, .link-chip:focus-visible,
+  input:focus-visible, textarea:focus-visible, select:focus-visible {
+    outline: 2px solid var(--accent-deep);
+    outline-offset: 2px;
+  }
   @media (hover: hover) {
     .nav-btn:hover,
     .link-chip:hover, .copy-btn:hover, .remove-link:hover,
@@ -666,6 +672,8 @@
   .bed-times .btn { flex: 1; }
 
   /* mood */
+  .mood-wrap { margin-top: 16px; }
+  .mood-label { font-size: 13px; color: var(--ink-soft); margin-bottom: 4px; }
   .mood-row {
     display: flex;
     gap: 12px;
@@ -749,11 +757,11 @@
     opacity: 0.75;
   }
   .trend-bar.missing { background: var(--line); opacity: 0.6; }
-  .trend-label { font-size: 10px; color: var(--ink-soft); }
+  .trend-label { font-size: 11px; color: var(--ink-soft); }
   .trend-keys {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--ink-soft);
     margin-top: 6px;
   }
@@ -1028,7 +1036,7 @@
 
   <div class="focus-bar" id="focusBar">
     <button type="button" id="focusPrev" aria-label="Previous section">‹</button>
-    <span class="focus-label" id="focusLabel"></span>
+    <span class="focus-label" id="focusLabel" aria-live="polite"></span>
     <button type="button" id="focusNext" aria-label="Next section">›</button>
     <button type="button" id="focusExit">Done</button>
   </div>
@@ -1086,7 +1094,7 @@
   </section>
 
   <footer class="controls home-foot">
-    <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
+    <button class="btn small edit-toggle" id="editToggle" aria-pressed="false">Edit lists</button>
   </footer>
   <p class="hint screen-hint centered-hint">Tip: swipe a row right to tick it, left to untick.</p>
   </div><!-- /screen-home -->
@@ -1139,12 +1147,12 @@
     </div>
     <div class="hint" id="bedSummary"></div>
 
-    <div style="margin-top:16px">
-      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:4px">How was today?</div>
+    <div class="mood-wrap">
+      <div class="mood-label">How was today?</div>
       <div class="mood-row" id="moodRow">
-        <button class="mood" data-mood="low">😔</button>
-        <button class="mood" data-mood="okay">😐</button>
-        <button class="mood" data-mood="good">🙂</button>
+        <button type="button" class="mood" data-mood="low" aria-label="Low" aria-pressed="false">😔</button>
+        <button type="button" class="mood" data-mood="okay" aria-label="Okay" aria-pressed="false">😐</button>
+        <button type="button" class="mood" data-mood="good" aria-label="Good" aria-pressed="false">🙂</button>
       </div>
       <textarea id="eveningNote" placeholder="A line about today (optional)…"
                 autocorrect="off" autocapitalize="sentences"></textarea>
@@ -1248,7 +1256,7 @@
         <button type="button" class="btn small" id="syncSetup">Set up</button>
         <button type="button" class="btn small" id="syncNow">Sync now</button>
       </div>
-      <div class="hint" id="syncStatus">Not set up yet.</div>
+      <div class="hint" id="syncStatus" aria-live="polite">Not set up yet.</div>
     </section>
 
     <section class="card" id="toolkitCard">
@@ -1304,7 +1312,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v22</div>
+  <div class="version" id="versionTag">v23</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1355,7 +1363,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v22";
+const VERSION = "v23";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -2209,7 +2217,9 @@ function nowHHMM() {
 function renderMood() {
   const rec = dayRecord();
   $$("#moodRow .mood").forEach((b) => {
-    b.classList.toggle("sel", b.dataset.mood === rec.mood);
+    const selected = b.dataset.mood === rec.mood;
+    b.classList.toggle("sel", selected);
+    b.setAttribute("aria-pressed", selected ? "true" : "false");
   });
   const note = $("#eveningNote");
   if (document.activeElement !== note) note.value = rec.note || "";
@@ -2470,6 +2480,7 @@ function setEditing(on) {
   document.body.classList.toggle("editing", on);
   $("#editToggle").classList.toggle("on", on);
   $("#editToggle").textContent = on ? "Done editing" : "Edit lists";
+  $("#editToggle").setAttribute("aria-pressed", on ? "true" : "false");
 }
 
 /* =====================================================================
