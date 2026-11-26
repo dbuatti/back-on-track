@@ -24,24 +24,24 @@
   :root {
     color-scheme: light;
     /* One warm surface, one ink hierarchy, one action colour. */
-    --bg: #f7f1e6;
-    --card: #ffffff;
+    --bg: #f6ede0;
+    --card: #fffaf2;
     --field: #fffef9;
-    --ink: #1f1a16;
-    --ink-soft: #5a4f45;
-    --line: #d8cbb8;
-    --control-line: #d8cbb8;
-    --accent: #2f6f4f;
-    --accent-deep: #1f4f35;
-    --accent-soft: #e3efe7;
-    --sun: #a86a2a;
-    --sun-soft: #f1e0c6;
-    --evening: #6a5a9a;
-    --evening-soft: #e8e1f0;
+    --ink: #3a2f28;
+    --ink-soft: #7a6a5a;
+    --line: #e8d9c8;
+    --control-line: #e8d9c8;
+    --accent: #c96a4a;
+    --accent-deep: #a85438;
+    --accent-soft: #f2e0d8;
+    --sun: #e0a85a;
+    --sun-soft: #f5e6c8;
+    --evening: #9a7fb0;
+    --evening-soft: #ece4f2;
     --on-accent: #ffffff;
     --glow: transparent;
-    --shadow: 0 1px 2px rgba(43,36,31,0.05), 0 16px 40px rgba(43,36,31,0.08);
-    --shadow-nav: 0 -2px 18px rgba(43,36,31,0.10);
+    --shadow: 0 2px 4px rgba(58,47,40,0.06), 0 18px 44px rgba(58,47,40,0.09);
+    --shadow-nav: 0 -2px 20px rgba(58,47,40,0.12);
     --snack-bg: #2f2722;
     --snack-ink: #fbf6ee;
     --snack-accent: #ffd9a8;
@@ -50,9 +50,9 @@
     /* 4 / 8 / 12 / 16 / 24 / 32 only */
     --s1: 4px; --s2: 8px; --s3: 12px;
     --s4: 18px; --s5: 26px; --s6: 36px;
-    --radius-sm: 16px;
-    --radius: 22px;
-    --radius-lg: 28px;
+    --radius-sm: 18px;
+    --radius: 24px;
+    --radius-lg: 30px;
     --tap: 46px;
     --content: 580px;
     --t-cap: 12px;
@@ -115,6 +115,7 @@
     margin: 0;
     padding: 0;
     background-color: var(--bg);
+    background-image: radial-gradient(ellipse at top, color-mix(in srgb, var(--accent-soft) 40%, transparent), transparent 60%);
     color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 17px;
@@ -1943,7 +1944,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v61";
+const VERSION = "v62";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
