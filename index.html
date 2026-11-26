@@ -404,6 +404,16 @@
     border-color: var(--sun);
   }
 
+  .version {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+    margin-top: 14px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+  }
+
   /* add-item row in edit mode */
   .add-row {
     display: none;
@@ -598,6 +608,7 @@
     <button class="btn small" id="importBtn">Import</button>
     <input type="file" id="importFile" accept="application/json" hidden />
   </footer>
+  <div class="version" id="versionTag">v3</div>
 </div>
 
 <div id="whisper" role="status" aria-live="polite"></div>
@@ -623,13 +634,17 @@
 
 const STORE_KEY = "bot.v1";
 
+/* App version — shown in the footer so you can tell which build is loaded.
+   Bump this (and CACHE_VERSION in sw.js) on every change. */
+const VERSION = "v5";
+
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
   morning: [
-    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)", url: "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260" },
+    { id: "m_sangha",  text: "Sangha meditation (in bed is fine)" },
     { id: "m_breakfast", text: "Breakfast outside, quiet" },
     { id: "m_sun",     text: "Sun movements + sun salute + om" },
-    { id: "m_nick",    text: "Nick Moss daily meditation" },
+    { id: "m_nick",    text: "Nick Moss daily meditation", url: "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260" },
   ],
   anchors: [
     { id: "a_walk",    text: "Walk" },
@@ -696,13 +711,15 @@ function load() {
   }
 }
 
-/* Gentle, non-destructive migrations. Only fills in the Sangha meditation
-   link if that item exists and has no url yet — never touches your edits. */
+/* Gentle, non-destructive migrations. The guided-meditation link lives on the
+   Nick Moss item; move it there from any older build that put it on Sangha,
+   and add it if missing. Never touches your other edits. */
 function migrate(s) {
+  const NICK_URL = DEFAULT_LISTS.morning.find((it) => it.id === "m_nick").url;
   const sangha = s.settings.lists.morning.find((it) => it.id === "m_sangha");
-  if (sangha && !sangha.url) {
-    sangha.url = DEFAULT_LISTS.morning.find((it) => it.id === "m_sangha").url;
-  }
+  const nick = s.settings.lists.morning.find((it) => it.id === "m_nick");
+  if (sangha && sangha.url) delete sangha.url;   // remove from Sangha if present
+  if (nick && !nick.url) nick.url = NICK_URL;     // ensure it's on Nick
   // new settings fields (time-of-day + rotating intention)
   if (typeof s.settings.intentionIndex !== "number") s.settings.intentionIndex = 0;
   if (typeof s.settings.intentionDay !== "string") s.settings.intentionDay = "";
@@ -1277,6 +1294,7 @@ function wire() {
 }
 
 /* ---------- Boot ---------- */
+$("#versionTag").textContent = VERSION;
 wire();
 renderAll();
 // keep header, time-of-day phase, Sunday mode and the daily intention fresh
