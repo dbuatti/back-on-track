@@ -45,21 +45,27 @@ The JS is organised in labelled sections inside one `<script>`:
   }
   ```
   Lists live in `state.settings.lists.{morning,anchors,instead}`; target bedtime in
-  `state.settings.targetBed`. This shape is what Export writes and Import reads, so
-  it's easy to merge into your anchor planner later.
+  `state.settings.targetBed`. Named shelves live in `state.settings.shelves`, and
+  temporary "borrowings" in `state.settings.loans`, so a shelf item can be used in
+  the day without being deleted from the shelf. Export writes the same shape and
+  Import merges it, so it's easy to fold into an anchor planner later.
 - **Rendering** — `renderAll()` and friends rebuild each section from state.
 - **Edit mode** — toggled by *Edit lists*; reveals add / remove / reorder (↑↓ and drag).
-  *My links* and the *On the shelf* items in More are always editable: tap **≡** and
-  drag to reorder, **×** to remove, with a five-second Undo.
+  In edit mode a Home row also gets **↧ Shelf**, which moves it to a named shelf
+  (with Undo) instead of deleting it. *My links* is always editable. Shelf editing
+  is its own deliberate mode (**Edit shelves**); reorder, rename, add or remove with
+  a five-second Undo, so a stray ✕ never quietly clears a shelf.
 
 ## Screens
 
 The bottom menu keeps each screen light:
 
-- **Home** — a "last night" banner (bedtime, wake and duration, with a small ✎ to
-  correct the time), greeting with a quiet today count, a little
-  italic note for the day, a soft progress strip, **Start focus mode**, **Log wake**,
-  morning checklist, daily anchors.
+- **Home** — the default until 7pm; from 7pm through the night the app opens on
+  Wind down instead. A "last night" banner (bedtime, wake and duration, with a
+  small ✎ to correct the time), greeting with a quiet today count, a little
+  italic note for the day, one optional small idea from a shelf, a soft progress
+  strip, **Start focus mode**, **Log wake**, morning checklist, daily anchors.
+  Borrowed shelf items appear in the relevant list with a quiet "from …" tag.
 - **Wind down** — "instead of gaming", bedtime/wake + mood (with gentle word
   captions), a sleep-trend strip (21 clearly-labelled nights with an average and
   usual wake time), a short note on waking, and the soft-dot week. All log buttons
@@ -76,14 +82,17 @@ The bottom menu keeps each screen light:
   card holds your own sites — add, remove, reorder (**≡**) and copy any URL there. From the iPhone
   home-screen app, external links use iOS's `x-safari-` hand-off so they open in
   real Safari and iCloud Keychain autofill works (notably for Kajabi).
-- **More** — the fifth bottom tab. A shelf for good things you're not in the mood
-  for: Sangha meditation (*not feeling it*), Kriya meditation (*never feeling it*),
-  sun movements and Nick Moss. Tap a name for a much smaller version ("one breath,
-  eyes closed"). Add, remove and drag **≡** to reorder, just like the other lists.
-  Sangha has been removed from the
-  Home checklist. The page also holds a quiet stats panel: average sleep, days with
-  one gentle step in the last 30, most-often done item and a soft dot grid —
-  patterns, not scores. The Home tab or Escape takes you back; no extra button needed.
+- **More** — the fifth bottom tab. Named shelves, not one dumping drawer:
+  **Not feeling it** (Sangha, Kriya, sun movements, Nick Moss and the functional
+  neuro check-in) and **Keep close** for good things you don't want to withdraw,
+  just aren't pulling into the day right now. Rename shelves, add another, or move
+  a Home item here with **↧ Shelf** in edit mode. Tap an item for a much smaller
+  version, then **Borrow** it into *Daily anchors* or *Morning* like taking a book
+  out of a library — it stays on its shelf and can be returned. **Back on morning**
+  / **Back on anchors** permanently reinstates things that came from Home. A quiet
+  stats panel sits below: average sleep, days with one gentle step in the last 30,
+  most-often done item and a soft dot grid — patterns, not scores. Home or Escape
+  takes you back.
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the

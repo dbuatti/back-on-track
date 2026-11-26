@@ -182,6 +182,107 @@
   .progress-actions .btn { flex: 1 1 140px; }
   .today-intro .hint { margin-top: 8px; }
 
+  /* A tiny, optional Shelf option — an invitation, never a task. */
+  .shelf-option {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--card);
+    border: 1px dashed var(--line);
+  }
+  .so-head {
+    font-size: 12px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .so-body {
+    font-family: Georgia, "Times New Roman", serif;
+    font-style: italic;
+    font-size: 16px;
+    line-height: 1.4;
+    margin: 6px 0 10px;
+  }
+  .so-body small {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-style: normal;
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+  .so-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .so-actions .btn { flex: 1 1 120px; }
+
+  /* ---------- Named shelves + borrowed items ----------
+     A shelf is a library, not a to-do list. Items can be borrowed into the
+     day without leaving their shelf, like taking a book out to read. */
+  .shelf-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .shelf-chip {
+    min-height: 44px;
+    padding: 8px 13px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .shelf-chip[aria-pressed="true"] {
+    background: var(--sun-soft);
+    border-color: var(--sun);
+    color: var(--accent-deep);
+  }
+  .shelf-block { margin-bottom: 18px; }
+  .shelf-block:last-child { margin-bottom: 0; }
+  .shelf-head { margin: 0 0 8px; }
+  .shelf-head h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .shelf-name-input {
+    flex: 1;
+    min-width: 0;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .shelf-note { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+  .shelf-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .shelf-actions .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 11px; font-size: 13px; }
+  .shelf-item-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .shelf-item-actions .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 11px; font-size: 13px; }
+  .loan-tag {
+    display: inline-block;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: var(--sun-soft);
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-top: 4px;
+  }
+  .shelf-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .shelf-picker[hidden], .gentle-item .drag-btn[hidden], .gentle-item .remove-link[hidden] { display: none; }
+  .shelf-picker .btn { flex: 0 1 auto; min-height: 44px; padding: 7px 10px; font-size: 13px; }
+  .shelf-empty { font-size: 13px; color: var(--ink-soft); font-style: italic; padding: 4px 0; }
+
   /* ---------- Last night banner + editable times ---------- */
   .sleep-banner {
     display: flex;
@@ -306,9 +407,14 @@
     cursor: pointer;
   }
   .remove-link:active { background: var(--accent-soft); }
+  .gentle-item .remove-link {
+    flex: 0 0 auto;
+    padding: 0 12px;
+    font-size: 14px;
+  }
   .link-form { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
   .link-form[hidden] { display: none; }
-  .link-form input {
+  .link-form input, .link-form select {
     flex: 1 1 100%;
     font: inherit;
     font-size: 16px;
@@ -388,7 +494,7 @@
     margin-bottom: 14px;
     border: 1px solid var(--line);
   }
-  .card > h2 {
+  .card > h2, .card > .card-heading h2 {
     font-size: 15px;
     font-weight: 600;
     letter-spacing: 0.02em;
@@ -399,6 +505,14 @@
     align-items: center;
     gap: 8px;
   }
+  .card-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .card-heading h2 { margin: 0; }
   .card > h2 .dot {
     width: 8px; height: 8px; border-radius: 50%;
     background: var(--accent);
@@ -1030,7 +1144,7 @@
     appearance: none;
     border: none;
     background: transparent;
-    color: var(--sun);
+    color: #ffd9a8;   /* readable on the dark snackbar */
     font: inherit;
     font-weight: 600;
     padding: 6px 8px;
@@ -1102,6 +1216,14 @@
       <div class="day-count" id="dayCount" aria-live="polite">0 / 0</div>
     </div>
     <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
+    <div class="shelf-option" id="shelfOption" hidden>
+      <div class="so-head">A small option from the shelf</div>
+      <div class="so-body"><span id="shelfOptionText"></span><small id="shelfOptionName"></small></div>
+      <div class="so-actions">
+        <button type="button" class="btn small" id="shelfOptionLater">Not now</button>
+        <button type="button" class="btn small" id="shelfOptionBorrow">Borrow into my day</button>
+      </div>
+    </div>
     <div class="progress-line" id="progressLine"></div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-actions">
@@ -1350,22 +1472,28 @@
   <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
     <section class="card" id="gentleIntro">
-      <h2><span class="dot"></span>Not feeling it</h2>
-      <p class="hint">Good things you're not in the mood for right now. They can wait here, quietly — nothing to do, nothing to fail.</p>
+      <h2><span class="dot"></span>The shelves</h2>
+      <p class="hint">Good things you know you're good at, but aren't pulling into the day right now. Each shelf has its own name. Nothing here is a task.</p>
     </section>
 
     <section class="card" id="gentlePractices">
-      <h2><span class="dot"></span>On the shelf</h2>
-      <div id="gentleList"></div>
+      <div class="card-heading">
+        <h2><span class="dot"></span>On the shelf</h2>
+        <button type="button" class="btn small edit-toggle" id="shelfEditToggle" aria-pressed="false">Edit shelves</button>
+      </div>
+      <div class="shelf-chips" id="shelfChips" aria-label="Choose a shelf"></div>
+      <div id="shelvesList"></div>
       <button type="button" class="btn small" id="gentleAddBtn">+ Add something</button>
+      <button type="button" class="btn small" id="addShelfBtn" hidden>+ Add a shelf</button>
       <div class="link-form" id="gentleForm" hidden>
+        <select id="gentleShelfSelect" aria-label="Add to shelf"></select>
         <input type="text" id="gentleName" placeholder="What is it?" enterkeyhint="next"
                autocorrect="off" autocapitalize="words" />
-        <input type="text" id="gentleNote" placeholder="e.g. not feeling it" enterkeyhint="done"
+        <input type="text" id="gentleNote" placeholder="e.g. needs a little care" enterkeyhint="done"
                autocorrect="off" autocapitalize="sentences" />
         <button type="button" class="btn small" id="gentleSave">Add</button>
       </div>
-      <p class="hint">Tap a name for a much smaller version; ≡ to reorder. No need to do the whole thing.</p>
+      <p class="hint" id="shelfHint">Tap a shelf name to switch. Tap an item for a much smaller version. Borrow something into your day whenever you want it back — it stays on its shelf.</p>
     </section>
 
     <section class="card" id="gentleStats">
@@ -1375,7 +1503,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v30</div>
+  <div class="version" id="versionTag">v31</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1426,7 +1554,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v30";
+const VERSION = "v31";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1458,6 +1586,24 @@ const GENTLE_PRACTICES = [
   { id: "g_kriya",  text: "Kriya meditation",  note: "Never feeling it", small: "Three slow breaths, hands still." },
   { id: "g_sun",    text: "Sun movements",     note: "Heavy mornings", small: "One stretch toward the light." },
   { id: "g_nick",   text: "Nick Moss meditation", note: "Later is fine", small: "Play it and hear the first minute." },
+  { id: "g_neuro",  text: "Functional neuro check-in", note: "Needs a little love and care", small: "One pathway, gently checked in." },
+];
+
+/* Named shelves. An item on a shelf is never deleted — it can be borrowed
+   into the day (or morning) and still belongs to its shelf. */
+const DEFAULT_SHELVES = [
+  {
+    id: "sh_notfeeling",
+    name: "Not feeling it",
+    note: "Too much, or not today.",
+    items: JSON.parse(JSON.stringify(GENTLE_PRACTICES)),
+  },
+  {
+    id: "sh_keepclose",
+    name: "Keep close",
+    note: "Good for you, just not in the daily rhythm.",
+    items: [],
+  },
 ];
 
 /* A quiet rotating intention — a gentle word or line, never a task.
@@ -1484,6 +1630,8 @@ const WHISPERS = ["there.", "good.", "done.", "nice.", "that counts.", "mm."];
 let state = load() || freshState();
 let syncCfg = loadSync();
 let editing = false;
+let editingShelf = false;      // removal/reordering is a deliberate mode on the Shelves
+let activeShelfId = "";        // which named shelf is shown first
 let showDoneMorning = false;   // when true, done morning items stay expanded
 
 function freshState() {
@@ -1494,7 +1642,10 @@ function freshState() {
       intentionIndex: 0,   // rotates through INTENTIONS; persisted so it's stable per day
       intentionDay: "",    // the YYYY-MM-DD the current intention was chosen for
       myLinks: [],         // your own sites: { id, name, url }
-      gentleItems: JSON.parse(JSON.stringify(GENTLE_PRACTICES)), // on the ☰ page
+      shelves: JSON.parse(JSON.stringify(DEFAULT_SHELVES)), // named library shelves
+      loans: [],           // temporary borrowings into morning/anchors
+      shelfOptionIndex: 0, // one tiny optional Shelf idea for today
+      shelfOptionDay: "",  // the YYYY-MM-DD that idea was chosen for
       updatedAt: 0,        // last change, used to decide which device wins a sync
     },
     days: {},
@@ -1541,17 +1692,56 @@ function migrate(s) {
   if (typeof s.settings.intentionIndex !== "number") s.settings.intentionIndex = 0;
   if (typeof s.settings.intentionDay !== "string") s.settings.intentionDay = "";
   if (!Array.isArray(s.settings.myLinks)) s.settings.myLinks = [];
-  if (!Array.isArray(s.settings.gentleItems)) {
-    s.settings.gentleItems = JSON.parse(JSON.stringify(GENTLE_PRACTICES));
+  // Old builds kept one flat "gentleItems" list. Move it onto a named shelf;
+  // nothing is overwritten and old exports keep working.
+  if (!Array.isArray(s.settings.shelves) || !s.settings.shelves.length) {
+    const old = Array.isArray(s.settings.gentleItems)
+      ? s.settings.gentleItems
+      : JSON.parse(JSON.stringify(GENTLE_PRACTICES));
+    s.settings.shelves = JSON.parse(JSON.stringify(DEFAULT_SHELVES));
+    s.settings.shelves[0].items = old;
   }
+  s.settings.shelves.forEach((shelf) => {
+    if (!shelf || typeof shelf !== "object") return;
+    if (typeof shelf.id !== "string") shelf.id = "sh_" + Math.random().toString(36).slice(2, 8);
+    if (typeof shelf.name !== "string") shelf.name = "Shelf";
+    if (typeof shelf.note !== "string") shelf.note = "";
+    if (!Array.isArray(shelf.items)) shelf.items = [];
+  });
+  // One-time addition of the newer check-in item. A deliberate later removal
+  // is respected because the flag is written after this runs.
+  if (!s.settings.neuroAdded) {
+    const first = s.settings.shelves[0];
+    const neuro = GENTLE_PRACTICES.find((it) => it.id === "g_neuro");
+    if (first && neuro && !first.items.some((it) => it.id === "g_neuro")) {
+      first.items.push(JSON.parse(JSON.stringify(neuro)));
+    }
+    s.settings.neuroAdded = true;
+  }
+  if (!Array.isArray(s.settings.loans)) s.settings.loans = [];
+  if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
+  if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
   // Sangha has moved off the Home checklist and onto the quiet ☰ page.
   if (Array.isArray(s.settings.lists.morning)) {
     s.settings.lists.morning = s.settings.lists.morning.filter((it) => it.id !== "m_sangha");
   }
 }
 
+/* Flat view used only to keep older exports/builds able to read the shelf. */
+function allShelfItems() {
+  const out = [];
+  (state.settings.shelves || []).forEach((shelf) => {
+    (shelf.items || []).forEach((item) => out.push({ shelf, item }));
+  });
+  return out;
+}
+function mirrorLegacyShelf() {
+  state.settings.gentleItems = allShelfItems().map(({ item }) => item);
+}
+
 function save() {
   try {
+    mirrorLegacyShelf();
     state.settings.updatedAt = Date.now();
     localStorage.setItem(STORE_KEY, JSON.stringify(state));
     scheduleSync();   // a real change — let other devices know soon
@@ -1636,6 +1826,7 @@ function renderAll() {
   renderWeek();
   renderMyLinks();
   renderGentle();
+  renderShelfOption();
   renderSync();
   if (focusOn) renderFocus();
 }
@@ -1705,6 +1896,12 @@ function updateNav() {
   });
 }
 
+function initialTab() {
+  // Evenings open on Wind down; mornings and daytime open on Home.
+  // Night hours stay on Wind down too — it's still the same wind-down window.
+  const h = new Date().getHours();
+  return (h >= 19 || h < 5) ? "winddown" : "home";
+}
 function showTab(name, opts = {}) {
   if (!TAB_SCREENS[name]) return;
   activeTab = name;
@@ -1876,9 +2073,11 @@ function renderProgress() {
   const rec = dayRecord();
   const morning = state.settings.lists.morning;
   const anchors = state.settings.lists.anchors;
+  const loans = (state.settings.loans || []).filter((l) => l.list === "morning" || l.list === "anchors");
   const done = [morning, anchors].reduce(
-    (n, list) => n + list.filter((it) => rec.checks[it.id]).length, 0);
-  const total = morning.length + anchors.length;
+    (n, list) => n + list.filter((it) => rec.checks[it.id]).length, 0)
+    + loans.filter((l) => rec.checks[l.id]).length;
+  const total = morning.length + anchors.length + loans.length;
   const line = $("#progressLine");
   if (line) {
     line.textContent = total
@@ -1896,6 +2095,7 @@ function renderList(which) {
   const container = which === "morning" ? $("#morningList") : $("#anchorsList");
   const list = state.settings.lists[which];
   const rec = dayRecord();
+  const loans = (state.settings.loans || []).filter((l) => l.list === which);
   container.innerHTML = "";
 
   list.forEach((item) => {
@@ -1979,20 +2179,41 @@ function renderList(which) {
       row.append(min);
     }
 
-    // edit controls
+    // edit controls — "Shelf" means pause this item on a named shelf, not delete
     const editWrap = document.createElement("div");
     editWrap.className = "row-edit";
     const up = mkIcon("↑", "Move up", () => moveItem(which, item.id, -1));
     const down = mkIcon("↓", "Move down", () => moveItem(which, item.id, 1));
+    const shelfBtn = mkIcon("↧", "Move to a shelf", () => {
+      if (picker) picker.hidden = !picker.hidden;
+    });
+    shelfBtn.setAttribute("aria-label", "Move " + item.text + " to a shelf");
     const del = mkIcon("✕", "Remove", () => removeItem(which, item.id));
-    editWrap.append(up, down, del);
+    editWrap.append(up, down, shelfBtn, del);
     row.append(editWrap);
+
+    const picker = document.createElement("div");
+    picker.className = "shelf-picker";
+    picker.hidden = true;
+    (state.settings.shelves || []).forEach((shelf) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "btn small";
+      b.textContent = shelf.name;
+      b.setAttribute("aria-label", "Move " + item.text + " to " + shelf.name);
+      b.addEventListener("click", (e) => {
+        e.stopPropagation();
+        parkItem(which, item.id, shelf.id);
+      });
+      picker.append(b);
+    });
+    row.append(picker);
 
     // tap to toggle (ignore when editing, and ignore the click after a swipe)
     row.addEventListener("click", (e) => {
       if (editing) return;
       if (row.dataset.swiped) return;
-      if (e.target.closest(".row-edit")) return;
+      if (e.target.closest(".row-edit, .shelf-picker")) return;
       toggleCheck(which, item.id);
     });
     // swipe: right = complete, left = untick. Direction-locked so vertical
@@ -2002,7 +2223,67 @@ function renderList(which) {
     container.append(row);
   });
 
-  if (list.length === 0) {
+  // Borrowed shelf items appear here on loan. They stay on their shelf —
+  // ticking a loan never changes the library copy.
+  loans.forEach((loan) => {
+    const found = allShelfItems().find(({ item }) => item.id === loan.itemId);
+    if (!found) return;
+    const { item, shelf } = found;
+    const done = !!rec.checks[loan.id];
+
+    const row = document.createElement("div");
+    row.className = "row loan-row" + (done ? " done" : "");
+    row.dataset.id = loan.id;
+    row.dataset.loanId = loan.id;
+
+    const toggle = document.createElement("button");
+    toggle.type = "button";
+    toggle.className = "check-toggle";
+    toggle.setAttribute("role", "checkbox");
+    toggle.setAttribute("aria-checked", done ? "true" : "false");
+    toggle.setAttribute("aria-label", item.text + ", from " + shelf.name);
+
+    const check = document.createElement("div");
+    check.className = "check";
+    const label = document.createElement("div");
+    label.className = "label";
+    label.append(document.createTextNode(item.text));
+    const tag = document.createElement("span");
+    tag.className = "loan-tag";
+    tag.textContent = ", from " + shelf.name;
+    label.append(tag);
+    toggle.append(check, label);
+    row.append(toggle);
+
+    if (item.url) {
+      const a = document.createElement("a");
+      a.className = "item-link";
+      a.href = item.url;
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.textContent = "Open";
+      a.addEventListener("click", (e) => e.stopPropagation());
+      row.append(a);
+    }
+
+    const editWrap = document.createElement("div");
+    editWrap.className = "row-edit";
+    const back = mkIcon("↩", "Return to shelf", () => returnLoan(loan.id));
+    back.setAttribute("aria-label", "Return " + item.text + " to " + shelf.name);
+    editWrap.append(back);
+    row.append(editWrap);
+
+    row.addEventListener("click", (e) => {
+      if (editing) return;
+      if (row.dataset.swiped) return;
+      if (e.target.closest(".row-edit")) return;
+      toggleCheck(which, loan.id);
+    });
+    attachSwipe(row, which, loan.id, () => !!rec.checks[loan.id]);
+    container.append(row);
+  });
+
+  if (list.length === 0 && loans.length === 0) {
     const empty = document.createElement("div");
     empty.className = "list-empty";
     empty.textContent = editing
@@ -2024,9 +2305,11 @@ function renderMorningDone() {
   box.innerHTML = "";
 
   const list = state.settings.lists.morning;
+  const loans = (state.settings.loans || []).filter((l) => l.list === "morning");
   const rec = dayRecord();
-  const total = list.length;
-  const doneCount = list.filter((it) => rec.checks[it.id]).length;
+  const total = list.length + loans.length;
+  const doneCount = list.filter((it) => rec.checks[it.id]).length
+    + loans.filter((l) => rec.checks[l.id]).length;
 
   if (total > 0 && doneCount === total && !editing) {
     const msg = document.createElement("div");
@@ -2061,7 +2344,7 @@ function attachSwipe(row, which, id, isDone) {
 
   row.addEventListener("pointerdown", (e) => {
     if (editing || e.pointerType === "mouse") return;   // touch/pen only
-    if (e.target.closest(".item-link, input, .row-edit, .drag")) return;
+    if (e.target.closest(".item-link, input, .row-edit, .drag, .shelf-picker")) return;
     startX = e.clientX; startY = e.clientY; axis = null; swiped = false;
   });
 
@@ -2232,7 +2515,7 @@ function attachSimpleDrag(container, listKey, rowSelector, renderFn) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const target = el && el.closest ? el.closest(rowSelector) : null;
     if (!target || target.dataset.id === dragId) return;
-    const list = state.settings[listKey] || [];
+    const list = typeof listKey === "function" ? (listKey() || []) : (state.settings[listKey] || []);
     const from = list.findIndex((x) => x.id === dragId);
     const to = list.findIndex((x) => x.id === target.dataset.id);
     if (from < 0 || to < 0) return;
@@ -2320,7 +2603,8 @@ function renderWeek() {
     const dots = document.createElement("div");
     dots.className = "dots";
     if (rec && rec.checks) {
-      const anchorIds = state.settings.lists.anchors.map((a) => a.id);
+      const anchorIds = state.settings.lists.anchors.map((a) => a.id)
+        .concat((state.settings.loans || []).filter((l) => l.list === "anchors").map((l) => l.id));
       anchorIds.forEach((id) => {
         if (rec.checks[id]) {
           const dot = document.createElement("span");
@@ -2387,6 +2671,7 @@ function closeOpenEditors() {
     const row = $(sel);
     if (row) row.hidden = true;
   });
+  $$(".shelf-picker").forEach((row) => { row.hidden = true; });
 }
 
 /* A soft read-out at the top of Home: when sleep began last night. */
@@ -2495,6 +2780,7 @@ function renderTrends() {
     col.className = "trend-day";
     const bar = document.createElement("div");
     bar.className = "trend-bar" + (mins === null ? " missing" : "");
+    bar.setAttribute("role", "img");
     if (mins === null) {
       bar.title = "No sleep logged";
       bar.setAttribute("aria-label", `Night ${i + 1}: no sleep logged`);
@@ -2558,6 +2844,23 @@ function setEditing(on) {
   $("#editToggle").classList.toggle("on", on);
   $("#editToggle").textContent = on ? "Done editing" : "Edit lists";
   $("#editToggle").setAttribute("aria-pressed", on ? "true" : "false");
+}
+
+function setEditingShelf(on) {
+  editingShelf = on;
+  const btn = $("#shelfEditToggle");
+  if (btn) {
+    btn.classList.toggle("on", on);
+    btn.textContent = on ? "Done editing" : "Edit shelves";
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  const add = $("#addShelfBtn");
+  if (add) add.hidden = !on;
+  const hint = $("#shelfHint");
+  if (hint) hint.textContent = on
+    ? "Rename a shelf, reorder or remove an item, or add another shelf. Tap Done when you're finished."
+    : "Tap a shelf name to switch. Tap an item for a much smaller version. Borrow something into your day whenever you want it back — it stays on its shelf.";
+  renderShelves();
 }
 
 /* =====================================================================
@@ -2764,76 +3067,318 @@ function removeMyLink(id) {
   });
 }
 
-/* ---------- More: good things, not right now ---------- */
+/* ---------- More: named shelves, not a dumping drawer ---------- */
+function shelves() { return state.settings.shelves || []; }
+function findShelf(id) { return shelves().find((s) => s.id === id) || null; }
+function findShelfItem(itemId) {
+  for (const shelf of shelves()) {
+    const item = (shelf.items || []).find((x) => x.id === itemId);
+    if (item) return { shelf, item };
+  }
+  return null;
+}
+function loanFor(itemId) {
+  return (state.settings.loans || []).find((l) => l.itemId === itemId) || null;
+}
+
 function renderGentle() {
-  renderGentleList();
+  renderShelves();
   renderGentleStats();
 }
 
-function renderGentleList() {
-  const box = $("#gentleList");
-  if (!box) return;
-  box.innerHTML = "";
-  const items = state.settings.gentleItems || [];
-  if (!items.length) {
-    const p = document.createElement("p");
-    p.className = "hint";
-    p.textContent = "Nothing on the shelf right now.";
-    box.append(p);
-    return;
+function renderShelves() {
+  const chips = $("#shelfChips");
+  const box = $("#shelvesList");
+  const select = $("#gentleShelfSelect");
+  if (!chips || !box) return;
+  const all = shelves();
+  if (!all.length) {
+    state.settings.shelves = JSON.parse(JSON.stringify(DEFAULT_SHELVES));
   }
-  items.forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "gentle-item";
-    row.dataset.id = item.id;
-    const drag = document.createElement("button");
-    drag.type = "button";
-    drag.className = "drag-btn";
-    drag.setAttribute("aria-label", "Drag to reorder " + item.text);
-    drag.title = "Drag to reorder";
-    drag.textContent = "≡";
-    const mark = document.createElement("span");
-    mark.className = "gi-mark";
-    mark.setAttribute("aria-hidden", "true");
-    mark.textContent = "🌿";
-    const body = document.createElement("div");
-    body.className = "gi-body";
-    const name = document.createElement("div");
-    name.className = "gi-name";
-    name.textContent = item.text;
-    name.setAttribute("role", "button");
-    name.setAttribute("tabindex", "0");
-    const note = document.createElement("div");
-    note.className = "gi-note";
-    note.textContent = item.note || "";
-    const small = document.createElement("div");
-    small.className = "gi-small";
-    small.textContent = item.small || "The smallest version is enough.";
-    small.hidden = true;
-    const toggleSmall = () => { small.hidden = !small.hidden; };
-    name.addEventListener("click", toggleSmall);
-    name.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSmall(); }
+  if (!activeShelfId || !findShelf(activeShelfId)) activeShelfId = shelves()[0].id;
+
+  chips.innerHTML = "";
+  shelves().forEach((shelf) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "shelf-chip";
+    b.textContent = shelf.name + " · " + (shelf.items || []).length;
+    b.setAttribute("aria-pressed", shelf.id === activeShelfId ? "true" : "false");
+    b.addEventListener("click", () => {
+      activeShelfId = shelf.id;
+      renderShelves();
     });
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "remove-link";
-    del.setAttribute("aria-label", "Remove " + item.text);
-    del.title = "Remove";
-    del.textContent = "×";
-    del.addEventListener("click", () => removeGentleItem(item.id));
-    body.append(name, note, small);
-    row.append(drag, mark, body, del);
-    box.append(row);
+    chips.append(b);
   });
-  attachSimpleDrag(box, "gentleItems", ".gentle-item", renderGentleList);
+
+  if (select) {
+    select.innerHTML = "";
+    shelves().forEach((shelf) => {
+      const o = document.createElement("option");
+      o.value = shelf.id;
+      o.textContent = shelf.name;
+      if (shelf.id === activeShelfId) o.selected = true;
+      select.append(o);
+    });
+  }
+
+  box.innerHTML = "";
+  shelves().filter((shelf) => shelf.id === activeShelfId).forEach((shelf) => {
+    const block = document.createElement("div");
+    block.className = "shelf-block";
+    block.dataset.shelfId = shelf.id;
+
+    const head = document.createElement("div");
+    head.className = "shelf-head";
+    if (editingShelf) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "shelf-name-input";
+      input.value = shelf.name;
+      input.setAttribute("aria-label", "Shelf name");
+      input.addEventListener("change", () => {
+        const name = input.value.trim() || "Shelf";
+        shelf.name = name;
+        save(); renderShelves(); renderShelfOption();
+      });
+      head.append(input);
+    } else {
+      const h = document.createElement("h3");
+      h.textContent = shelf.name;
+      head.append(h);
+    }
+    if (shelf.note) {
+      const note = document.createElement("div");
+      note.className = "shelf-note";
+      note.textContent = shelf.note;
+      head.append(note);
+    }
+    if (editingShelf && shelves().length > 1 && !(shelf.items || []).length) {
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "btn small";
+      rm.textContent = "Remove empty shelf";
+      rm.addEventListener("click", () => removeShelf(shelf.id));
+      head.append(rm);
+    }
+    block.append(head);
+
+    const listEl = document.createElement("div");
+    listEl.className = "shelf-items";
+    if (!(shelf.items || []).length) {
+      const p = document.createElement("p");
+      p.className = "shelf-empty";
+      p.textContent = "Nothing here — that's fine.";
+      listEl.append(p);
+    } else {
+      shelf.items.forEach((item) => listEl.append(renderShelfItem(item, shelf)));
+    }
+    block.append(listEl);
+    box.append(block);
+    attachSimpleDrag(listEl, () => shelf.items, ".gentle-item", renderShelves);
+  });
+}
+
+function renderShelfItem(item, shelf) {
+  const row = document.createElement("div");
+  row.className = "gentle-item";
+  row.dataset.id = item.id;
+  row.dataset.shelfId = shelf.id;
+
+  const drag = document.createElement("button");
+  drag.type = "button";
+  drag.className = "drag-btn";
+  drag.hidden = !editingShelf;
+  drag.setAttribute("aria-label", "Drag to reorder " + item.text);
+  drag.title = "Drag to reorder";
+  drag.textContent = "≡";
+
+  const mark = document.createElement("span");
+  mark.className = "gi-mark";
+  mark.setAttribute("aria-hidden", "true");
+  mark.textContent = "🌿";
+
+  const body = document.createElement("div");
+  body.className = "gi-body";
+  const name = document.createElement("div");
+  name.className = "gi-name";
+  name.textContent = item.text;
+  name.setAttribute("role", "button");
+  name.setAttribute("tabindex", "0");
+  const note = document.createElement("div");
+  note.className = "gi-note";
+  note.textContent = [item.note, item.from ? "from " + (item.from === "morning" ? "morning" : "anchors") : ""]
+    .filter(Boolean).join(" · ");
+  const small = document.createElement("div");
+  small.className = "gi-small";
+  small.textContent = item.small || "The smallest version is enough.";
+  small.hidden = true;
+  const toggleSmall = () => { small.hidden = !small.hidden; };
+  name.addEventListener("click", toggleSmall);
+  name.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleSmall(); }
+  });
+  body.append(name, note, small);
+
+  const actions = document.createElement("div");
+  actions.className = "shelf-item-actions";
+  const loan = loanFor(item.id);
+  if (loan) {
+    const here = document.createElement("button");
+    here.type = "button";
+    here.className = "btn small";
+    here.textContent = loan.list === "morning" ? "In my morning" : "In my day";
+    here.setAttribute("aria-label", item.text + " is borrowed into " + (loan.list === "morning" ? "morning" : "daily anchors"));
+    here.addEventListener("click", () => showSnackbar("Already borrowed — return it first if you want to change"));
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "btn small";
+    back.textContent = "Return";
+    back.setAttribute("aria-label", "Return " + item.text + " to " + shelf.name);
+    back.addEventListener("click", () => returnLoan(loan.id));
+    actions.append(here, back);
+  } else {
+    const borrow = document.createElement("button");
+    borrow.type = "button";
+    borrow.className = "btn small";
+    borrow.textContent = "Borrow";
+    borrow.setAttribute("aria-label", "Borrow " + item.text + " into your day");
+    const picker = document.createElement("div");
+    picker.className = "shelf-picker";
+    picker.hidden = true;
+    const toDay = document.createElement("button");
+    toDay.type = "button";
+    toDay.className = "btn small";
+    toDay.textContent = "Daily anchors";
+    toDay.setAttribute("aria-label", "Borrow " + item.text + " into daily anchors");
+    toDay.addEventListener("click", () => borrowItem(shelf.id, item.id, "anchors"));
+    const toMorning = document.createElement("button");
+    toMorning.type = "button";
+    toMorning.className = "btn small";
+    toMorning.textContent = "Morning";
+    toMorning.setAttribute("aria-label", "Borrow " + item.text + " into morning");
+    toMorning.addEventListener("click", () => borrowItem(shelf.id, item.id, "morning"));
+    picker.append(toDay, toMorning);
+    if (item.from) {
+      const home = document.createElement("button");
+      home.type = "button";
+      home.className = "btn small";
+      home.textContent = "Back on " + (item.from === "morning" ? "morning" : "anchors");
+      home.setAttribute("aria-label", "Put " + item.text + " back on " + item.from);
+      home.addEventListener("click", () => reinstateItem(shelf.id, item.id));
+      picker.append(home);
+    }
+    borrow.addEventListener("click", () => { picker.hidden = !picker.hidden; });
+    actions.append(borrow, picker);
+  }
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "remove-link";
+  del.hidden = !editingShelf;
+  del.setAttribute("aria-label", "Remove " + item.text);
+  del.title = "Remove";
+  del.textContent = "×";
+  del.addEventListener("click", () => removeGentleItem(shelf.id, item.id));
+
+  row.append(drag, mark, body, actions, del);
+  return row;
+}
+
+function smallVersion(text) {
+  const t = String(text || "").trim();
+  if (!t) return "The smallest version is enough.";
+  return "One gentle step: " + t + ".";
+}
+
+function refreshAfterShelfChange() {
+  renderList("morning");
+  renderList("anchors");
+  renderProgress();
+  renderWeek();
+  renderShelves();
+  renderShelfOption();
+}
+
+function parkItem(which, id, shelfId) {
+  const list = state.settings.lists[which];
+  const idx = list.findIndex((x) => x.id === id);
+  const shelf = findShelf(shelfId);
+  if (idx < 0 || !shelf) return;
+  const [item] = list.splice(idx, 1);
+  item.from = which;
+  item.small = item.small || smallVersion(item.text);
+  shelf.items.unshift(item);
+  save(); refreshAfterShelfChange();
+  showSnackbar(`Moved to ${shelf.name}`, () => {
+    const at = shelf.items.findIndex((x) => x.id === item.id);
+    if (at >= 0) shelf.items.splice(at, 1);
+    state.settings.lists[which].splice(idx, 0, item);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function borrowItem(shelfId, itemId, list) {
+  const found = findShelfItem(itemId);
+  if (!found || loanFor(itemId)) return;
+  const loan = {
+    id: "ln_" + Date.now().toString(36),
+    shelfId, itemId, list, since: todayKey(),
+  };
+  state.settings.loans.push(loan);
+  save(); refreshAfterShelfChange();
+  showSnackbar(list === "morning" ? "Borrowed into your morning" : "Borrowed into your day", () => {
+    const at = state.settings.loans.findIndex((l) => l.id === loan.id);
+    if (at >= 0) state.settings.loans.splice(at, 1);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function returnLoan(loanId) {
+  const loans = state.settings.loans || [];
+  const idx = loans.findIndex((l) => l.id === loanId);
+  if (idx < 0) return;
+  const [loan] = loans.splice(idx, 1);
+  save(); refreshAfterShelfChange();
+  showSnackbar("Back on the shelf", () => {
+    state.settings.loans.splice(idx, 0, loan);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function reinstateItem(shelfId, itemId) {
+  const shelf = findShelf(shelfId);
+  if (!shelf) return;
+  const idx = shelf.items.findIndex((x) => x.id === itemId);
+  if (idx < 0) return;
+  const [item] = shelf.items.splice(idx, 1);
+  const which = item.from === "morning" ? "morning" : "anchors";
+  state.settings.lists[which].push(item);
+  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
+  if (loanIdx >= 0) state.settings.loans.splice(loanIdx, 1);
+  delete item.from;
+  save(); refreshAfterShelfChange();
+  showSnackbar("Back on Home", () => {
+    const backAt = state.settings.lists[which].findIndex((x) => x.id === itemId);
+    if (backAt >= 0) state.settings.lists[which].splice(backAt, 1);
+    item.from = which;
+    shelf.items.splice(idx, 0, item);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
 }
 
 function addGentleItem() {
   const nameEl = $("#gentleName"), noteEl = $("#gentleNote");
   const text = ((nameEl && nameEl.value) || "").trim();
   if (!text) { showSnackbar("Give it a name first"); return; }
-  state.settings.gentleItems.unshift({
+  const select = $("#gentleShelfSelect");
+  const shelf = findShelf(select && select.value) || findShelf(activeShelfId) || shelves()[0];
+  if (!shelf) return;
+  shelf.items.unshift({
     id: "g_" + Date.now().toString(36),
     text,
     note: ((noteEl && noteEl.value) || "").trim(),
@@ -2843,20 +3388,81 @@ function addGentleItem() {
   if (noteEl) noteEl.value = "";
   const form = $("#gentleForm");
   if (form) form.hidden = true;
-  save(); renderGentleList();
+  save(); renderShelves(); renderShelfOption();
   haptic(8);
 }
 
-function removeGentleItem(id) {
-  const items = state.settings.gentleItems || [];
-  const idx = items.findIndex((x) => x.id === id);
+function removeGentleItem(shelfId, itemId) {
+  const shelf = findShelf(shelfId);
+  if (!shelf) return;
+  const idx = shelf.items.findIndex((x) => x.id === itemId);
   if (idx < 0) return;
-  const [gone] = items.splice(idx, 1);
-  save(); renderGentleList();
+  const [gone] = shelf.items.splice(idx, 1);
+  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
+  let loan = null;
+  if (loanIdx >= 0) loan = state.settings.loans.splice(loanIdx, 1)[0];
+  save(); refreshAfterShelfChange();
   showSnackbar("Removed " + gone.text, () => {
-    state.settings.gentleItems.splice(idx, 0, gone);
-    save(); renderGentleList();
+    shelf.items.splice(idx, 0, gone);
+    if (loan) state.settings.loans.splice(loanIdx, 0, loan);
+    save(); refreshAfterShelfChange();
   });
+}
+
+function addShelf() {
+  const shelf = {
+    id: "sh_" + Date.now().toString(36),
+    name: "New shelf",
+    note: "",
+    items: [],
+  };
+  state.settings.shelves.push(shelf);
+  activeShelfId = shelf.id;
+  save(); renderShelves();
+  const input = $("#shelvesList .shelf-name-input");
+  if (input) { input.focus(); input.select(); }
+}
+
+function removeShelf(shelfId) {
+  const idx = shelves().findIndex((s) => s.id === shelfId);
+  if (idx < 0 || shelves().length < 2) return;
+  const shelf = shelves()[idx];
+  if ((shelf.items || []).length) { showSnackbar("Move its items first"); return; }
+  shelves().splice(idx, 1);
+  if (activeShelfId === shelfId) activeShelfId = shelves()[0].id;
+  save(); renderShelves();
+  showSnackbar("Removed empty shelf", () => {
+    shelves().splice(idx, 0, shelf);
+    activeShelfId = shelfId;
+    save(); renderShelves();
+  });
+}
+
+function renderShelfOption() {
+  const box = $("#shelfOption");
+  if (!box) return;
+  const today = todayKey();
+  if (state.settings.shelfOptionDay !== today && state.settings.shelfOptionIndex < 0) {
+    state.settings.shelfOptionIndex = 0;
+  }
+  if (state.settings.shelfOptionDay !== today) {
+    const n = allShelfItems().length;
+    state.settings.shelfOptionIndex = n
+      ? (Number(state.settings.shelfOptionIndex) + 1) % n
+      : 0;
+    state.settings.shelfOptionDay = today;
+    saveQuiet();
+  }
+  if (state.settings.shelfOptionIndex < 0) { box.hidden = true; return; }
+  const entries = allShelfItems().filter(({ item }) => !loanFor(item.id));
+  if (!entries.length) { box.hidden = true; return; }
+  const picked = entries[state.settings.shelfOptionIndex % entries.length];
+  const text = $("#shelfOptionText"), name = $("#shelfOptionName");
+  if (text) text.textContent = picked.item.small || "The smallest version is enough.";
+  if (name) name.textContent = picked.item.text + " · " + picked.shelf.name;
+  box.hidden = false;
+  box.dataset.itemId = picked.item.id;
+  box.dataset.shelfId = picked.shelf.id;
 }
 
 function renderGentleStats() {
@@ -2898,6 +3504,10 @@ function renderGentleStats() {
   const topId = Object.keys(counts).sort((a, b) => counts[b] - counts[a])[0];
   if (topId) {
     const all = [].concat(state.settings.lists.morning || [], state.settings.lists.anchors || []);
+    (state.settings.loans || []).forEach((loan) => {
+      const found = allShelfItems().find((x) => x.item.id === loan.itemId);
+      if (found) all.push({ id: loan.id, text: found.item.text });
+    });
     const item = all.find((x) => x.id === topId);
     rows.push(["Often", item ? item.text : topId]);
   }
@@ -3135,6 +3745,8 @@ function wire() {
   });
 
   // More — a normal bottom tab; Home and Escape are already ways back
+  $("#shelfEditToggle").addEventListener("click", () => setEditingShelf(!editingShelf));
+  $("#addShelfBtn").addEventListener("click", addShelf);
   $("#gentleAddBtn").addEventListener("click", () => {
     const form = $("#gentleForm");
     form.hidden = !form.hidden;
@@ -3144,9 +3756,21 @@ function wire() {
   $$("#gentleForm input").forEach((input) => {
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") addGentleItem(); });
   });
+  $("#shelfOptionLater").addEventListener("click", () => {
+    state.settings.shelfOptionIndex = -1;
+    state.settings.shelfOptionDay = todayKey();
+    saveQuiet();
+    const box = $("#shelfOption");
+    if (box) box.hidden = true;
+  });
+  $("#shelfOptionBorrow").addEventListener("click", () => {
+    const box = $("#shelfOption");
+    if (!box || !box.dataset.itemId) return;
+    borrowItem(box.dataset.shelfId, box.dataset.itemId, "anchors");
+  });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    const open = [...document.querySelectorAll(".time-edit, .link-form")]
+    const open = [...document.querySelectorAll(".time-edit, .link-form, .shelf-picker")]
       .some((row) => !row.hidden);
     if (open) {
       closeOpenEditors();
@@ -3179,6 +3803,7 @@ function wire() {
 $("#versionTag").textContent = VERSION;
 wire();
 renderAll();
+showTab(initialTab());
 // if sync is set up: pull once on open, and flush any pending change when you
 // leave the app (best effort on mobile — GitHub may cut off a hidden page)
 if (syncCfg.gistId && syncCfg.token) setTimeout(() => syncNow({ silent: true }), 800);
@@ -3196,6 +3821,7 @@ setInterval(() => {
   applyPhase();
   applySunday();
   renderRotIntention();
+  renderShelfOption();
   renderSleepBanner();
   if (focusOn) renderFocus();   // Sunday can change which sections exist
 }, 60 * 1000);
