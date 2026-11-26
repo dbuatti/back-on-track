@@ -72,8 +72,123 @@
   .wrap {
     max-width: 640px;
     margin: 0 auto;
-    padding: 20px 16px 80px;
+    padding: 20px 16px calc(112px + env(safe-area-inset-bottom));
   }
+
+  /* ---------- Screens + bottom menu ----------
+     The long single scroll is split into a few calm screens. Only one is
+     shown at a time; the menu is always one thumb away at the bottom. */
+  .screen[hidden] { display: none !important; }
+  .bottom-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 40;
+    display: flex;
+    justify-content: space-around;
+    gap: 2px;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    box-shadow: 0 -2px 14px rgba(60,55,45,0.06);
+  }
+  .nav-btn {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 11px;
+    line-height: 1.1;
+    min-width: 66px;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .nav-btn .nav-icon { font-size: 21px; line-height: 1; }
+  .nav-btn.active { color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .nav-btn:active { background: var(--accent-soft); }
+
+  /* ---------- Home: a lighter "today" strip ---------- */
+  .today-intro {
+    background: linear-gradient(180deg, var(--sun-soft), var(--card));
+  }
+  .today-intro .greeting {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .today-intro .rot-intention { margin: 0 0 14px; }
+  .progress-line {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+    font-variant-numeric: tabular-nums;
+  }
+  .progress-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  .progress-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+
+  /* ---------- Links screen ---------- */
+  .link-main {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .link-main:active { background: var(--card); }
+  .link-main .link-icon { font-size: 26px; line-height: 1; }
+  .link-copy { flex: 1; display: flex; flex-direction: column; }
+  .link-copy strong { font-size: 16px; font-weight: 600; }
+  .link-copy small { font-size: 13px; color: var(--ink-soft); }
+  .link-arrow { color: var(--accent); font-size: 17px; }
+  .link-section-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin: 16px 0 8px;
+  }
+  .link-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 14px;
+  }
+  .link-chip:active { background: var(--accent-soft); }
+  .more-row { display: flex; align-items: center; gap: 14px; }
+  .more-row .toolkit-link { margin: 0; flex: 0 0 auto; }
+  .more-copy { display: flex; flex-direction: column; }
+  .more-copy strong { font-size: 16px; font-weight: 600; }
+  .more-copy small { font-size: 13px; color: var(--ink-soft); }
 
   /* ---------- Header ---------- */
   header.top {
@@ -490,8 +605,12 @@
 
   /* ---------- Focus mode ----------
      One section at a time, nothing else on screen (ADHD: few choices). */
-  body[data-focus="true"] .wrap > .card { display: none; }
-  body[data-focus="true"] .wrap > .card.focused { display: block; }
+  body[data-focus="true"] .screen .card { display: none; }
+  body[data-focus="true"] .screen .card.focused { display: block; }
+  body[data-focus="true"] .today-intro,
+  body[data-focus="true"] .home-foot,
+  body[data-focus="true"] .screen-hint,
+  body[data-focus="true"] .version { display: none; }
   body[data-focus="true"] header.top .date { opacity: 0.5; }
   .focus-bar {
     display: none;
@@ -571,7 +690,7 @@
   #whisper {
     position: fixed;
     left: 50%;
-    bottom: calc(28px + env(safe-area-inset-bottom));
+    bottom: calc(86px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(8px);
     background: var(--accent);
     color: #fff;
@@ -590,7 +709,7 @@
   #snackbar {
     position: fixed;
     left: 50%;
-    bottom: calc(28px + env(safe-area-inset-bottom));
+    bottom: calc(86px + env(safe-area-inset-bottom));
     transform: translateX(-50%) translateY(12px);
     background: var(--ink);
     color: var(--bg);
@@ -625,7 +744,6 @@
   /* ---------- Sunday mode ----------
      A protected day. JS adds data-sunday="true"; we soften the page and
      tuck the do-y things away, leaving rest + the bedtime log. */
-  body[data-sunday="true"] .card:not(#bedCard):not(#weekCard) { opacity: 0.55; }
   body[data-sunday="true"] #morningCard,
   body[data-sunday="true"] #anchorsCard,
   body[data-sunday="true"] #insteadCard { display: none; }
@@ -652,8 +770,6 @@
     <span class="date" id="todayLabel"></span>
   </header>
 
-  <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
-
   <div class="focus-bar" id="focusBar">
     <button type="button" id="focusPrev" aria-label="Previous section">‹</button>
     <span class="focus-label" id="focusLabel"></span>
@@ -661,10 +777,25 @@
     <button type="button" id="focusExit">Done</button>
   </div>
 
+  <!-- ============ HOME ============ -->
+  <div class="screen" id="screen-home">
+
+  <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
+
+  <section class="card today-intro" id="todayCard">
+    <div class="greeting" id="greeting">A quiet day.</div>
+    <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
+    <div class="progress-line" id="progressLine"></div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-actions">
+      <button type="button" class="btn small ghost" data-focus-jump="morningCard">Morning</button>
+      <button type="button" class="btn small ghost" data-focus-jump="anchorsCard">Anchors</button>
+    </div>
+  </section>
+
   <!-- ============ MORNING ============ -->
   <section class="card morning" id="morningCard">
     <h2><span class="dot"></span>Morning</h2>
-    <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
     <div id="morningList"></div>
     <div id="morningDone"></div>
     <div class="intention-wrap">
@@ -691,6 +822,15 @@
       <button class="btn small" data-add="anchors">Add</button>
     </div>
   </section>
+
+  <footer class="controls home-foot">
+    <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
+  </footer>
+  <p class="hint screen-hint" style="text-align:center">Tip: swipe a row right to tick it, left to untick.</p>
+  </div><!-- /screen-home -->
+
+  <!-- ============ WIND DOWN ============ -->
+  <div class="screen" id="screen-winddown" hidden>
 
   <!-- ============ INSTEAD OF GAMING ============ -->
   <section class="card instead-card" id="insteadCard">
@@ -746,24 +886,73 @@
     <p class="hint">Soft dots are anchors that happened. Empty days are just empty — no catching up needed.</p>
   </section>
 
-  <!-- ============ CONTROLS ============ -->
-  <footer class="controls">
-    <button class="btn small" id="focusBtn">Focus</button>
-    <button class="btn small edit-toggle" id="editToggle">Edit lists</button>
-    <button class="btn small" id="exportBtn">Export</button>
-    <button class="btn small" id="importBtn">Import</button>
-    <input type="file" id="importFile" accept="application/json" hidden />
-  </footer>
+  <p class="hint screen-hint" style="text-align:center">Evenings are for lowering the lights. Nothing here needs finishing.</p>
+  </div><!-- /screen-winddown -->
 
-  <a class="toolkit-link" id="toolkitLink" href="https://thecalmafter.vercel.app/"
-     target="_blank" rel="noopener" aria-label="Open The Calm After tool kit in a new tab"
-     title="Tool kit">
-    <span aria-hidden="true">⛈️</span>
-  </a>
+  <!-- ============ LINKS ============ -->
+  <div class="screen" id="screen-links" hidden>
+    <section class="card" id="doorCard">
+      <h2><span class="dot"></span>The Door</h2>
+      <a class="link-main"
+         href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/"
+         target="_blank" rel="noopener"
+         aria-label="Open The Door, your local app launcher, in a new tab">
+        <span class="link-icon" aria-hidden="true">🚪</span>
+        <span class="link-copy"><strong>Open The Door</strong><small>Your local app launcher</small></span>
+        <span class="link-arrow" aria-hidden="true">↗</span>
+      </a>
 
-  <p class="hint" style="text-align:center">Tip: swipe a row right to tick it, left to untick.</p>
-  <div class="version" id="versionTag">v3</div>
+      <div class="link-section-label">Go straight there</div>
+      <div class="link-chips">
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=comm-analytics" target="_blank" rel="noopener">Comm Analytics</a>
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=when-free" target="_blank" rel="noopener">When Free</a>
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=fnh-study-hub" target="_blank" rel="noopener">FNH Study Hub</a>
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?app=kinesiology-app" target="_blank" rel="noopener">Kinesiology</a>
+        <a class="link-chip" href="https://danieles-mac-mini.tailab1fd5.ts.net:8451/?search=kinesiology" target="_blank" rel="noopener">Search “kinesiology”</a>
+      </div>
+      <p class="hint">Links open on your Tailnet — if the Mac mini is asleep, The Door won't open. Use the search field there for anything not listed.</p>
+    </section>
+
+    <section class="card" id="moreCard">
+      <h2><span class="dot"></span>More</h2>
+      <div class="more-row">
+        <a class="toolkit-link" id="toolkitLink" href="https://thecalmafter.vercel.app/"
+           target="_blank" rel="noopener" title="Tool kit"
+           aria-label="Open The Calm After tool kit in a new tab">
+          <span aria-hidden="true">⛈️</span>
+        </a>
+        <div class="more-copy"><strong>Tool kit</strong><small>The Calm After</small></div>
+      </div>
+    </section>
+
+    <section class="card" id="dataCard">
+      <h2><span class="dot"></span>Your data</h2>
+      <div class="btn-row">
+        <button type="button" class="btn small" id="exportBtn">Export</button>
+        <button type="button" class="btn small" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </div>
+      <p class="hint">Everything stays on this device. Export to move it to another one.</p>
+    </section>
+  </div><!-- /screen-links -->
+
+  <div class="version" id="versionTag">v10</div>
 </div>
+
+<nav class="bottom-nav" aria-label="Main menu">
+  <button type="button" class="nav-btn active" data-tab="home" aria-current="page">
+    <span class="nav-icon" aria-hidden="true">🏠</span><span>Home</span>
+  </button>
+  <button type="button" class="nav-btn" data-tab="winddown">
+    <span class="nav-icon" aria-hidden="true">🌙</span><span>Wind down</span>
+  </button>
+  <button type="button" class="nav-btn" data-tab="focus">
+    <span class="nav-icon" aria-hidden="true">◎</span><span>Focus</span>
+  </button>
+  <button type="button" class="nav-btn" data-tab="links">
+    <span class="nav-icon" aria-hidden="true">🔗</span><span>Links</span>
+  </button>
+</nav>
 
 <div id="whisper" role="status" aria-live="polite"></div>
 <div id="snackbar" role="status" aria-live="polite">
@@ -794,7 +983,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v10";
+const VERSION = "v11";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -926,6 +1115,8 @@ function renderAll() {
   applyPhase();
   applySunday();
   renderHeader();
+  renderGreeting();
+  renderProgress();
   renderRotIntention();
   renderList("morning");
   renderList("anchors");
@@ -933,6 +1124,7 @@ function renderAll() {
   renderBedtime();
   renderMood();
   renderWeek();
+  if (focusOn) renderFocus();
 }
 
 /* ---------- Time-of-day phase (warm morning → cool dusk) ---------- */
@@ -963,6 +1155,61 @@ const FOCUS_SECTIONS = [
 let focusOn = false;
 let focusIdx = 0;
 
+/* ---------- Bottom menu: fewer things on each screen ---------- */
+const TAB_SCREENS = {
+  home: "screen-home",
+  winddown: "screen-winddown",
+  links: "screen-links",
+};
+let activeTab = "home";
+
+function updateNav() {
+  $$(".nav-btn").forEach((b) => {
+    const t = b.dataset.tab;
+    const on = (t === "focus") ? focusOn : (!focusOn && t === activeTab);
+    b.classList.toggle("active", on);
+    if (on) b.setAttribute("aria-current", "page");
+    else b.removeAttribute("aria-current");
+  });
+}
+
+function showTab(name, opts = {}) {
+  if (!TAB_SCREENS[name]) return;
+  activeTab = name;
+  Object.keys(TAB_SCREENS).forEach((k) => {
+    const el = $("#" + TAB_SCREENS[k]);
+    if (el) el.hidden = (k !== name);
+  });
+  updateNav();
+  if (!opts.keepScroll && window.scrollTo) window.scrollTo(0, 0);
+}
+
+function handleTab(name) {
+  if (name === "focus") {
+    if (focusOn) {
+      toggleFocus(false);
+      showTab("home", { keepScroll: true });
+    } else {
+      showTab("home");
+      toggleFocus(true);
+    }
+    return;
+  }
+  if (focusOn) toggleFocus(false);
+  showTab(name);
+}
+
+function jumpToSection(id) {
+  const idx = focusableSections().findIndex((s) => s.id === id);
+  if (idx < 0) {
+    handleTab(id === "bedCard" || id === "weekCard" ? "winddown" : "home");
+    return;
+  }
+  if (!focusOn) showTab("home");
+  focusIdx = idx;
+  toggleFocus(true);
+}
+
 function focusableSections() {
   // Sunday tucks some cards away — skip those in focus mode too.
   const sunday = new Date().getDay() === 0;
@@ -972,7 +1219,6 @@ function focusableSections() {
 function toggleFocus(on) {
   focusOn = (typeof on === "boolean") ? on : !focusOn;
   document.body.dataset.focus = focusOn ? "true" : "false";
-  $("#focusBtn").textContent = focusOn ? "Exit focus" : "Focus";
   if (focusOn) {
     const n = focusableSections().length;
     if (focusIdx >= n) focusIdx = 0;
@@ -981,6 +1227,7 @@ function toggleFocus(on) {
   } else {
     FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
   }
+  updateNav();
 }
 function moveFocus(dir) {
   const n = focusableSections().length;
@@ -992,7 +1239,16 @@ function renderFocus() {
   const sections = focusableSections();
   FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
   const current = sections[focusIdx];
-  if (current) $("#" + current.id)?.classList.add("focused");
+  if (current) {
+    const el = $("#" + current.id);
+    if (el) el.classList.add("focused");
+    // A focused card may live on the other screen — follow it there.
+    const host = el && el.closest ? el.closest(".screen") : null;
+    if (host) {
+      const name = host.id === "screen-winddown" ? "winddown" : "home";
+      if (name !== activeTab || host.hidden) showTab(name, { keepScroll: true });
+    }
+  }
   $("#focusLabel").textContent = current ? current.label : "";
 }
 
@@ -1073,6 +1329,34 @@ function renderHeader() {
     weekday: "long", day: "numeric", month: "long",
   });
   $("#todayLabel").textContent = label;
+}
+
+/* A soft, non-judgy read on the day — no streaks, no red marks. */
+function renderGreeting() {
+  const h = new Date().getHours();
+  const text = h < 11 ? "Good morning."
+    : h < 17 ? "A quiet afternoon."
+    : h < 21 ? "Winding down."
+    : "Late and gentle.";
+  const el = $("#greeting");
+  if (el) el.textContent = text;
+}
+
+function renderProgress() {
+  const rec = dayRecord();
+  const morning = state.settings.lists.morning;
+  const anchors = state.settings.lists.anchors;
+  const done = [morning, anchors].reduce(
+    (n, list) => n + list.filter((it) => rec.checks[it.id]).length, 0);
+  const total = morning.length + anchors.length;
+  const line = $("#progressLine");
+  if (line) {
+    line.textContent = total
+      ? `${done} of ${total} gentle steps today`
+      : "A quiet day ahead.";
+  }
+  const fill = $("#progressFill");
+  if (fill) fill.style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
 }
 
 /* Generic checklist renderer for morning + anchors */
@@ -1301,6 +1585,7 @@ function toggleCheck(which, id) {
   save();
   renderList(which);
   renderWeek();
+  renderProgress();
   // tiny haptic confirmation where supported (Android/PWA; iOS ignores it)
   try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
   // quiet celebration when an anchor is completed (not when un-ticking)
@@ -1556,11 +1841,20 @@ function wire() {
     hideSnackbar();
   });
 
+  // bottom menu
+  $$(".nav-btn").forEach((b) => {
+    b.addEventListener("click", () => handleTab(b.dataset.tab));
+  });
+
+  // home progress strip jumps straight into focus mode for that section
+  $$("[data-focus-jump]").forEach((b) => {
+    b.addEventListener("click", () => jumpToSection(b.dataset.focusJump));
+  });
+
   // focus mode
-  $("#focusBtn").addEventListener("click", () => toggleFocus());
   $("#focusPrev").addEventListener("click", () => moveFocus(-1));
   $("#focusNext").addEventListener("click", () => moveFocus(1));
-  $("#focusExit").addEventListener("click", () => toggleFocus(false));
+  $("#focusExit").addEventListener("click", () => { toggleFocus(false); showTab("home", { keepScroll: true }); });
 
   // intention
   $("#intentionInput").addEventListener("input", (e) => {
@@ -1647,9 +1941,11 @@ renderAll();
 // if the app is left open across a boundary (no timers needed otherwise)
 setInterval(() => {
   renderHeader();
+  renderGreeting();
   applyPhase();
   applySunday();
   renderRotIntention();
+  if (focusOn) renderFocus();   // Sunday can change which sections exist
 }, 60 * 1000);
 
 // PWA service worker (no-op if unsupported / file://)
