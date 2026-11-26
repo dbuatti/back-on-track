@@ -1784,7 +1784,7 @@
 
     <section class="card" id="syncCard">
       <h2><span class="dot"></span>Sync</h2>
-      <p class="hint">Your devices stay in step through a private bridge to a GitHub Gist. Enter the same six-character code on each device — no account, no token to type.</p>
+      <p class="hint">Your devices stay in step through your Supabase account. Sign in with your email — no pairing code needed.</p>
       <div class="btn-row">
         <button type="button" class="btn small" id="syncNow">Sync now</button>
       </div>
@@ -1918,6 +1918,7 @@
   <button class="snack-undo" id="snackUndo" type="button">Undo</button>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -1939,13 +1940,15 @@
 
 const STORE_KEY = "bot.v1";
 const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
+const SUPABASE_URL = "https://yfgapigmiyclgryqdgne.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmZ2FwaWdtaXljbGdyeXFkZ25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MTU3MDEsImV4cCI6MjA3Nzk5MTcwMX0.YPSk_2bOwLC3kTjJ9j-8YR3degNlMleymbo4X9F_bSo";
 /* Only this bridge may ever receive the app's data. A pairing link cannot
    redirect sync traffic to another host. */
 const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v51";
+const VERSION = "v52";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3737,149 +3740,61 @@ function setEditingShelf(on) {
 }
 
 /* =====================================================================
-   SYNC ACROSS DEVICES (private GitHub Gist)
-   Credentials live in their own localStorage key so exports stay clean.
-   Last-change-wins: simple, predictable, and easy to explain.
+   SYNC ACROSS DEVICES (Supabase + email magic link)
    ===================================================================== */
+let syncClient = null;
+function getSupabase() {
+  if (!syncClient) syncClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  return syncClient;
+}
+let syncCfg = loadSync();
 let syncTimer = null, syncBusy = false, syncAgain = false, applyingRemote = false;
-let syncError = null;   // last failed attempt; cleared on the next success
+let syncError = null;
 
-function loadSync() {
-  try { return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {}; }
-  catch (e) { return {}; }
-}
-function saveSync(cfg) {
-  try { localStorage.setItem(SYNC_KEY, JSON.stringify(cfg)); }
-  catch (e) { console.warn("Could not save sync settings:", e); }
-}
-function syncStatus(text) {
-  const el = $("#syncStatus");
-  if (el) el.textContent = text;
-}
-function syncIsAutomatic() {
-  return !!(syncCfg.endpoint === SYNC_ENDPOINT && syncCfg.syncKey && syncCfg.gistId);
-}
+function loadSync() { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || "{}") || {}; } catch (e) { return {}; } }
+function saveSync(cfg) { try { localStorage.setItem(SYNC_KEY, JSON.stringify(cfg)); } catch (e) { console.warn("Could not save sync settings:", e); } }
+function syncStatus(text) { const el = $("#syncStatus"); if (el) el.textContent = text; }
+function syncIsAutomatic() { return !!syncCfg.session; }
 function renderSync() {
-  const t = $("#syncToken"), g = $("#syncGist"), s = $("#syncStatus");
-  const automatic = syncIsAutomatic();
-  const card = $("#syncCard");
-  if (card) card.classList.toggle("automatic", automatic);
-  $$("#syncCard .setup-only").forEach((el) => { el.hidden = automatic; });
-  if (t && document.activeElement !== t) t.value = syncCfg.token || "";
-  if (g && document.activeElement !== g) g.value = syncCfg.gistId || "";
+  const s = $("#syncStatus");
   if (!s) return;
-  if (!syncCfg.gistId) {
-    s.textContent = "Not set up yet. Enter the same six-character code on each device.";
-    s.title = "";
+  const session = syncCfg.session;
+  if (!session) {
+    s.textContent = "Not signed in. Enter your email below to sync.";
     return;
   }
   const when = syncCfg.lastSync ? " · last " + new Date(syncCfg.lastSync).toLocaleString() : "";
-  if (syncError === "rate-limit") s.textContent = "The bridge is busy just now. Nothing is lost here; I'll try again.";
-  else if (syncError === "offline") s.textContent = "Not connected. Your changes are saved here and will go across when you're back.";
-  else if (syncError === "clock-skew") s.textContent = "Your device is behind the other one. Check the date and time, then try again.";
+  if (syncError === "offline") s.textContent = "Not connected. Your changes are saved here and will go across when you're back." + when + ".";
   else if (syncError) s.textContent = "Sync paused — your data is safe on this device." + when + ".";
-  else if (automatic) s.textContent = (syncCfg.lastSync ? "Set up — changes go across on their own" : "Set up") + when + ".";
-  else s.textContent = "Gist " + syncCfg.gistId + when + ".";
-  s.title = syncError || "";
+  else s.textContent = "Signed in — changes go across on their own" + when + ".";
 }
-/* New devices pair once with a six-character code; the GitHub token never
-   leaves the server. Older builds can still use the direct-token fields. */
-function cleanPairCode(raw) {
-  return String(raw || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-}
-async function pairWithCode(raw) {
-  const code = cleanPairCode(raw);
-  if (code.length !== 6) { syncStatus("A pairing code is six characters."); return false; }
-  syncStatus("Connecting this device…");
+
+async function syncSignIn(email) {
+  email = String(email || "").trim();
+  if (!email || email.indexOf("@") < 0) { syncStatus("Enter a valid email address."); return false; }
+  syncStatus("Sending sign-in link…");
   try {
-    const res = await fetch(SYNC_ENDPOINT, {
-      method: "POST",
-      headers: { "x-sync-key": code, Accept: "application/json" },
-      body: "{}",
+    const { error } = await getSupabase().auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: location.origin + location.pathname }
     });
-    if (!res.ok) throw new Error("pairing was not accepted (" + res.status + ")");
-    const reply = await res.json();
-    if (!reply || reply.endpoint !== SYNC_ENDPOINT || !reply.gistId) {
-      throw new Error("that code isn't for this app");
-    }
-    syncCfg = {
-      endpoint: SYNC_ENDPOINT,
-      syncKey: reply.syncKey || code,
-      gistId: reply.gistId,
-      lastSync: syncCfg.lastSync || null,
-    };
-    saveSync(syncCfg);
-    syncError = null;
-    renderSync();
-    syncStatus("Paired. Use the same code on your other devices.");
-    setTimeout(() => syncNow({ silent: true }), 400);
+    if (error) throw error;
+    syncStatus("Check your email for the sign-in link, then return here.");
     return true;
   } catch (e) {
-    syncStatus("Couldn't pair: " + e.message + ".");
+    syncStatus("Couldn't send link: " + e.message);
     return false;
   }
 }
-function consumePairHash() {
-  const hash = location.hash || "";
-  const clearHash = () => {
-    try { history.replaceState(null, "", location.pathname + location.search); }
-    catch (e) { location.hash = ""; }
-  };
-  if (hash.indexOf("#pair=") === 0) {
-    const code = hash.slice(6);
-    clearHash();
-    pairWithCode(code);
-    return;
-  }
-  if (hash.indexOf("#sync=") !== 0) return;
-  try {
-    const cfg = JSON.parse(decodeURIComponent(hash.slice(6)));
-    if (cfg && cfg.endpoint === SYNC_ENDPOINT && cfg.syncKey && cfg.gistId) {
-      syncCfg = {
-        endpoint: SYNC_ENDPOINT,
-        syncKey: cfg.syncKey,
-        gistId: cfg.gistId,
-        lastSync: syncCfg.lastSync || null,
-      };
-      saveSync(syncCfg);
-      syncStatus("Sync connected.");
-    } else {
-      syncStatus("That sync link isn't for this app.");
-    }
-  } catch (e) {
-    console.warn("Ignored an invalid sync link:", e);
-    syncStatus("That sync link isn't for this app.");
-  }
-  clearHash();
-}
-async function syncFetch(method, url, body) {
-  const automatic = method === "GET" || method === "PUT" ? syncIsAutomatic() : false;
-  const headers = automatic
-    ? { "x-sync-key": syncCfg.syncKey || "", Accept: "application/json" }
-    : {
-        Authorization: "token " + (syncCfg.token || ""),
-        Accept: "application/vnd.github+json",
-      };
-  if (body !== undefined) headers["Content-Type"] = "application/json";
-  const res = await fetch(url, {
-    method, headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  });
-  if (!res.ok) {
-    let detail = "";
-    try { const j = await res.json(); if (j.error || j.message) detail = " — " + (j.error || j.message); } catch (e) {}
-    const err = new Error((automatic ? "Sync " : "GitHub ") + res.status + detail);
-    err.status = res.status;
-    err.retryAfter = res.headers.get("Retry-After");
-    throw err;
-  }
-  return res.json();
+async function syncSignOut() {
+  try { await getSupabase().auth.signOut(); } catch (e) {}
+  syncCfg.session = null;
+  saveSync(syncCfg);
+  renderSync();
 }
 
-/* Background sync: pull once on open, then push quietly a moment after any
-   real change. Failures are silent here — Links still shows the last time. */
 function scheduleSync() {
-  if (!syncCfg.gistId || (!syncIsAutomatic() && !syncCfg.token) || applyingRemote) return;
+  if (!syncCfg.session || applyingRemote) return;
   clearTimeout(syncTimer);
   syncTimer = setTimeout(runAutoSync, 1500);
 }
@@ -3889,1044 +3804,72 @@ async function runAutoSync() {
   if (syncAgain) { syncAgain = false; scheduleSync(); }
 }
 
-async function syncSetup() {
-  const token = (($("#syncToken") && $("#syncToken").value) || "").trim();
-  if (!token) { syncStatus("Add a token with gist scope first."); return; }
-  syncCfg.token = token; saveSync(syncCfg);
-  syncStatus("Creating a private gist…");
-  try {
-    const gist = await syncFetch("POST", "https://api.github.com/gists", {
-      description: "Back on Track — private device sync",
-      public: false,
-      files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
-    });
-    syncCfg.gistId = gist.id;
-    syncCfg.lastSync = new Date().toISOString();
-    saveSync(syncCfg);
-    renderSync();
-    syncStatus("Set up. Copy the gist ID to your other devices — they'll keep in step by themselves.");
-    haptic(8);
-  } catch (e) {
-    syncStatus("Couldn't set up: " + e.message + ". Check the token has gist scope.");
-  }
-}
 async function syncNow(opts = {}) {
   const silent = !!opts.silent;
-  const automatic = syncIsAutomatic();
-  const token = (($("#syncToken") && $("#syncToken").value) || "").trim() || syncCfg.token;
-  const id = (($("#syncGist") && $("#syncGist").value) || "").trim() || syncCfg.gistId;
-  if (!id || (!automatic && !token)) {
-    if (!silent) syncStatus("Not set up yet — enter your pairing code, or use Set up sync.");
+  const { data: { session } } = await getSupabase().auth.getSession();
+  if (!session) {
+    if (!silent) syncStatus("Not signed in. Enter your email below to sync.");
+    renderSync();
     return;
   }
+  syncCfg.session = session;
+  saveSync(syncCfg);
   if (syncBusy) { syncAgain = true; return; }
-  if (!automatic) { syncCfg.token = token; syncCfg.gistId = id; saveSync(syncCfg); }
   syncBusy = true;
   syncError = null;
-  syncCfg.pendingSync = true; saveSync(syncCfg);
   if (!silent) syncStatus("Checking your sync…");
   try {
-    let remote = null;
-    if (automatic) {
-      const reply = await syncFetch("GET", SYNC_ENDPOINT);
-      remote = reply && reply.state ? reply.state : null;
-    } else {
-      const gist = await syncFetch("GET", "https://api.github.com/gists/" + encodeURIComponent(id));
-      const file = gist.files && gist.files["back-on-track.json"];
-      if (file && file.content) remote = JSON.parse(file.content);
-    }
-    const localStamp = Number(state.settings.updatedAt) || 0;
+    const { data, error } = await getSupabase()
+      .from("back_on_track_state")
+      .select("state, updated_at")
+      .eq("user_id", session.user.id)
+      .maybeSingle();
+    if (error) throw error;
+    const remote = data && data.state ? data.state : null;
     const remoteStamp = remote ? Number(remote.settings && remote.settings.updatedAt) || 0 : 0;
-    if (remote && Math.abs(remoteStamp - Date.now()) > 5 * 60 * 1000) {
-      throw Object.assign(new Error("clock-skew"), { status: 0 });
-    }
+    const localStamp = Number(state.settings.updatedAt) || 0;
     if (remote && remoteStamp > localStamp) {
       applyingRemote = true;
-      const merged = mergeState(state, remote);
-      // A pull can add local-only rows/days/marks to the remote's data.
-      // When it does, bump the stamp and push the union back, otherwise
-      // those additions stay on this device forever (see audit P0-1).
-      const changed = JSON.stringify({ d: merged.days, l: merged.settings.lists, s: merged.settings.shelves, o: merged.settings.loans, m: merged.settings.myLinks, p: merged.settings.program30 })
-        !== JSON.stringify({ d: remote.days, l: remote.settings && remote.settings.lists, s: remote.settings && remote.settings.shelves, o: remote.settings && remote.settings.loans, m: remote.settings && remote.settings.myLinks, p: remote.settings && remote.settings.program30 });
-      state = merged;
+      state = mergeState(state, remote);
       applyingRemote = false;
-      if (changed) save(); else saveQuiet();
-      renderAll();
+      saveQuiet(); renderAll();
       if (!silent) syncStatus("Pulled newer data from your sync.");
     } else if (!remote || localStamp > remoteStamp) {
-      if (automatic) {
-        try { await syncFetch("PUT", SYNC_ENDPOINT, { state: state, baseUpdatedAt: localStamp }); }
-catch (e) {
-  if (e && e.status === 409) {
-    const reply = await syncFetch("GET", SYNC_ENDPOINT);
-    const remoteState = reply && reply.state ? reply.state : null;
-    if (remoteState) { applyingRemote = true; state = mergeState(state, remoteState); applyingRemote = false; saveQuiet(); renderAll(); }
-    await syncFetch("PUT", SYNC_ENDPOINT, { state: state, baseUpdatedAt: Number(state.settings.updatedAt) || 0 });
-  } else { throw e; }
-}
-      } else {
-        await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
-          files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
-        });
-      }
+      const { error: upsertErr } = await getSupabase()
+        .from("back_on_track_state")
+        .upsert({ user_id: session.user.id, state, updated_at: new Date().toISOString() });
+      if (upsertErr) throw upsertErr;
       if (!silent) syncStatus("Pushed this device's data to your sync.");
     } else {
       if (!silent) syncStatus("Already in step.");
     }
-    syncCfg.pendingSync = false;
     syncCfg.lastSync = new Date().toISOString();
     saveSync(syncCfg);
     if (silent) renderSync();
-    else setTimeout(renderSync, 2500);   // let the plain-language message settle first
+    else setTimeout(renderSync, 2500);
     if (!silent) haptic(8);
   } catch (e) {
-    const msg = e && e.message || "";
-    if (e && (e.status === 429 || /rate limit/i.test(msg))) {
-      syncError = "rate-limit";
-      const wait = (Number(e.retryAfter) || 60) * 1000;
-      setTimeout(() => syncNow({ silent: true }), wait);
-    } else if (/Failed to fetch|NetworkError/i.test(msg)) {
-      syncError = "offline";
-    } else if (msg === "clock-skew" || msg.indexOf("clock-skew") >= 0) {
-      syncError = "clock-skew";
-    } else {
-      syncError = msg;
-    }
+    syncError = e.message || String(e);
     renderSync();
-    if (!silent) {
-      if (syncError === "rate-limit") syncStatus("The bridge is busy just now. Nothing is lost here; I'll try again.");
-      else if (syncError === "offline") syncStatus("Not connected. Your changes are saved here and will go across when you're back.");
-      else if (syncError === "clock-skew") syncStatus("Your device is behind the other one. Check the date and time, then try again.");
-      else syncStatus("Sync paused — your data is safe on this device.");
-    }
+    if (!silent) syncStatus("Sync paused — your data is safe on this device.");
   } finally {
     syncBusy = false;
-    if (syncAgain) {
-      syncAgain = false;
-      setTimeout(() => syncNow({ silent: true }), 300);
-    }
+    if (syncAgain) { syncAgain = false; setTimeout(() => syncNow({ silent: true }), 300); }
   }
 }
 
-/* ---------- Your own links ---------- */
-function normaliseURL(raw) {
-  let url = (raw || "").trim();
-  if (!url) return "";
-  if (!/^https?:\/\//i.test(url)) url = "https://" + url;
-  if (!/^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(url)) return "";
-  return url;
-}
-
-function renderMyLinks() {
-  const box = $("#myLinksList");
-  if (!box) return;
-  box.innerHTML = "";
-  const links = state.settings.myLinks || [];
-  if (!links.length) {
-    const p = document.createElement("p");
-    p.className = "hint";
-    p.textContent = "Nothing here yet.";
-    box.append(p);
-    return;
-  }
-  links.forEach((link) => {
-    const row = document.createElement("div");
-    row.className = "my-link-row";
-    row.dataset.id = link.id;
-    const drag = document.createElement("button");
-    drag.type = "button";
-    drag.className = "drag-btn";
-    drag.setAttribute("aria-label", "Drag to reorder " + link.name);
-    drag.title = "Drag to reorder";
-    const a = document.createElement("a");
-    a.className = "link-chip";
-    a.href = link.url;
-    a.target = "_blank";
-    a.rel = "noopener";
-    a.textContent = link.name;
-    const copy = document.createElement("button");
-    copy.type = "button";
-    copy.className = "copy-btn";
-    copy.dataset.copy = link.url;
-    copy.setAttribute("aria-label", "Copy " + link.name + " link");
-    copy.textContent = "Copy";
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "remove-link";
-    del.setAttribute("aria-label", "Remove " + link.name);
-    del.textContent = "Remove";
-    del.addEventListener("click", () => removeMyLink(link.id));
-    row.append(drag, a, copy, del);
-    box.append(row);
-  });
-  attachSimpleDrag(box, "myLinks", ".my-link-row", renderMyLinks);
-}
-
-function addMyLink() {
-  const nameEl = $("#newLinkName"), urlEl = $("#newLinkUrl");
-  const name = ((nameEl && nameEl.value) || "").trim();
-  const url = normaliseURL(urlEl && urlEl.value);
-  if (!name || !url) { showSnackbar("Add a name and a valid web address"); return; }
-  state.settings.myLinks.unshift({ id: "lnk_" + Date.now().toString(36), name, url });
-  if (nameEl) nameEl.value = "";
-  if (urlEl) urlEl.value = "";
-  const form = $("#myLinksForm");
-  if (form) form.hidden = true;
-  save(); renderMyLinks();
-  haptic(8);
-}
-
-function removeMyLink(id) {
-  const links = state.settings.myLinks || [];
-  const idx = links.findIndex((l) => l.id === id);
-  if (idx < 0) return;
-  const [gone] = links.splice(idx, 1);
-  save(); renderMyLinks();
-  showSnackbar("Removed " + gone.name, () => {
-    state.settings.myLinks.splice(idx, 0, gone);
-    save(); renderMyLinks();
-  });
-}
-
-/* ---------- More: named shelves, not a dumping drawer ---------- */
-function shelves() { return state.settings.shelves || []; }
-function findShelf(id) { return shelves().find((s) => s.id === id) || null; }
-
-/* Four quiet shelf tones. Known shelves keep their own; a shelf you add
-   borrows the next tone in order, so there is nothing to configure. */
-const SHELF_TONES = {
-  sh_notfeeling: "clay",
-  sh_keepclose: "slate",
-  sh_movement: "green",
-  sh_smallstarts: "amber",
-};
-const SHELF_TONE_CYCLE = ["clay", "slate", "green", "amber"];
-function toneForShelf(shelf) {
-  if (!shelf) return "green";
-  if (SHELF_TONES[shelf.id]) return SHELF_TONES[shelf.id];
-  const i = shelves().indexOf(shelf);
-  return SHELF_TONE_CYCLE[(i < 0 ? 0 : i) % SHELF_TONE_CYCLE.length];
-}
-function findShelfItem(itemId) {
-  for (const shelf of shelves()) {
-    const item = (shelf.items || []).find((x) => x.id === itemId);
-    if (item) return { shelf, item };
-  }
-  return null;
-}
-function loanFor(itemId) {
-  return (state.settings.loans || []).find((l) => l.itemId === itemId) || null;
-}
-
-function renderGentle() {
-  renderShelves();
-  renderGentleStats();
-}
-
-/* A walking sketch derived from one optional number. No tracking, no dates,
-   no targets — each step is only there if it's wanted. */
-function renderMovementLadder() {
-  const wrap = $("#movementGradual");
-  if (!wrap) return;
-  wrap.hidden = activeShelfId !== "sh_movement";
-  if (wrap.hidden) return;
-  const base = Math.max(5, Math.round(Number(state.settings.walkStartMinutes) || 10));
-  const select = $("#walkStart");
-  if (select && document.activeElement !== select) select.value = String(base);
-  const steps = [base, base + 5, base + 10, base + 15, base + 20, base + 30];
-  const labels = ["now", "a little later", "later", "after a while", "in a few months", "whenever you're ready"];
-  const line = $("#walkLadder");
-  if (line) {
-    line.textContent = "Walk: " + steps.map((m, i) =>
-      (i ? labels[i] + " " : "") + m + " minutes").join(" · ")
-      + ". Or simply go a little further than last time — only when that feels right."
-      + " Stay at any step as long as you like.";
-  }
-}
-
-function renderShelfNotice() {
-  const el = $("#shelfNotice");
-  if (!el) return;
-  const recent = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    recent.push(todayKey(d));
-  }
-  let candidate = null;
-  (state.settings.loans || []).forEach((loan) => {
-    const found = allShelfItems().find(({ item }) => item.id === loan.itemId);
-    if (!found) return;
-    const count = recent.filter((k) => state.days[k] && state.days[k].checks && state.days[k].checks[loan.id]).length;
-    if (count >= 2 && !candidate) candidate = { loan, item: found.item, count };
-  });
-  if (!candidate) { el.textContent = ""; el.hidden = true; return; }
-  el.hidden = false;
-  el.textContent = candidate.item.text + " kept showing up. Keep it close?";
-}
-function renderShelves() {
-  renderShelfNotice();
-  renderMovementLadder();
-  const chips = $("#shelfChips");
-  const box = $("#shelvesList");
-  const select = $("#gentleShelfSelect");
-  if (!chips || !box) return;
-  const all = shelves();
-  if (!all.length) {
-    state.settings.shelves = JSON.parse(JSON.stringify(DEFAULT_SHELVES));
-  }
-  if (!activeShelfId || !findShelf(activeShelfId)) activeShelfId = shelves()[0].id;
-
-  chips.innerHTML = "";
-  shelves().forEach((shelf) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "shelf-chip";
-    b.dataset.tone = toneForShelf(shelf);
-    b.textContent = shelf.name;
-    b.setAttribute("aria-pressed", shelf.id === activeShelfId ? "true" : "false");
-    b.addEventListener("click", () => {
-      activeShelfId = shelf.id;
-      renderShelves();
-    });
-    chips.append(b);
-  });
-
-  if (select) {
-    select.innerHTML = "";
-    shelves().forEach((shelf) => {
-      const o = document.createElement("option");
-      o.value = shelf.id;
-      o.textContent = shelf.name;
-      if (shelf.id === activeShelfId) o.selected = true;
-      select.append(o);
-    });
-  }
-  const nameInput = $("#gentleName"), noteInput = $("#gentleNote");
-  if (nameInput) {
-    nameInput.placeholder = activeShelfId === "sh_smallstarts"
-      ? "What's the small thing?" : "What is it?";
-  }
-  if (noteInput) {
-    noteInput.placeholder = activeShelfId === "sh_smallstarts"
-      ? "e.g. five minutes, just for fun" : "e.g. needs a little care";
-  }
-
-  box.innerHTML = "";
-  shelves().filter((shelf) => shelf.id === activeShelfId).forEach((shelf) => {
-    const block = document.createElement("div");
-    block.className = "shelf-block";
-    block.dataset.shelfId = shelf.id;
-    block.dataset.tone = toneForShelf(shelf);
-
-    const head = document.createElement("div");
-    head.className = "shelf-head";
-    if (editingShelf) {
-      const input = document.createElement("input");
-      input.type = "text";
-      input.className = "shelf-name-input";
-      input.value = shelf.name;
-      input.setAttribute("aria-label", "Shelf name");
-      input.addEventListener("change", () => {
-        const name = input.value.trim() || "Shelf";
-        shelf.name = name;
-        save(); renderShelves(); renderShelfOption();
-      });
-      head.append(input);
-    } else {
-      const h = document.createElement("h3");
-      h.textContent = shelf.name;
-      head.append(h);
-    }
-    if (shelf.note) {
-      const note = document.createElement("div");
-      note.className = "shelf-note";
-      note.textContent = shelf.note;
-      head.append(note);
-    }
-    if (editingShelf && shelves().length > 1 && !(shelf.items || []).length) {
-      const rm = document.createElement("button");
-      rm.type = "button";
-      rm.className = "btn small";
-      rm.textContent = "Remove empty shelf";
-      rm.addEventListener("click", () => removeShelf(shelf.id));
-      head.append(rm);
-    }
-    block.append(head);
-
-    const listEl = document.createElement("div");
-    listEl.className = "shelf-items";
-    if (!(shelf.items || []).length) {
-      const p = document.createElement("p");
-      p.className = "shelf-empty";
-      p.textContent = shelf.id === "sh_smallstarts"
-        ? "Nothing here yet — add a few small things when you like."
-        : "Nothing here — that's fine.";
-      listEl.append(p);
-    } else {
-      shelf.items.forEach((item) => listEl.append(renderShelfItem(item, shelf)));
-    }
-    block.append(listEl);
-    box.append(block);
-    attachSimpleDrag(listEl, () => shelf.items, ".gentle-item", renderShelves);
-  });
-}
-
-function renderShelfItem(item, shelf) {
-  const row = document.createElement("div");
-  row.className = "gentle-item" + (editingShelf ? " editing" : "");
-  row.dataset.id = item.id;
-  row.dataset.shelfId = shelf.id;
-
-  const drag = document.createElement("button");
-  drag.type = "button";
-  drag.className = "drag-btn";
-  drag.hidden = !editingShelf;
-  drag.setAttribute("aria-label", "Drag to reorder " + item.text);
-  drag.title = "Drag to reorder";
-
-  const body = document.createElement("div");
-  body.className = "gi-body";
-  const name = document.createElement("button");
-  name.type = "button";
-  name.className = "btn quiet gi-name";
-  name.textContent = item.text;
-  const note = document.createElement("div");
-  note.className = "gi-note";
-  note.textContent = [item.note, item.from ? "from " + (item.from === "morning" ? "morning" : "anchors") : ""]
-    .filter(Boolean).join(" · ");
-  const small = document.createElement("div");
-  small.className = "gi-small";
-  small.textContent = item.small || "The smallest version is enough.";
-  small.hidden = true;
-  const toggleSmall = () => {
-    if (row.dataset.swiped) return;
-    small.hidden = !small.hidden;
-    name.setAttribute("aria-expanded", String(!small.hidden));
-  };
-  name.setAttribute("aria-expanded", "false");
-  name.addEventListener("click", toggleSmall);
-  body.append(name, note, small);
-
-  const actions = document.createElement("div");
-  actions.className = "shelf-item-actions";
-  const loan = loanFor(item.id);
-  if (loan) {
-    const here = document.createElement("span");
-    here.className = "loan-status";
-    here.textContent = loan.list === "morning" ? "In my morning" : "In my day";
-    here.setAttribute("aria-label", item.text + " is borrowed into " + (loan.list === "morning" ? "morning" : "daily anchors"));
-    const back = document.createElement("button");
-    back.type = "button";
-    back.className = "btn small";
-    back.textContent = "Return";
-    back.setAttribute("aria-label", "Return " + item.text + " to " + shelf.name);
-    back.addEventListener("click", () => returnLoan(loan.id));
-    actions.append(here, back);
-  } else {
-    const target = document.createElement("select");
-    target.className = "borrow-target";
-    target.setAttribute("aria-label", "Borrow " + item.text + " into");
-    [["anchors", "Daily anchors"], ["morning", "Morning"]].forEach(([value, label]) => {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = label;
-      target.append(option);
-    });
-    const borrow = document.createElement("button");
-    borrow.type = "button";
-    borrow.className = "btn small";
-    borrow.textContent = "Borrow";
-    borrow.setAttribute("aria-label", "Borrow " + item.text + " into your day");
-    borrow.addEventListener("click", () => borrowItem(shelf.id, item.id, target.value));
-    actions.append(target, borrow);
-    if (item.from) {
-      const home = document.createElement("button");
-      home.type = "button";
-      home.className = "btn small";
-      home.textContent = "Back on " + (item.from === "morning" ? "morning" : "anchors");
-      home.setAttribute("aria-label", "Put " + item.text + " back on " + item.from);
-      home.addEventListener("click", () => reinstateItem(shelf.id, item.id));
-      actions.append(home);
-    }
-  }
-
-  const del = document.createElement("button");
-  del.type = "button";
-  del.className = "remove-link";
-  del.hidden = !editingShelf;
-  del.setAttribute("aria-label", "Remove " + item.text);
-  del.title = "Remove";
-  del.textContent = "Remove";
-  del.addEventListener("click", () => removeGentleItem(shelf.id, item.id));
-
-  row.append(drag, body, actions, del);
-  attachShelfSwipe(row, shelf.id, item.id);
-  return row;
-}
-
-function smallVersion(text) {
-  const t = String(text || "").trim();
-  if (!t) return "The smallest version is enough.";
-  return "One gentle step: " + t + ".";
-}
-
-function refreshAfterShelfChange() {
-  renderList("morning");
-  renderList("anchors");
-  renderProgress();
-  renderWeek();
-  renderShelves();
-  renderShelfOption();
-}
-
-function parkItem(which, id, shelfId) {
-  const list = state.settings.lists[which];
-  const idx = list.findIndex((x) => x.id === id);
-  const shelf = findShelf(shelfId);
-  if (idx < 0 || !shelf) return;
-  const [item] = list.splice(idx, 1);
-  item.from = which;
-  item.small = item.small || smallVersion(item.text);
-  shelf.items.unshift(item);
-  save(); refreshAfterShelfChange();
-  showSnackbar(`Moved to ${shelf.name}`, () => {
-    const at = shelf.items.findIndex((x) => x.id === item.id);
-    if (at >= 0) shelf.items.splice(at, 1);
-    state.settings.lists[which].splice(idx, 0, item);
-    save(); refreshAfterShelfChange();
-  });
-  haptic(8);
-}
-
-function borrowItem(shelfId, itemId, list) {
-  const found = findShelfItem(itemId);
-  if (!found || loanFor(itemId)) return;
-  const loan = {
-    id: "ln_" + Date.now().toString(36),
-    shelfId, itemId, list, since: todayKey(),
-  };
-  state.settings.loans.push(loan);
-  save(); refreshAfterShelfChange();
-  showSnackbar(list === "morning" ? "Borrowed into your morning" : "Borrowed into your day", () => {
-    const at = state.settings.loans.findIndex((l) => l.id === loan.id);
-    if (at >= 0) state.settings.loans.splice(at, 1);
-    save(); refreshAfterShelfChange();
-  });
-  haptic(8);
-}
-
-function returnLoan(loanId) {
-  const loans = state.settings.loans || [];
-  const idx = loans.findIndex((l) => l.id === loanId);
-  if (idx < 0) return;
-  const [loan] = loans.splice(idx, 1);
-  markDeleted("loan:" + loan.id);
-  save(); refreshAfterShelfChange();
-  showSnackbar("Back on the shelf", () => {
-    state.settings.loans.splice(idx, 0, loan);
-    unmarkDeleted("loan:" + loan.id);
-    save(); refreshAfterShelfChange();
-  });
-  haptic(8);
-}
-
-function reinstateItem(shelfId, itemId) {
-  const shelf = findShelf(shelfId);
-  if (!shelf) return;
-  const idx = shelf.items.findIndex((x) => x.id === itemId);
-  if (idx < 0) return;
-  const [item] = shelf.items.splice(idx, 1);
-  const which = item.from === "morning" ? "morning" : "anchors";
-  state.settings.lists[which].push(item);
-  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
-  if (loanIdx >= 0) state.settings.loans.splice(loanIdx, 1);
-  delete item.from;
-  save(); refreshAfterShelfChange();
-  showSnackbar("Back on Home", () => {
-    const backAt = state.settings.lists[which].findIndex((x) => x.id === itemId);
-    if (backAt >= 0) state.settings.lists[which].splice(backAt, 1);
-    item.from = which;
-    shelf.items.splice(idx, 0, item);
-    save(); refreshAfterShelfChange();
-  });
-  haptic(8);
-}
-
-function addGentleItem() {
-  const nameEl = $("#gentleName"), noteEl = $("#gentleNote");
-  const text = ((nameEl && nameEl.value) || "").trim();
-  if (!text) { showSnackbar("Give it a name first"); return; }
-  const select = $("#gentleShelfSelect");
-  const shelf = findShelf(select && select.value) || findShelf(activeShelfId) || shelves()[0];
-  if (!shelf) return;
-  shelf.items.unshift({
-    id: "g_" + Date.now().toString(36),
-    text,
-    note: ((noteEl && noteEl.value) || "").trim(),
-    small: "The smallest version is enough.",
-  });
-  if (nameEl) nameEl.value = "";
-  if (noteEl) noteEl.value = "";
-  const form = $("#gentleForm");
-  if (form) form.hidden = true;
-  save(); renderShelves(); renderShelfOption();
-  haptic(8);
-}
-
-function removeGentleItem(shelfId, itemId) {
-  const shelf = findShelf(shelfId);
-  if (!shelf) return;
-  const idx = shelf.items.findIndex((x) => x.id === itemId);
-  if (idx < 0) return;
-  const [gone] = shelf.items.splice(idx, 1);
-  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
-  let loan = null;
-  if (loanIdx >= 0) loan = state.settings.loans.splice(loanIdx, 1)[0];
-  markDeleted("shelf:" + shelfId + ":" + gone.id);
-  if (loan) markDeleted("loan:" + loan.id);
-  save(); refreshAfterShelfChange();
-  showSnackbar("Removed " + gone.text, () => {
-    shelf.items.splice(idx, 0, gone);
-    if (loan) state.settings.loans.splice(loanIdx, 0, loan);
-    unmarkDeleted("shelf:" + shelfId + ":" + gone.id);
-    if (loan) unmarkDeleted("loan:" + loan.id);
-    save(); refreshAfterShelfChange();
-  });
-}
-
-function addShelf() {
-  const shelf = {
-    id: "sh_" + Date.now().toString(36),
-    name: "New shelf",
-    note: "",
-    items: [],
-  };
-  state.settings.shelves.push(shelf);
-  activeShelfId = shelf.id;
-  save(); renderShelves();
-  const input = $("#shelvesList .shelf-name-input");
-  if (input) { input.focus(); input.select(); }
-}
-
-function removeShelf(shelfId) {
-  const idx = shelves().findIndex((s) => s.id === shelfId);
-  if (idx < 0 || shelves().length < 2) return;
-  const shelf = shelves()[idx];
-  if ((shelf.items || []).length) { showSnackbar("Move its items first"); return; }
-  shelves().splice(idx, 1);
-  markDeleted("shelf:" + shelfId);
-  if (activeShelfId === shelfId) activeShelfId = shelves()[0].id;
-  save(); renderShelves();
-  showSnackbar("Removed empty shelf", () => {
-    shelves().splice(idx, 0, shelf);
-    unmarkDeleted("shelf:" + shelfId);
-    activeShelfId = shelfId;
-    save(); renderShelves();
-  });
-}
-
-/* One quiet idea, only from Small starts, revealed only when asked for. */
-function smallStartsPool() {
-  const shelf = findShelf("sh_smallstarts");
-  if (!shelf) return [];
-  const base = (shelf.items || []).filter((item) => item && !loanFor(item.id));
-  const hour = new Date().getHours();
-  const prefer = hour < 12
-    ? (it) => /push|walk|stretch|move/i.test((it.note || "") + " " + (it.text || ""))
-    : (it) => /tidy|read|reply|email|message/i.test((it.note || "") + " " + (it.text || ""));
-  const filtered = base.filter(prefer);
-  return filtered.length >= 2 ? filtered : base;
-}
-function chooseSmallStart() {
-  const pool = smallStartsPool();
-  if (!pool.length) return;
-  const current = $("#shelfOption")?.dataset.itemId;
-  let idx = Number(state.settings.shelfOptionIndex) || 0;
-  if (pool.length > 1 && pool[idx % pool.length]?.id === current) {
-    idx = (idx + 1) % pool.length;
-  } else {
-    idx %= pool.length;
-  }
-  state.settings.shelfOptionIndex = idx;
-  state.settings.shelfOptionDay = todayKey();
-  saveQuiet();   // looking is not a data change
-  renderShelfOption();
-  haptic(6);
-}
-function renderShelfOption() {
-  const entry = $("#ideaEntry"), box = $("#shelfOption"), btn = $("#ideaBtn");
-  if (!entry || !box) return;
-  const pool = smallStartsPool();
-  if (!pool.length) {
-    entry.hidden = true;
-    box.hidden = true;
-    return;
-  }
-  entry.hidden = false;
-  const today = todayKey();
-  if (state.settings.shelfOptionDay !== today && state.settings.shelfOptionIndex < 0) {
-    state.settings.shelfOptionIndex = 0;
-    saveQuiet();
-  }
-  const revealed = state.settings.shelfOptionDay === today
-    && Number(state.settings.shelfOptionIndex) >= 0;
-  if (btn) btn.hidden = revealed;
-  box.hidden = !revealed;
-  if (!revealed) return;
-  const idx = Number(state.settings.shelfOptionIndex) % pool.length;
-  const picked = pool[idx];
-  const text = $("#shelfOptionText"), name = $("#shelfOptionName");
-  if (text) text.textContent = picked.small || "The smallest version is enough.";
-  if (name) name.textContent = picked.text;
-  const another = $("#shelfOptionAnother");
-  if (another) another.hidden = pool.length < 2;
-  box.dataset.itemId = picked.id;
-  box.dataset.shelfId = "sh_smallstarts";
-}
-
-/* ---------- A 30-day sequence, loaded in or out at will ----------
-   It is an overlay on the rhythm, not another list. Loading out only hides the
-   card; the step, the dates and the gentle marks stay exactly where they were.
-   There is no calendar pressure and nothing to catch up on. */
-function currentProgramStep() {
-  const p = state.settings.program30 || {};
-  const i = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
-  return PROGRAM30[i] || null;
-}
-/* Quiet labels drawn from the focus-area words used in Med Log, so both apps
-   describe the same kinds of care the same way. */
-const PROGRAM_KIND_LABELS = {
-  nick: "Awareness",
-  rest: "Quiet repeat",
-  sleep: "Sleep",
-  body: "Movement",
-  day: "Everyday",
-  connection: "Connection",
-};
-/* When even the invitation feels like too much, there is a smaller way in.
-   Each line is permission to stop, never a second thing to do. */
-const PROGRAM_SMALLER = {
-  nick: "Just open the page. No listening needed — that's enough.",
-  rest: "One breath, then you can stop.",
-  sleep: "Just notice what time it is. That's all.",
-  body: "Just feel your feet for a moment.",
-  day: "Just look around once. No need to do anything.",
-  connection: "Just think of someone. No message needed.",
-};
-function fillProgramCard(prefix, p, step, at) {
-  const q = (name) => $("#" + prefix + name);
-  const card = q("Card");
-  if (!card) return;
-  card.hidden = !p.loaded || !step;
-  if (card.hidden) return;
-  const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
-  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + ", at your pace";
-  const gap = q("Gap");
-  if (gap) {
-    const days = daysSinceKey(p.lastDoneAt);
-    gap.hidden = !(p.loaded && days !== null && days >= 2);
-    if (!gap.hidden) gap.textContent = "Your step is right where you left it. Nothing to catch up on.";
-  }
-  if (kind) kind.textContent = PROGRAM_KIND_LABELS[step.kind] || "";
-  if (title) title.textContent = step.title;
-  if (invite) invite.textContent = step.invitation;
-  const nick = q("Nick");
-  if (nick) {
-    nick.hidden = !step.nick;
-    if (step.nick) {
-      nick.href = NICK_URL;
-      nick.textContent = "Open Nick Moss · " + step.nick;
-      nick.setAttribute("aria-label", "Open the Nick Moss daily meditation in a new tab");
-    }
-  }
-  const optional = q("Optional");
-  if (optional) {
-    optional.hidden = !step.optional;
-    optional.textContent = step.optional || "";
-  }
-  const smaller = q("SmallerText");
-  if (smaller) smaller.textContent = PROGRAM_SMALLER[step.kind] || "Just be here for one breath.";
-  const last = p.step >= PROGRAM30.length - 1;
-  const done = q("Done");
-  if (done) done.textContent = last ? "Keep this step" : "That's enough";
-  const close = q("Close");
-  if (close) {
-    close.hidden = !last;
-    if (last) close.textContent = "That's the thirty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
-  }
-  const reflect = q("Reflect");
-  if (reflect) {
-    reflect.hidden = !last;
-    // Never move the caret out from under someone who is writing.
-    if (last && document.activeElement !== reflect && reflect.value !== (p.reflection || "")) {
-      reflect.value = p.reflection || "";
-    }
-  }
-}
-function renderProgramNote() {
-  const step = currentProgramStep();
-  const p = state.settings.program30 || {};
-  const val = (p.notes && step) ? (p.notes[step.id] || "") : "";
-  ["#programNote", "#programEveNote"].forEach((sel) => {
-    const el = $(sel);
-    if (el && document.activeElement !== el && el.value !== val) el.value = val;
-  });
-}
-function renderProgram() {
-  const more = $("#programMoreText"), load = $("#programLoadBtn");
-  const p = state.settings.program30 || {};
-  const step = currentProgramStep();
-  const at = Math.min(PROGRAM30.length, (Math.round(Number(p.step) || 0) + 1));
-  const nudge = $("#programHomeNudge");
-  if (nudge) nudge.hidden = !!p.loaded;
-  if (more) {
-    const marks = Object.keys(p.done || {}).filter((k) => p.done[k]).length;
-    more.textContent = p.loaded
-      ? "Your place is kept."
-      : (marks || p.startedAt)
-        ? "Kept where you left it. Loading in resumes there — nothing is lost."
-        : "Thirty small invitations, at your pace. Nothing to catch up on.";
-  }
-  if (load) load.textContent = p.loaded ? "Load out" : "Load in";
-  fillProgramCard("program", p, step, at);
-  fillProgramCard("programEve", p, step, at);
-  renderProgramNote();
-}
-function setProgramLoaded(loaded) {
-  const p = state.settings.program30;
-  if (!p) return;
-  p.loaded = !!loaded;
-  save();
-  renderProgram();
-  haptic(6);
-}
-function completeProgramStep() {
-  const p = state.settings.program30;
-  const step = currentProgramStep();
-  if (!p || !p.loaded || !step) return;
-  const before = {
-    step: p.step,
-    startedAt: p.startedAt,
-    lastDoneAt: p.lastDoneAt,
-    hadMark: Object.prototype.hasOwnProperty.call(p.done, step.id),
-    mark: p.done[step.id],
-  };
-  const today = todayKey();
-  p.done[step.id] = today;
-  p.lastDoneAt = today;
-  if (!p.startedAt) p.startedAt = today;
-  if (p.step < PROGRAM30.length - 1) p.step += 1;
-  save();
-  renderProgram();
-  haptic(8);
-  // An accidental tap is easy to make when you're tired — let it be undone.
-  showSnackbar("Kept. The next one is here whenever you want it.", () => {
-    p.step = before.step;
-    p.startedAt = before.startedAt;
-    p.lastDoneAt = before.lastDoneAt;
-    if (before.hadMark) p.done[step.id] = before.mark;
-    else p.done[step.id] = null;
-    save();
-    renderProgram();
-  });
-}
-
-/* Kept as a no-op so older callers stay harmless. Counts and "often" scores
-   have no place in the daily rhythm now. */
-function renderGentleStats() { return; }
-
-/* ---------- Open external links in real Safari on iPhone ----------
-   A home-screen PWA uses a separate web view, so iCloud Keychain autofill
-   doesn't reach sites like Kajabi. iOS 17+ understands the x-safari- scheme
-   and hands the URL to Safari. Everywhere else, the normal link is used. */
-function standaloneIOS() {
-  const ua = navigator.userAgent || "";
-  const ios = /iPad|iPhone|iPod/.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-  if (!ios) return false;
-  return navigator.standalone === true ||
-    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
-}
-
-function openExternalInSafari(e) {
-  if (!standaloneIOS()) return;
-  const a = e.target && e.target.closest && e.target.closest("a[href]");
-  if (!a) return;
-  const url = a.href;
-  if (!/^https?:\/\//i.test(url)) return;
-  if (url.indexOf(location.origin) === 0) return;
-  e.preventDefault();
-  window.location.href = "x-safari-" + url;
-}
-
-/* ---------- Copy any link to the clipboard ---------- */
-async function copyLink(url, label) {
-  let ok = false;
+// Handle magic-link redirect
+(async function handleAuthRedirect() {
   try {
-    if (navigator.clipboard && window.isSecureContext) {
-      await navigator.clipboard.writeText(url);
-      ok = true;
+    const { data } = await getSupabase().auth.getSession();
+    if (data && data.session) {
+      syncCfg.session = data.session;
+      saveSync(syncCfg);
+      renderSync();
+      setTimeout(() => syncNow({ silent: true }), 800);
     }
   } catch (e) {}
-  if (!ok) {
-    // older browsers and file:// pages don't expose the async API
-    try {
-      const ta = document.createElement("textarea");
-      ta.value = url;
-      ta.setAttribute("readonly", "");
-      ta.style.position = "fixed";
-      ta.style.opacity = "0";
-      document.body.appendChild(ta);
-      ta.select();
-      ok = document.execCommand("copy");
-      ta.remove();
-    } catch (e) {}
-  }
-  showSnackbar(ok ? `Copied ${label} link` : "Couldn't copy — long-press the link instead");
-  if (ok) haptic(8);
-}
-
-/* =====================================================================
-   EXPORT / IMPORT
-   ===================================================================== */
-function exportJSON() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `back-on-track-${todayKey()}.json`;
-  document.body.append(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-  showSnackbar("Backup saved to Downloads");
-}
-
-function importJSON(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(reader.result);
-      if (!parsed || typeof parsed !== "object") throw new Error("bad shape");
-      // merge: imported days/settings win where present, keep the rest
-      migrate(parsed);
-      // Respect updatedAt: an older file may add records, but it must not
-      // roll back newer settings/scalars (see audit P0-2).
-      const localStamp = Number(state.settings.updatedAt) || 0;
-      const incomingStamp = Number(parsed.settings && parsed.settings.updatedAt) || 0;
-      state = incomingStamp > localStamp
-        ? mergeState(state, parsed)
-        : mergeState(parsed, state);
-      save();
-      renderAll();
-      showSnackbar("Imported. Welcome back.");
-    } catch (e) {
-      showSnackbar("That file doesn't look like a Back on Track export.");
-    }
-  };
-  reader.readAsText(file);
-}
-
-/* Collections are merged by id so a pull or import can never quietly drop a
-   row the other device added. Later values win for the same id. */
-function mergeCollection(localList, incomingList, deleted, prefix) {
-  prefix = prefix || "";
-  const byId = new Map();
-  [localList, incomingList].forEach((list) => {
-    (Array.isArray(list) ? list : []).forEach((item) => {
-      if (!item || typeof item !== "object") return;
-      const key = prefix + String(item.id || JSON.stringify(item));
-      if (deleted && deleted[key]) return;
-      byId.set(key, item);
-    });
-  });
-  return [...byId.values()].filter((item) =>
-    !deleted || !deleted[prefix + String(item.id || JSON.stringify(item))]);
-}
-function mergeShelves(localShelves, incomingShelves, deleted) {
-  const byId = new Map();
-  [localShelves, incomingShelves].forEach((list) => {
-    (Array.isArray(list) ? list : []).forEach((shelf) => {
-      if (!shelf || typeof shelf !== "object" || !shelf.id) return;
-      if (deleted && deleted["shelf:" + shelf.id]) return;
-      const previous = byId.get(shelf.id);
-      byId.set(shelf.id, previous
-        ? { ...previous, ...shelf, items: mergeCollection(previous.items, shelf.items, deleted, "shelf:" + shelf.id + ":") }
-        : { ...shelf, items: mergeCollection([], shelf.items, deleted, "shelf:" + shelf.id + ":") });
-    });
-  });
-  return [...byId.values()].filter((shelf) => !deleted || !deleted["shelf:" + shelf.id]);
-}
-function mergeDay(localDay, incomingDay, incomingWins) {
-  const a = localDay && typeof localDay === "object" ? localDay : {};
-  const b = incomingDay && typeof incomingDay === "object" ? incomingDay : {};
-  const out = { ...freshDay(), ...a };
-  Object.keys(b).forEach((key) => {
-    const value = b[key];
-    if (value === undefined || value === null) return;
-    if (key === "checks") return;
-    if (key === "note" || key === "intention") {
-      if (incomingWins) out[key] = value;
-      else if (value !== "" && (a[key] === "" || a[key] == null)) out[key] = value;
-    } else if (incomingWins) {
-      if (value !== "") out[key] = value;
-    } else if (value !== "" && (a[key] === "" || a[key] == null)) {
-      out[key] = value;
-    }
-  });
-  out.checks = { ...(a.checks || {}), ...(b.checks || {}) };
-  return out;
-}
-function mergeState(local, incoming) {
-  if (!incoming || typeof incoming !== "object") return local;
-  migrate(incoming);   // older exports and remote records get the same repair
-  const base = freshState().settings;
-  const a = local.settings || {};
-  const b = incoming.settings || {};
-  const mergedSettings = Object.assign({}, base, a, b);
-  const incomingWins = (Number(b.updatedAt) || 0) > (Number(a.updatedAt) || 0);
-  // The 30-day marks are a union on import/sync: the newer device wins the
-  // scalar fields, but no device's gentle marks are erased.
-  if (a.program30 || b.program30) {
-    const pa = a.program30 || {}, pb = b.program30 || {};
-    const num = (v, fallback) => (typeof v === "number" && isFinite(v) ? v : fallback);
-    const done = { ...(pa.done || {}), ...(pb.done || {}) };
-    let consecutive = 0;
-    while (consecutive < PROGRAM30.length && done[PROGRAM30[consecutive].id]) consecutive++;
-    const winner = (pb.lastDoneAt || "") > (pa.lastDoneAt || "") ? pb : pa;
-    const other = winner === pb ? pa : pb;
-    const step = Math.max(0, Math.min(PROGRAM30.length - 1,
-      Math.max(num(winner.step, 0), num(other.step, 0), consecutive)));
-    mergedSettings.program30 = {
-      loaded: typeof winner.loaded === "boolean" ? winner.loaded
-        : (typeof other.loaded === "boolean" ? other.loaded : false),
-      step,
-      startedAt: winner.startedAt || other.startedAt || "",
-      lastDoneAt: winner.lastDoneAt || other.lastDoneAt || "",
-      done,
-      notes: { ...(pa.notes || {}), ...(pb.notes || {}) },
-      reflection: typeof winner.reflection === "string" ? winner.reflection
-        : (winner.reflection || other.reflection || ""),
-    };
-  }
-  ["morning", "anchors", "instead"].forEach((key) => {
-    mergedSettings.lists = mergedSettings.lists || {};
-    mergedSettings.lists[key] = mergeCollection(
-      (a.lists || {})[key], (b.lists || {})[key], mergedSettings.deleted, "");
-  });
-  mergedSettings.deleted = mergeDeleted(a.deleted, b.deleted);
-  mergedSettings.shelves = mergeShelves(a.shelves, b.shelves, mergedSettings.deleted);
-  mergedSettings.loans = mergeCollection(a.loans, b.loans, mergedSettings.deleted, "loan:");
-  mergedSettings.myLinks = mergeCollection(a.myLinks, b.myLinks, mergedSettings.deleted, "");
-
-  const days = { ...(local.days || {}) };
-  Object.keys(incoming.days || {}).forEach((key) => {
-    days[key] = mergeDay(days[key], incoming.days[key], incomingWins);
-  });
-  const merged = { settings: mergedSettings, days };
-  unifyNick(merged);   // repair the union, not just each side
-  return merged;
-}
+})();
 
 /* =====================================================================
    EVENT WIRING
@@ -5145,21 +4088,26 @@ function wire() {
     e.target.value = "";
   });
 
-  // sync — a short code pairs home-screen apps too; tokens stay behind Set up
-  const pairInput = $("#syncPairCode");
-  if (pairInput) pairInput.addEventListener("input", (e) => {
-    e.target.value = cleanPairCode(e.target.value);
-  });
-  $("#syncPair").addEventListener("click", () => {
-    pairWithCode(pairInput && pairInput.value);
-  });
-  $("#syncToken").addEventListener("change", (e) => {
-    syncCfg.token = e.target.value.trim(); saveSync(syncCfg);
-  });
-  $("#syncGist").addEventListener("change", (e) => {
-    syncCfg.gistId = e.target.value.trim(); saveSync(syncCfg);
-  });
-  $("#syncSetup").addEventListener("click", syncSetup);
+  // sync — email magic link
+  const emailInput = $("#syncPairCode");
+  if (emailInput) {
+    emailInput.type = "email";
+    emailInput.placeholder = "you@example.com";
+    emailInput.removeAttribute("maxlength");
+    emailInput.removeAttribute("pattern");
+  }
+  const sendBtn = $("#syncPair");
+  if (sendBtn) {
+    sendBtn.textContent = "Send sign-in link";
+    sendBtn.addEventListener("click", () => {
+      syncSignIn(emailInput && emailInput.value);
+    });
+  }
+  const signOutBtn = $("#syncSetup");
+  if (signOutBtn) {
+    signOutBtn.textContent = "Sign out";
+    signOutBtn.addEventListener("click", syncSignOut);
+  }
   $("#syncNow").addEventListener("click", syncNow);
 }
 
@@ -5169,23 +4117,19 @@ $("#versionTag").textContent = VERSION;
 wire();
 renderAll();
 showTab(initialTab());
-// if sync is set up: pull once on open, and flush any pending change when you
-// leave the app (best effort on mobile — GitHub may cut off a hidden page)
 if (syncCfg.pendingSync) setTimeout(() => syncNow({ silent: true }), 300);
-if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) setTimeout(() => syncNow({ silent: true }), 800);
+setTimeout(() => syncNow({ silent: true }), 800);
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "hidden" && syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
+  if (document.visibilityState === "hidden") {
     syncCfg.pendingSync = true; saveSync(syncCfg);
     clearTimeout(syncTimer);
     syncNow({ silent: true });
   }
 });
 window.addEventListener("pagehide", () => {
-  if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
-    syncCfg.pendingSync = true; saveSync(syncCfg);
-    clearTimeout(syncTimer);
-    syncNow({ silent: true });
-  }
+  syncCfg.pendingSync = true; saveSync(syncCfg);
+  clearTimeout(syncTimer);
+  syncNow({ silent: true });
 });
 document.addEventListener("freeze", () => {
   if (syncCfg.gistId && (syncIsAutomatic() || syncCfg.token)) {
