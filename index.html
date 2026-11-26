@@ -762,6 +762,10 @@
     margin-bottom: var(--s6);
     border: 1px solid var(--line);
   }
+  .sync-nudge {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
   .card > h2, .card > .card-heading h2 {
     font-family: Georgia, "Times New Roman", serif;
     font-size: var(--t-card);
@@ -1523,6 +1527,12 @@
     <button type="button" class="btn small" data-cancel-editor="#wakeEdit">Cancel</button>
   </div>
 
+  <section class="card sync-nudge" id="syncNudge" hidden>
+    <h2><span class="dot"></span>Sync your devices</h2>
+    <p class="hint">Sign in with your email to keep your data in step across devices.</p>
+    <button type="button" class="btn primary" id="syncNudgeBtn">Sign in to sync</button>
+  </section>
+
   <section class="invitation" id="inviteCard" aria-label="When you don't know what to do">
     <div class="idea-card" id="ideaEntry">
       <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
@@ -1811,18 +1821,6 @@
       </div>
     </section>
 
-    <section class="card" id="dataCard">
-      <h2><span class="dot"></span>Your data</h2>
-      <div class="btn-row">
-        <button type="button" class="btn small" id="exportBtn">Export</button>
-        <button type="button" class="btn small" id="importBtn">Import</button>
-        <input type="file" id="importFile" accept="application/json" hidden />
-      </div>
-      <details class="disclosure">
-        <summary>About your data</summary>
-        <p class="hint">Your data lives on this device. If device sync is set up, the same private copy is kept in your Gist. Export to back it up or move it; importing adds to what's already here and never erases it.</p>
-      </details>
-    </section>
   </div><!-- /screen-links -->
 
   <!-- ============ MORE (fifth bottom tab) ============ -->
@@ -1871,6 +1869,19 @@
         <button type="button" class="btn small" id="gentleSave">Add</button>
       </div>
       <p class="hint" id="shelfHint">Tap a shelf name to switch. Tap an item for a much smaller version. Borrow something into your day whenever you want it back — it stays on its shelf. Swipe a row to remove it; Undo is there if you need it.</p>
+    </section>
+
+    <section class="card" id="dataCard">
+      <h2><span class="dot"></span>Your data</h2>
+      <div class="btn-row">
+        <button type="button" class="btn small" id="exportBtn">Export</button>
+        <button type="button" class="btn small" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json" hidden />
+      </div>
+      <details class="disclosure">
+        <summary>About your data</summary>
+        <p class="hint">Your data lives on this device. If device sync is set up, the same private copy is kept in your Gist. Export to back it up or move it; importing adds to what's already here and never erases it.</p>
+      </details>
     </section>
 
   </div>
@@ -1932,7 +1943,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v56";
+const VERSION = "v57";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2535,6 +2546,7 @@ function renderAll() {
   renderShelfOption();
   renderProgram();
   renderSync();
+  renderSyncNudge();
   if (focusOn) renderFocus();
 }
 
@@ -3748,6 +3760,12 @@ function loadSync() { try { return JSON.parse(localStorage.getItem(SYNC_KEY) || 
 function saveSync(cfg) { try { localStorage.setItem(SYNC_KEY, JSON.stringify(cfg)); } catch (e) { console.warn("Could not save sync settings:", e); } }
 function syncStatus(text) { const el = $("#syncStatus"); if (el) el.textContent = text; }
 function syncIsAutomatic() { return !!syncCfg.session; }
+function renderSyncNudge() {
+  const card = $("#syncNudge");
+  if (!card) return;
+  const session = syncCfg.session;
+  card.hidden = !!session;
+}
 function renderSync() {
   const s = $("#syncStatus");
   if (!s) return;
@@ -4109,6 +4127,12 @@ function wire() {
     signOutBtn.addEventListener("click", syncSignOut);
   }
   $("#syncNow").addEventListener("click", syncNow);
+  const syncNudgeBtn = $("#syncNudgeBtn");
+  if (syncNudgeBtn) syncNudgeBtn.addEventListener("click", () => {
+    showTab("links");
+    const input = $("#syncPairCode");
+    if (input) input.focus();
+  });
 }
 
 /* ---------- Boot ---------- */
