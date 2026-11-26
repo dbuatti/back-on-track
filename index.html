@@ -137,10 +137,26 @@
   .today-intro {
     background: linear-gradient(180deg, var(--sun-soft), var(--card));
   }
+  .today-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
   .today-intro .greeting {
     font-size: 20px;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin: 0;
+  }
+  .day-count {
+    font-size: 13px;
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
   .today-intro .rot-intention { margin: 0 0 14px; }
   .progress-line {
@@ -367,7 +383,7 @@
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     padding: 18px 16px;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     border: 1px solid var(--line);
   }
   .card > h2 {
@@ -1049,7 +1065,10 @@
   <div class="sunday-note">Rest is the practice. 🌿<br />Nothing to do today but log your sleep.</div>
 
   <section class="card today-intro" id="todayCard">
-    <div class="greeting" id="greeting">A quiet day.</div>
+    <div class="today-top">
+      <div class="greeting" id="greeting">A quiet day.</div>
+      <div class="day-count" id="dayCount" aria-live="polite">0 / 0</div>
+    </div>
     <div class="rot-intention" id="rotIntention" title="Tap for another">A gentle word will wait here.</div>
     <div class="progress-line" id="progressLine"></div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -1312,7 +1331,7 @@
     </section>
   </div>
 
-  <div class="version" id="versionTag">v23</div>
+  <div class="version" id="versionTag">v24</div>
 </main>
 
 <nav class="bottom-nav" aria-label="Main menu">
@@ -1363,7 +1382,7 @@ const SYNC_KEY = "bot.sync.v1";   // credentials stay out of JSON exports
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v23";
+const VERSION = "v24";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1822,6 +1841,8 @@ function renderProgress() {
       ? `${done} of ${total} gentle steps today`
       : "A quiet day ahead.";
   }
+  const count = $("#dayCount");
+  if (count) count.textContent = total ? `${done} / ${total}` : "—";
   const fill = $("#progressFill");
   if (fill) fill.style.width = total ? Math.round((done / total) * 100) + "%" : "0%";
 }
@@ -2369,7 +2390,11 @@ function renderWakeLine() {
   const line = $("#wakeLine");
   const btn = $("#homeWakeBtn");
   if (btn) btn.textContent = rec.wakeTime ? "☀  Update wake" : "☀  Log wake";
-  if (line) line.textContent = rec.wakeTime ? `Woke ${rec.wakeTime} today — tap to change it.` : "";
+  if (line) {
+    line.textContent = rec.wakeTime
+      ? `Woke ${rec.wakeTime} today — tap to change it.`
+      : "No rush — log it whenever you're ready.";
+  }
 }
 
 function fmtDuration(mins) {

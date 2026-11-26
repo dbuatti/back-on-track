@@ -57,7 +57,7 @@ The JS is organised in labelled sections inside one `<script>`:
 The bottom menu keeps each screen light:
 
 - **Home** — a "last night" banner (bedtime, wake and duration, with a small ✎ to
-  correct the time), greeting, a little
+  correct the time), greeting with a quiet today count, a little
   italic note for the day, a soft progress strip, **Start focus mode**, **Log wake**,
   morning checklist, daily anchors.
 - **Wind down** — "instead of gaming", bedtime/wake + mood, a sleep-trend strip
@@ -99,7 +99,8 @@ Nothing pulses or slides for anyone who has asked iOS to reduce motion. Text mee
 WCAG AA contrast in every time-of-day phase; checklist items are real buttons whose
 spoken name matches the visible label. Mood buttons and *Edit lists* expose their
 on/off state to screen readers, sync and focus status announce quietly, keyboard
-users get a clear focus ring, and small trend labels stay at 11px. A Lighthouse run
+users get a clear focus ring, small trend labels stay at 11px, and the Home count
+and wake prompt update in place. A Lighthouse run
 scores 100 for accessibility and best practices. Desktop gets a gentle hover tint;
 touch devices keep only the instant press feedback.
 
