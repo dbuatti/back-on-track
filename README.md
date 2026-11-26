@@ -17,6 +17,11 @@ slowly to eight minutes with repeat/rest steps. It can be **loaded in** or
 keeps the step, dates and gentle marks exactly where they were. Steps advance
 only when you tap *That's enough* — no calendar pressure, streak or catch-up.
 
+**v35** makes step-marking reversible with a five-second **Undo**, and imports /
+sync now union the per-step marks instead of letting a newer device erase marks
+made on another. The current step is a real heading, so the sequence reads cleanly
+with a screen reader.
+
 ## Run it
 
 - **Easiest:** open `index.html` directly in a browser. Everything works.
