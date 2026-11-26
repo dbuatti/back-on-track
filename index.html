@@ -467,6 +467,9 @@
     border-left: 3px solid var(--shelf, var(--accent));
     padding-left: calc(var(--s2) + 2px);
   }
+  .row-small { flex-basis: 100%; font-size: var(--t-small); color: var(--ink-soft); margin-top: var(--s1); }
+  .row-small summary { cursor: pointer; color: var(--ink-soft); }
+  .row-small p { margin: var(--s1) 0 0; }
   .shelf-picker {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -1477,6 +1480,7 @@
   <div class="focus-bar" id="focusBar">
     <button type="button" id="focusPrev" aria-label="Previous section">‹</button>
     <span class="focus-label" id="focusLabel" aria-live="polite"></span>
+    <span class="focus-hint">One section at a time is enough.</span>
     <button type="button" id="focusNext" aria-label="Next section">›</button>
     <button type="button" id="focusExit">Done</button>
   </div>
@@ -1845,7 +1849,8 @@
         <button type="button" class="btn small edit-toggle" id="shelfEditToggle" aria-pressed="false">Edit shelves</button>
       </div>
       <div class="shelf-chips" id="shelfChips" aria-label="Choose a shelf"></div>
-      <div id="shelvesList"></div>
+      <p class="hint" id="shelfNotice" aria-live="polite"></p>
+       <div id="shelvesList"></div>
       <details class="disclosure" id="movementGradual" hidden>
         <summary>Gradual movement, if you want</summary>
         <p class="hint">A sketch, not a schedule. Nothing here needs logging, and you can change or stop at any point.</p>
@@ -1932,7 +1937,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v43";
+const VERSION = "v44";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -1952,10 +1957,10 @@ const DEFAULT_LISTS = {
     { id: NICK_NATIVE_ID, text: NICK_TEXT, url: NICK_URL },
   ],
   anchors: [
-    { id: "a_walk",    text: "Walk" },
-    { id: "a_read",    text: "Reading", minutes: true },
-    { id: "a_journal", text: "Journal" },
-    { id: "a_offscreen", text: "One off-screen thing (tidy, stretch, piano)" },
+    { id: "a_walk",    text: "Walk", small: "To the end of the street and back." },
+    { id: "a_read",    text: "Reading", minutes: true, small: "Read one page." },
+    { id: "a_journal", text: "Journal", small: "Write one line." },
+    { id: "a_offscreen", text: "One off-screen thing (tidy, stretch, piano)", small: "Tidy one surface." },
   ],
   instead: [
     { id: "i_journal", text: "Open the journal and write three lines", tag: "gentle" },
@@ -2859,6 +2864,17 @@ function renderList(which) {
     rowParts.push(toggle);
     row.append(...rowParts);
 
+    // optional "even smaller" disclosure, mirroring shelves
+    if (item.small) {
+      const det = document.createElement("details");
+      det.className = "row-small";
+      const sum = document.createElement("summary");
+      sum.textContent = "Even smaller";
+      const p = document.createElement("p");
+      p.textContent = item.small;
+      det.append(sum, p);
+      row.append(det);
+    }
     // optional tap-to-open link (e.g. the guided meditation in Kajabi)
     if (item.url) {
       const a = document.createElement("a");
@@ -3924,7 +3940,15 @@ async function syncNow(opts = {}) {
       if (!silent) syncStatus("Pulled newer data from your sync.");
     } else if (!remote || localStamp > remoteStamp) {
       if (automatic) {
-        await syncFetch("PUT", SYNC_ENDPOINT, state);
+        try { await syncFetch("PUT", SYNC_ENDPOINT, { state: state, baseUpdatedAt: localStamp }); }
+catch (e) {
+  if (e && e.status === 409) {
+    const reply = await syncFetch("GET", SYNC_ENDPOINT);
+    const remoteState = reply && reply.state ? reply.state : null;
+    if (remoteState) { applyingRemote = true; state = mergeState(state, remoteState); applyingRemote = false; saveQuiet(); renderAll(); }
+    await syncFetch("PUT", SYNC_ENDPOINT, { state: state, baseUpdatedAt: Number(state.settings.updatedAt) || 0 });
+  } else { throw e; }
+}
       } else {
         await syncFetch("PATCH", "https://api.github.com/gists/" + encodeURIComponent(id), {
           files: { "back-on-track.json": { content: JSON.stringify(state, null, 2) } },
@@ -4105,7 +4129,27 @@ function renderMovementLadder() {
   }
 }
 
+function renderShelfNotice() {
+  const el = $("#shelfNotice");
+  if (!el) return;
+  const recent = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    recent.push(todayKey(d));
+  }
+  let candidate = null;
+  (state.settings.loans || []).forEach((loan) => {
+    const found = allShelfItems().find(({ item }) => item.id === loan.itemId);
+    if (!found) return;
+    const count = recent.filter((k) => state.days[k] && state.days[k].checks && state.days[k].checks[loan.id]).length;
+    if (count >= 2 && !candidate) candidate = { loan, item: found.item, count };
+  });
+  if (!candidate) { el.textContent = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.textContent = candidate.item.text + " kept showing up. Keep it close?";
+}
 function renderShelves() {
+  renderShelfNotice();
   renderMovementLadder();
   const chips = $("#shelfChips");
   const box = $("#shelvesList");
@@ -4604,6 +4648,15 @@ function fillProgramCard(prefix, p, step, at) {
     }
   }
 }
+function renderProgramNote() {
+  const step = currentProgramStep();
+  const p = state.settings.program30 || {};
+  const val = (p.notes && step) ? (p.notes[step.id] || "") : "";
+  ["#programNote", "#programEveNote"].forEach((sel) => {
+    const el = $(sel);
+    if (el && document.activeElement !== el && el.value !== val) el.value = val;
+  });
+}
 function renderProgram() {
   const more = $("#programMoreText"), load = $("#programLoadBtn");
   const p = state.settings.program30 || {};
@@ -4622,6 +4675,7 @@ function renderProgram() {
   if (load) load.textContent = p.loaded ? "Load out" : "Load in";
   fillProgramCard("program", p, step, at);
   fillProgramCard("programEve", p, step, at);
+  renderProgramNote();
 }
 function setProgramLoaded(loaded) {
   const p = state.settings.program30;
