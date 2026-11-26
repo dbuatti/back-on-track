@@ -17,6 +17,7 @@
 <meta name="apple-mobile-web-app-title" content="Back on Track" />
 <link rel="manifest" href="manifest.webmanifest" />
 <link rel="apple-touch-icon" href="icon-192.png" />
+<link rel="icon" href="icon-192.png" />
 <title>Back on Track</title>
 <meta name="description" content="A calm daily rhythm for sleep, gentle anchors and small next steps." />
 <style>
@@ -28,11 +29,11 @@
     --card: #fffaf2;
     --field: #fffef9;
     --ink: #3a2f28;
-    --ink-soft: #7a6a5a;
+    --ink-soft: #6a5a4a;
     --line: #e8d9c8;
     --control-line: #e8d9c8;
     --accent: #c96a4a;
-    --accent-deep: #a85438;
+    --accent-deep: #9a4a30;
     --accent-soft: #f2e0d8;
     --sun: #e0a85a;
     --sun-soft: #f5e6c8;
@@ -1944,7 +1945,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v62";
+const VERSION = "v64";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2429,6 +2430,158 @@ function allShelfItems() {
 }
 function mirrorLegacyShelf() {
   state.settings.gentleItems = allShelfItems().map(({ item }) => item);
+}
+
+/* Collections are merged by id so a pull or import can never quietly drop a
+   row the other device added. Later values win for the same id. */
+function mergeCollection(localList, incomingList, deleted, prefix) {
+  prefix = prefix || "";
+  const byId = new Map();
+  [localList, incomingList].forEach((list) => {
+    (Array.isArray(list) ? list : []).forEach((item) => {
+      if (!item || typeof item !== "object") return;
+      const key = prefix + String(item.id || JSON.stringify(item));
+      if (deleted && deleted[key]) return;
+      byId.set(key, item);
+    });
+  });
+  return [...byId.values()].filter((item) =>
+    !deleted || !deleted[prefix + String(item.id || JSON.stringify(item))]);
+}
+function mergeShelves(localShelves, incomingShelves, deleted) {
+  const byId = new Map();
+  [localShelves, incomingShelves].forEach((list) => {
+    (Array.isArray(list) ? list : []).forEach((shelf) => {
+      if (!shelf || typeof shelf !== "object" || !shelf.id) return;
+      if (deleted && deleted["shelf:" + shelf.id]) return;
+      const previous = byId.get(shelf.id);
+      byId.set(shelf.id, previous
+        ? { ...previous, ...shelf, items: mergeCollection(previous.items, shelf.items, deleted, "shelf:" + shelf.id + ":") }
+        : { ...shelf, items: mergeCollection([], shelf.items, deleted, "shelf:" + shelf.id + ":") });
+    });
+  });
+  return [...byId.values()].filter((shelf) => !deleted || !deleted["shelf:" + shelf.id]);
+}
+function mergeDay(localDay, incomingDay, incomingWins) {
+  const a = localDay && typeof localDay === "object" ? localDay : {};
+  const b = incomingDay && typeof incomingDay === "object" ? incomingDay : {};
+  const out = { ...freshDay(), ...a };
+  Object.keys(b).forEach((key) => {
+    const value = b[key];
+    if (value === undefined || value === null) return;
+    if (key === "checks") return;
+    if (key === "note" || key === "intention") {
+      if (incomingWins) out[key] = value;
+      else if (value !== "" && (a[key] === "" || a[key] == null)) out[key] = value;
+    } else if (incomingWins) {
+      if (value !== "") out[key] = value;
+    } else if (value !== "" && (a[key] === "" || a[key] == null)) {
+      out[key] = value;
+    }
+  });
+  out.checks = { ...(a.checks || {}), ...(b.checks || {}) };
+  return out;
+}
+function mergeState(local, incoming) {
+  if (!incoming || typeof incoming !== "object") return local;
+  migrate(incoming);   // older exports and remote records get the same repair
+  const base = freshState().settings;
+  const a = local.settings || {};
+  const b = incoming.settings || {};
+  const mergedSettings = Object.assign({}, base, a, b);
+  const incomingWins = (Number(b.updatedAt) || 0) > (Number(a.updatedAt) || 0);
+  // The 30-day marks are a union on import/sync: the newer device wins the
+  // scalar fields, but no device's gentle marks are erased.
+  if (a.program30 || b.program30) {
+    const pa = a.program30 || {}, pb = b.program30 || {};
+    const num = (v, fallback) => (typeof v === "number" && isFinite(v) ? v : fallback);
+    const done = { ...(pa.done || {}), ...(pb.done || {}) };
+    let consecutive = 0;
+    while (consecutive < PROGRAM30.length && done[PROGRAM30[consecutive].id]) consecutive++;
+    const winner = (pb.lastDoneAt || "") > (pa.lastDoneAt || "") ? pb : pa;
+    const other = winner === pb ? pa : pb;
+    const step = Math.max(0, Math.min(PROGRAM30.length - 1,
+      Math.max(num(winner.step, 0), num(other.step, 0), consecutive)));
+    // reflection: a newer device arriving with an empty line must not wipe
+    // one you wrote (v37). Keep the first non-empty value, winner first.
+    const reflection = (typeof winner.reflection === "string" && winner.reflection.trim())
+      ? winner.reflection
+      : (typeof other.reflection === "string" && other.reflection.trim())
+        ? other.reflection
+        : (winner.reflection || other.reflection || "");
+    mergedSettings.program30 = {
+      loaded: typeof winner.loaded === "boolean" ? winner.loaded
+        : (typeof other.loaded === "boolean" ? other.loaded : false),
+      step,
+      startedAt: winner.startedAt || other.startedAt || "",
+      lastDoneAt: winner.lastDoneAt || other.lastDoneAt || "",
+      done,
+      notes: { ...(pa.notes || {}), ...(pb.notes || {}) },
+      reflection,
+    };
+  }
+  // Lists merged by id, with deleted-tombstone respect.
+  ["morning", "anchors", "instead"].forEach((key) => {
+    mergedSettings.lists = mergedSettings.lists || {};
+    mergedSettings.lists[key] = mergeCollection(
+      (a.lists || {})[key], (b.lists || {})[key], mergedSettings.deleted, "list:" + key + ":");
+  });
+  mergedSettings.deleted = mergeDeleted(a.deleted, b.deleted);
+  mergedSettings.shelves = mergeShelves(a.shelves, b.shelves, mergedSettings.deleted);
+  mergedSettings.loans = mergeCollection(a.loans, b.loans, mergedSettings.deleted, "loan:");
+  mergedSettings.myLinks = mergeCollection(a.myLinks, b.myLinks, mergedSettings.deleted, "");
+  // Fill missing settings fields from the loser so an older export can't
+  // erase a setting it never knew about (Object.assign already kept a then b).
+  // (no-op safety: ensure arrays)
+  if (!Array.isArray(mergedSettings.myLinks)) mergedSettings.myLinks = a.myLinks || b.myLinks || [];
+
+  const days = { ...(local.days || {}) };
+  Object.keys(incoming.days || {}).forEach((key) => {
+    days[key] = mergeDay(days[key], incoming.days[key], incomingWins);
+  });
+  const merged = { settings: mergedSettings, days };
+  unifyNick(merged);   // repair the union, not just each side
+  migrate(merged);     // ensure shape
+  return merged;
+}
+
+/* ---------- Export / Import ---------- */
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `back-on-track-${todayKey()}.json`;
+  document.body.append(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  showSnackbar("Backup saved to Downloads");
+  haptic(6);
+}
+
+function importJSON(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!parsed || typeof parsed !== "object") throw new Error("bad shape");
+      migrate(parsed);
+      const localStamp = Number(state.settings.updatedAt) || 0;
+      const incomingStamp = Number(parsed.settings && parsed.settings.updatedAt) || 0;
+      state = incomingStamp > localStamp
+        ? mergeState(state, parsed)
+        : mergeState(parsed, state);
+      save();
+      renderAll();
+      showSnackbar("Imported. Welcome back.");
+      haptic(8);
+    } catch (e) {
+      console.warn(e);
+      showSnackbar("That file doesn't look like a Back on Track export.");
+    }
+  };
+  reader.readAsText(file);
 }
 
 function save() {
@@ -3791,7 +3944,7 @@ async function syncSignIn(email) {
       options: { emailRedirectTo: location.origin + location.pathname }
     });
     if (error) throw error;
-    syncStatus("Check your email for the sign-in link, then return here.");
+    syncStatus("Check your email for the sign-in link, then open it in the same browser you use for Back on Track. On a home-screen app, open it in Safari first.");
     return true;
   } catch (e) {
     syncStatus("Couldn't send link: " + e.message);
@@ -3870,17 +4023,30 @@ async function syncNow(opts = {}) {
   }
 }
 
-// Handle magic-link redirect
+// Handle magic-link / OAuth redirect (PKCE code or implicit hash).
 (async function handleAuthRedirect() {
   try {
+    const url = new URL(location.href);
+    const code = url.searchParams.get("code");
+    if (code) {
+      try { await getSupabase().auth.exchangeCodeForSession(code); }
+      catch (e) { console.warn("code exchange:", e && e.message); }
+    }
     const { data } = await getSupabase().auth.getSession();
     if (data && data.session) {
       syncCfg.session = data.session;
       saveSync(syncCfg);
       renderSync();
+      // Tidy the address bar so a refresh doesn't reprocess the callback.
+      try {
+        url.searchParams.delete("code");
+        url.searchParams.delete("state");
+        url.hash = "";
+        window.history.replaceState({}, "", url.pathname + (url.search || ""));
+      } catch (e) {}
       setTimeout(() => syncNow({ silent: true }), 800);
     }
-  } catch (e) {}
+  } catch (e) { console.warn("auth redirect:", e && e.message); }
 })();
 
 
