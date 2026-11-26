@@ -1959,7 +1959,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v53";
+const VERSION = "v54";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3768,7 +3768,6 @@ function getSupabase() {
   if (!syncClient) syncClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   return syncClient;
 }
-let syncCfg = loadSync();
 let syncTimer = null, syncBusy = false, syncAgain = false, applyingRemote = false;
 let syncError = null;
 
