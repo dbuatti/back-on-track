@@ -54,18 +54,21 @@ The JS is organised in labelled sections inside one `<script>`:
 
 The bottom menu keeps each screen light:
 
-- **Home** — greeting, a little italic note for the day, a soft progress strip,
-  **Start focus mode**, **Log wake**, morning checklist, daily anchors.
+- **Home** — a "last night" banner (bedtime, wake and duration), greeting, a little
+  italic note for the day, a soft progress strip, **Start focus mode**, **Log wake**,
+  morning checklist, daily anchors.
 - **Wind down** — "instead of gaming", bedtime/wake + mood, a sleep-trend strip
-  (last 14 nights with an average and usual wake time), a short note on waking,
-  and the soft-dot week.
+  (last 21 nights with an average and usual wake time), a short note on waking,
+  and the soft-dot week. All log buttons open a small time picker, prefilled with
+  *now* but editable, so a late log can still record the real time.
 - **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
   onto its screen, and skips hidden sections on Sunday.
 - **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`); direct
   links to FNH Study Hub and Comm Analytics (URLs from `~/Projects/the-door/apps.yaml`,
   so they open in the browser on this device rather than launching on the mini);
   a `?search=fnh` shortcut for everything else; device sync; the ⛈️ Tool kit button
-  (`thecalmafter.vercel.app`); and Export/Import.
+  (`thecalmafter.vercel.app`); and Export/Import. Every link has a small **⧉** button
+  to copy its URL to the clipboard (with a fallback for older browsers).
 
   Note: The Door's `?app=<id>` asks the server to open the app on its own Mac, which
   doesn't show anything on an iPhone. That's why the useful shortcuts here use the
