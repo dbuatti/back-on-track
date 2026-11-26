@@ -1943,7 +1943,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v58";
+const VERSION = "v59";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3961,6 +3961,704 @@ function removeMyLink(id) {
     state.settings.myLinks.splice(idx, 0, gone);
     save(); renderMyLinks();
   });
+}
+
+/* ---------- More: named shelves, not a dumping drawer ---------- */
+function shelves() { return state.settings.shelves || []; }
+function findShelf(id) { return shelves().find((s) => s.id === id) || null; }
+
+/* Four quiet shelf tones. Known shelves keep their own; a shelf you add
+   borrows the next tone in order, so there is nothing to configure. */
+const SHELF_TONES = {
+  sh_notfeeling: "clay",
+  sh_keepclose: "slate",
+  sh_movement: "green",
+  sh_smallstarts: "amber",
+};
+const SHELF_TONE_CYCLE = ["clay", "slate", "green", "amber"];
+function toneForShelf(shelf) {
+  if (!shelf) return "green";
+  if (SHELF_TONES[shelf.id]) return SHELF_TONES[shelf.id];
+  const i = shelves().indexOf(shelf);
+  return SHELF_TONE_CYCLE[(i < 0 ? 0 : i) % SHELF_TONE_CYCLE.length];
+}
+function findShelfItem(itemId) {
+  for (const shelf of shelves()) {
+    const item = (shelf.items || []).find((x) => x.id === itemId);
+    if (item) return { shelf, item };
+  }
+  return null;
+}
+function loanFor(itemId) {
+  return (state.settings.loans || []).find((l) => l.itemId === itemId) || null;
+}
+
+function renderGentle() {
+  renderShelves();
+  renderGentleStats();
+}
+
+/* A walking sketch derived from one optional number. No tracking, no dates,
+   no targets — each step is only there if it's wanted. */
+function renderMovementLadder() {
+  const wrap = $("#movementGradual");
+  if (!wrap) return;
+  wrap.hidden = activeShelfId !== "sh_movement";
+  if (wrap.hidden) return;
+  const base = Math.max(5, Math.round(Number(state.settings.walkStartMinutes) || 10));
+  const select = $("#walkStart");
+  if (select && document.activeElement !== select) select.value = String(base);
+  const steps = [base, base + 5, base + 10, base + 15, base + 20, base + 30];
+  const labels = ["now", "a little later", "later", "after a while", "in a few months", "whenever you're ready"];
+  const line = $("#walkLadder");
+  if (line) {
+    line.textContent = "Walk: " + steps.map((m, i) =>
+      (i ? labels[i] + " " : "") + m + " minutes").join(" · ")
+      + ". Or simply go a little further than last time — only when that feels right."
+      + " Stay at any step as long as you like.";
+  }
+}
+
+function renderShelfNotice() {
+  const el = $("#shelfNotice");
+  if (!el) return;
+  const recent = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    recent.push(todayKey(d));
+  }
+  let candidate = null;
+  (state.settings.loans || []).forEach((loan) => {
+    const found = allShelfItems().find(({ item }) => item.id === loan.itemId);
+    if (!found) return;
+    const count = recent.filter((k) => state.days[k] && state.days[k].checks && state.days[k].checks[loan.id]).length;
+    if (count >= 2 && !candidate) candidate = { loan, item: found.item, count };
+  });
+  if (!candidate) { el.textContent = ""; el.hidden = true; return; }
+  el.hidden = false;
+  el.textContent = candidate.item.text + " kept showing up. Keep it close?";
+}
+function renderShelves() {
+  renderShelfNotice();
+  renderMovementLadder();
+  const chips = $("#shelfChips");
+  const box = $("#shelvesList");
+  const select = $("#gentleShelfSelect");
+  if (!chips || !box) return;
+  const all = shelves();
+  if (!all.length) {
+    state.settings.shelves = JSON.parse(JSON.stringify(DEFAULT_SHELVES));
+  }
+  if (!activeShelfId || !findShelf(activeShelfId)) activeShelfId = shelves()[0].id;
+
+  chips.innerHTML = "";
+  shelves().forEach((shelf) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "shelf-chip";
+    b.dataset.tone = toneForShelf(shelf);
+    b.textContent = shelf.name;
+    b.setAttribute("aria-pressed", shelf.id === activeShelfId ? "true" : "false");
+    b.addEventListener("click", () => {
+      activeShelfId = shelf.id;
+      renderShelves();
+    });
+    chips.append(b);
+  });
+
+  if (select) {
+    select.innerHTML = "";
+    shelves().forEach((shelf) => {
+      const o = document.createElement("option");
+      o.value = shelf.id;
+      o.textContent = shelf.name;
+      if (shelf.id === activeShelfId) o.selected = true;
+      select.append(o);
+    });
+  }
+  const nameInput = $("#gentleName"), noteInput = $("#gentleNote");
+  if (nameInput) {
+    nameInput.placeholder = activeShelfId === "sh_smallstarts"
+      ? "What's the small thing?" : "What is it?";
+  }
+  if (noteInput) {
+    noteInput.placeholder = activeShelfId === "sh_smallstarts"
+      ? "e.g. five minutes, just for fun" : "e.g. needs a little care";
+  }
+
+  box.innerHTML = "";
+  shelves().filter((shelf) => shelf.id === activeShelfId).forEach((shelf) => {
+    const block = document.createElement("div");
+    block.className = "shelf-block";
+    block.dataset.shelfId = shelf.id;
+    block.dataset.tone = toneForShelf(shelf);
+
+    const head = document.createElement("div");
+    head.className = "shelf-head";
+    if (editingShelf) {
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "shelf-name-input";
+      input.value = shelf.name;
+      input.setAttribute("aria-label", "Shelf name");
+      input.addEventListener("change", () => {
+        const name = input.value.trim() || "Shelf";
+        shelf.name = name;
+        save(); renderShelves(); renderShelfOption();
+      });
+      head.append(input);
+    } else {
+      const h = document.createElement("h3");
+      h.textContent = shelf.name;
+      head.append(h);
+    }
+    if (shelf.note) {
+      const note = document.createElement("div");
+      note.className = "shelf-note";
+      note.textContent = shelf.note;
+      head.append(note);
+    }
+    if (editingShelf && shelves().length > 1 && !(shelf.items || []).length) {
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "btn small";
+      rm.textContent = "Remove empty shelf";
+      rm.addEventListener("click", () => removeShelf(shelf.id));
+      head.append(rm);
+    }
+    block.append(head);
+
+    const listEl = document.createElement("div");
+    listEl.className = "shelf-items";
+    if (!(shelf.items || []).length) {
+      const p = document.createElement("p");
+      p.className = "shelf-empty";
+      p.textContent = shelf.id === "sh_smallstarts"
+        ? "Nothing here yet — add a few small things when you like."
+        : "Nothing here — that's fine.";
+      listEl.append(p);
+    } else {
+      shelf.items.forEach((item) => listEl.append(renderShelfItem(item, shelf)));
+    }
+    block.append(listEl);
+    box.append(block);
+    attachSimpleDrag(listEl, () => shelf.items, ".gentle-item", renderShelves);
+  });
+}
+
+function renderShelfItem(item, shelf) {
+  const row = document.createElement("div");
+  row.className = "gentle-item" + (editingShelf ? " editing" : "");
+  row.dataset.id = item.id;
+  row.dataset.shelfId = shelf.id;
+
+  const drag = document.createElement("button");
+  drag.type = "button";
+  drag.className = "drag-btn";
+  drag.hidden = !editingShelf;
+  drag.setAttribute("aria-label", "Drag to reorder " + item.text);
+  drag.title = "Drag to reorder";
+
+  const body = document.createElement("div");
+  body.className = "gi-body";
+  const name = document.createElement("button");
+  name.type = "button";
+  name.className = "btn quiet gi-name";
+  name.textContent = item.text;
+  const note = document.createElement("div");
+  note.className = "gi-note";
+  note.textContent = [item.note, item.from ? "from " + (item.from === "morning" ? "morning" : "anchors") : ""]
+    .filter(Boolean).join(" · ");
+  const small = document.createElement("div");
+  small.className = "gi-small";
+  small.textContent = item.small || "The smallest version is enough.";
+  small.hidden = true;
+  const toggleSmall = () => {
+    if (row.dataset.swiped) return;
+    small.hidden = !small.hidden;
+    name.setAttribute("aria-expanded", String(!small.hidden));
+  };
+  name.setAttribute("aria-expanded", "false");
+  name.addEventListener("click", toggleSmall);
+  body.append(name, note, small);
+
+  const actions = document.createElement("div");
+  actions.className = "shelf-item-actions";
+  const loan = loanFor(item.id);
+  if (loan) {
+    const here = document.createElement("span");
+    here.className = "loan-status";
+    here.textContent = loan.list === "morning" ? "In my morning" : "In my day";
+    here.setAttribute("aria-label", item.text + " is borrowed into " + (loan.list === "morning" ? "morning" : "daily anchors"));
+    const back = document.createElement("button");
+    back.type = "button";
+    back.className = "btn small";
+    back.textContent = "Return";
+    back.setAttribute("aria-label", "Return " + item.text + " to " + shelf.name);
+    back.addEventListener("click", () => returnLoan(loan.id));
+    actions.append(here, back);
+  } else {
+    const target = document.createElement("select");
+    target.className = "borrow-target";
+    target.setAttribute("aria-label", "Borrow " + item.text + " into");
+    [["anchors", "Daily anchors"], ["morning", "Morning"]].forEach(([value, label]) => {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = label;
+      target.append(option);
+    });
+    const borrow = document.createElement("button");
+    borrow.type = "button";
+    borrow.className = "btn small";
+    borrow.textContent = "Borrow";
+    borrow.setAttribute("aria-label", "Borrow " + item.text + " into your day");
+    borrow.addEventListener("click", () => borrowItem(shelf.id, item.id, target.value));
+    actions.append(target, borrow);
+    if (item.from) {
+      const home = document.createElement("button");
+      home.type = "button";
+      home.className = "btn small";
+      home.textContent = "Back on " + (item.from === "morning" ? "morning" : "anchors");
+      home.setAttribute("aria-label", "Put " + item.text + " back on " + item.from);
+      home.addEventListener("click", () => reinstateItem(shelf.id, item.id));
+      actions.append(home);
+    }
+  }
+
+  const del = document.createElement("button");
+  del.type = "button";
+  del.className = "remove-link";
+  del.hidden = !editingShelf;
+  del.setAttribute("aria-label", "Remove " + item.text);
+  del.title = "Remove";
+  del.textContent = "Remove";
+  del.addEventListener("click", () => removeGentleItem(shelf.id, item.id));
+
+  row.append(drag, body, actions, del);
+  attachShelfSwipe(row, shelf.id, item.id);
+  return row;
+}
+
+function smallVersion(text) {
+  const t = String(text || "").trim();
+  if (!t) return "The smallest version is enough.";
+  return "One gentle step: " + t + ".";
+}
+
+function refreshAfterShelfChange() {
+  renderList("morning");
+  renderList("anchors");
+  renderProgress();
+  renderWeek();
+  renderShelves();
+  renderShelfOption();
+}
+
+function parkItem(which, id, shelfId) {
+  const list = state.settings.lists[which];
+  const idx = list.findIndex((x) => x.id === id);
+  const shelf = findShelf(shelfId);
+  if (idx < 0 || !shelf) return;
+  const [item] = list.splice(idx, 1);
+  item.from = which;
+  item.small = item.small || smallVersion(item.text);
+  shelf.items.unshift(item);
+  save(); refreshAfterShelfChange();
+  showSnackbar(`Moved to ${shelf.name}`, () => {
+    const at = shelf.items.findIndex((x) => x.id === item.id);
+    if (at >= 0) shelf.items.splice(at, 1);
+    state.settings.lists[which].splice(idx, 0, item);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function borrowItem(shelfId, itemId, list) {
+  const found = findShelfItem(itemId);
+  if (!found || loanFor(itemId)) return;
+  const loan = {
+    id: "ln_" + Date.now().toString(36),
+    shelfId, itemId, list, since: todayKey(),
+  };
+  state.settings.loans.push(loan);
+  save(); refreshAfterShelfChange();
+  showSnackbar(list === "morning" ? "Borrowed into your morning" : "Borrowed into your day", () => {
+    const at = state.settings.loans.findIndex((l) => l.id === loan.id);
+    if (at >= 0) state.settings.loans.splice(at, 1);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function returnLoan(loanId) {
+  const loans = state.settings.loans || [];
+  const idx = loans.findIndex((l) => l.id === loanId);
+  if (idx < 0) return;
+  const [loan] = loans.splice(idx, 1);
+  markDeleted("loan:" + loan.id);
+  save(); refreshAfterShelfChange();
+  showSnackbar("Back on the shelf", () => {
+    state.settings.loans.splice(idx, 0, loan);
+    unmarkDeleted("loan:" + loan.id);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function reinstateItem(shelfId, itemId) {
+  const shelf = findShelf(shelfId);
+  if (!shelf) return;
+  const idx = shelf.items.findIndex((x) => x.id === itemId);
+  if (idx < 0) return;
+  const [item] = shelf.items.splice(idx, 1);
+  const which = item.from === "morning" ? "morning" : "anchors";
+  state.settings.lists[which].push(item);
+  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
+  if (loanIdx >= 0) state.settings.loans.splice(loanIdx, 1);
+  delete item.from;
+  save(); refreshAfterShelfChange();
+  showSnackbar("Back on Home", () => {
+    const backAt = state.settings.lists[which].findIndex((x) => x.id === itemId);
+    if (backAt >= 0) state.settings.lists[which].splice(backAt, 1);
+    item.from = which;
+    shelf.items.splice(idx, 0, item);
+    save(); refreshAfterShelfChange();
+  });
+  haptic(8);
+}
+
+function addGentleItem() {
+  const nameEl = $("#gentleName"), noteEl = $("#gentleNote");
+  const text = ((nameEl && nameEl.value) || "").trim();
+  if (!text) { showSnackbar("Give it a name first"); return; }
+  const select = $("#gentleShelfSelect");
+  const shelf = findShelf(select && select.value) || findShelf(activeShelfId) || shelves()[0];
+  if (!shelf) return;
+  shelf.items.unshift({
+    id: "g_" + Date.now().toString(36),
+    text,
+    note: ((noteEl && noteEl.value) || "").trim(),
+    small: "The smallest version is enough.",
+  });
+  if (nameEl) nameEl.value = "";
+  if (noteEl) noteEl.value = "";
+  const form = $("#gentleForm");
+  if (form) form.hidden = true;
+  save(); renderShelves(); renderShelfOption();
+  haptic(8);
+}
+
+function removeGentleItem(shelfId, itemId) {
+  const shelf = findShelf(shelfId);
+  if (!shelf) return;
+  const idx = shelf.items.findIndex((x) => x.id === itemId);
+  if (idx < 0) return;
+  const [gone] = shelf.items.splice(idx, 1);
+  const loanIdx = (state.settings.loans || []).findIndex((l) => l.itemId === itemId);
+  let loan = null;
+  if (loanIdx >= 0) loan = state.settings.loans.splice(loanIdx, 1)[0];
+  markDeleted("shelf:" + shelfId + ":" + gone.id);
+  if (loan) markDeleted("loan:" + loan.id);
+  save(); refreshAfterShelfChange();
+  showSnackbar("Removed " + gone.text, () => {
+    shelf.items.splice(idx, 0, gone);
+    if (loan) state.settings.loans.splice(loanIdx, 0, loan);
+    unmarkDeleted("shelf:" + shelfId + ":" + gone.id);
+    if (loan) unmarkDeleted("loan:" + loan.id);
+    save(); refreshAfterShelfChange();
+  });
+}
+
+function addShelf() {
+  const shelf = {
+    id: "sh_" + Date.now().toString(36),
+    name: "New shelf",
+    note: "",
+    items: [],
+  };
+  state.settings.shelves.push(shelf);
+  activeShelfId = shelf.id;
+  save(); renderShelves();
+  const input = $("#shelvesList .shelf-name-input");
+  if (input) { input.focus(); input.select(); }
+}
+
+function removeShelf(shelfId) {
+  const idx = shelves().findIndex((s) => s.id === shelfId);
+  if (idx < 0 || shelves().length < 2) return;
+  const shelf = shelves()[idx];
+  if ((shelf.items || []).length) { showSnackbar("Move its items first"); return; }
+  shelves().splice(idx, 1);
+  markDeleted("shelf:" + shelfId);
+  if (activeShelfId === shelfId) activeShelfId = shelves()[0].id;
+  save(); renderShelves();
+  showSnackbar("Removed empty shelf", () => {
+    shelves().splice(idx, 0, shelf);
+    unmarkDeleted("shelf:" + shelfId);
+    activeShelfId = shelfId;
+    save(); renderShelves();
+  });
+}
+
+/* One quiet idea, only from Small starts, revealed only when asked for. */
+function smallStartsPool() {
+  const shelf = findShelf("sh_smallstarts");
+  if (!shelf) return [];
+  const base = (shelf.items || []).filter((item) => item && !loanFor(item.id));
+  const hour = new Date().getHours();
+  const prefer = hour < 12
+    ? (it) => /push|walk|stretch|move/i.test((it.note || "") + " " + (it.text || ""))
+    : (it) => /tidy|read|reply|email|message/i.test((it.note || "") + " " + (it.text || ""));
+  const filtered = base.filter(prefer);
+  return filtered.length >= 2 ? filtered : base;
+}
+function chooseSmallStart() {
+  const pool = smallStartsPool();
+  if (!pool.length) return;
+  const current = $("#shelfOption")?.dataset.itemId;
+  let idx = Number(state.settings.shelfOptionIndex) || 0;
+  if (pool.length > 1 && pool[idx % pool.length]?.id === current) {
+    idx = (idx + 1) % pool.length;
+  } else {
+    idx %= pool.length;
+  }
+  state.settings.shelfOptionIndex = idx;
+  state.settings.shelfOptionDay = todayKey();
+  saveQuiet();   // looking is not a data change
+  renderShelfOption();
+  haptic(6);
+}
+function renderShelfOption() {
+  const entry = $("#ideaEntry"), box = $("#shelfOption"), btn = $("#ideaBtn");
+  if (!entry || !box) return;
+  const pool = smallStartsPool();
+  if (!pool.length) {
+    entry.hidden = true;
+    box.hidden = true;
+    return;
+  }
+  entry.hidden = false;
+  const today = todayKey();
+  if (state.settings.shelfOptionDay !== today && state.settings.shelfOptionIndex < 0) {
+    state.settings.shelfOptionIndex = 0;
+    saveQuiet();
+  }
+  const revealed = state.settings.shelfOptionDay === today
+    && Number(state.settings.shelfOptionIndex) >= 0;
+  if (btn) btn.hidden = revealed;
+  box.hidden = !revealed;
+  if (!revealed) return;
+  const idx = Number(state.settings.shelfOptionIndex) % pool.length;
+  const picked = pool[idx];
+  const text = $("#shelfOptionText"), name = $("#shelfOptionName");
+  if (text) text.textContent = picked.small || "The smallest version is enough.";
+  if (name) name.textContent = picked.text;
+  const another = $("#shelfOptionAnother");
+  if (another) another.hidden = pool.length < 2;
+  box.dataset.itemId = picked.id;
+  box.dataset.shelfId = "sh_smallstarts";
+}
+
+/* ---------- A 30-day sequence, loaded in or out at will ----------
+   It is an overlay on the rhythm, not another list. Loading out only hides the
+   card; the step, the dates and the gentle marks stay exactly where they were.
+   There is no calendar pressure and nothing to catch up on. */
+function currentProgramStep() {
+  const p = state.settings.program30 || {};
+  const i = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
+  return PROGRAM30[i] || null;
+}
+/* Quiet labels drawn from the focus-area words used in Med Log, so both apps
+   describe the same kinds of care the same way. */
+const PROGRAM_KIND_LABELS = {
+  nick: "Awareness",
+  rest: "Quiet repeat",
+  sleep: "Sleep",
+  body: "Movement",
+  day: "Everyday",
+  connection: "Connection",
+};
+/* When even the invitation feels like too much, there is a smaller way in.
+   Each line is permission to stop, never a second thing to do. */
+const PROGRAM_SMALLER = {
+  nick: "Just open the page. No listening needed — that's enough.",
+  rest: "One breath, then you can stop.",
+  sleep: "Just notice what time it is. That's all.",
+  body: "Just feel your feet for a moment.",
+  day: "Just look around once. No need to do anything.",
+  connection: "Just think of someone. No message needed.",
+};
+function fillProgramCard(prefix, p, step, at) {
+  const q = (name) => $("#" + prefix + name);
+  const card = q("Card");
+  if (!card) return;
+  card.hidden = !p.loaded || !step;
+  if (card.hidden) return;
+  const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
+  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + ", at your pace";
+  const gap = q("Gap");
+  if (gap) {
+    const days = daysSinceKey(p.lastDoneAt);
+    gap.hidden = !(p.loaded && days !== null && days >= 2);
+    if (!gap.hidden) gap.textContent = "Your step is right where you left it. Nothing to catch up on.";
+  }
+  if (kind) kind.textContent = PROGRAM_KIND_LABELS[step.kind] || "";
+  if (title) title.textContent = step.title;
+  if (invite) invite.textContent = step.invitation;
+  const nick = q("Nick");
+  if (nick) {
+    nick.hidden = !step.nick;
+    if (step.nick) {
+      nick.href = NICK_URL;
+      nick.textContent = "Open Nick Moss · " + step.nick;
+      nick.setAttribute("aria-label", "Open the Nick Moss daily meditation in a new tab");
+    }
+  }
+  const optional = q("Optional");
+  if (optional) {
+    optional.hidden = !step.optional;
+    optional.textContent = step.optional || "";
+  }
+  const smaller = q("SmallerText");
+  if (smaller) smaller.textContent = PROGRAM_SMALLER[step.kind] || "Just be here for one breath.";
+  const last = p.step >= PROGRAM30.length - 1;
+  const done = q("Done");
+  if (done) done.textContent = last ? "Keep this step" : "That's enough";
+  const close = q("Close");
+  if (close) {
+    close.hidden = !last;
+    if (last) close.textContent = "That's the thirty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
+  }
+  const reflect = q("Reflect");
+  if (reflect) {
+    reflect.hidden = !last;
+    // Never move the caret out from under someone who is writing.
+    if (last && document.activeElement !== reflect && reflect.value !== (p.reflection || "")) {
+      reflect.value = p.reflection || "";
+    }
+  }
+}
+function renderProgramNote() {
+  const step = currentProgramStep();
+  const p = state.settings.program30 || {};
+  const val = (p.notes && step) ? (p.notes[step.id] || "") : "";
+  ["#programNote", "#programEveNote"].forEach((sel) => {
+    const el = $(sel);
+    if (el && document.activeElement !== el && el.value !== val) el.value = val;
+  });
+}
+function renderProgram() {
+  const more = $("#programMoreText"), load = $("#programLoadBtn");
+  const p = state.settings.program30 || {};
+  const step = currentProgramStep();
+  const at = Math.min(PROGRAM30.length, (Math.round(Number(p.step) || 0) + 1));
+  const nudge = $("#programHomeNudge");
+  if (nudge) nudge.hidden = !!p.loaded;
+  if (more) {
+    const marks = Object.keys(p.done || {}).filter((k) => p.done[k]).length;
+    more.textContent = p.loaded
+      ? "Your place is kept."
+      : (marks || p.startedAt)
+        ? "Kept where you left it. Loading in resumes there — nothing is lost."
+        : "Thirty small invitations, at your pace. Nothing to catch up on.";
+  }
+  if (load) load.textContent = p.loaded ? "Load out" : "Load in";
+  fillProgramCard("program", p, step, at);
+  fillProgramCard("programEve", p, step, at);
+  renderProgramNote();
+}
+function setProgramLoaded(loaded) {
+  const p = state.settings.program30;
+  if (!p) return;
+  p.loaded = !!loaded;
+  save();
+  renderProgram();
+  haptic(6);
+}
+function completeProgramStep() {
+  const p = state.settings.program30;
+  const step = currentProgramStep();
+  if (!p || !p.loaded || !step) return;
+  const before = {
+    step: p.step,
+    startedAt: p.startedAt,
+    lastDoneAt: p.lastDoneAt,
+    hadMark: Object.prototype.hasOwnProperty.call(p.done, step.id),
+    mark: p.done[step.id],
+  };
+  const today = todayKey();
+  p.done[step.id] = today;
+  p.lastDoneAt = today;
+  if (!p.startedAt) p.startedAt = today;
+  if (p.step < PROGRAM30.length - 1) p.step += 1;
+  save();
+  renderProgram();
+  haptic(8);
+  // An accidental tap is easy to make when you're tired — let it be undone.
+  showSnackbar("Kept. The next one is here whenever you want it.", () => {
+    p.step = before.step;
+    p.startedAt = before.startedAt;
+    p.lastDoneAt = before.lastDoneAt;
+    if (before.hadMark) p.done[step.id] = before.mark;
+    else p.done[step.id] = null;
+    save();
+    renderProgram();
+  });
+}
+
+/* Kept as a no-op so older callers stay harmless. Counts and "often" scores
+   have no place in the daily rhythm now. */
+function renderGentleStats() { return; }
+
+/* ---------- Open external links in real Safari on iPhone ----------
+   A home-screen PWA uses a separate web view, so iCloud Keychain autofill
+   doesn't reach sites like Kajabi. iOS 17+ understands the x-safari- scheme
+   and hands the URL to Safari. Everywhere else, the normal link is used. */
+function standaloneIOS() {
+  const ua = navigator.userAgent || "";
+  const ios = /iPad|iPhone|iPod/.test(ua) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!ios) return false;
+  return navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+}
+
+function openExternalInSafari(e) {
+  if (!standaloneIOS()) return;
+  const a = e.target && e.target.closest && e.target.closest("a[href]");
+  if (!a) return;
+  const url = a.href;
+  if (!/^https?:\/\//i.test(url)) return;
+  if (url.indexOf(location.origin) === 0) return;
+  e.preventDefault();
+  window.location.href = "x-safari-" + url;
+}
+
+/* ---------- Copy any link to the clipboard ---------- */
+async function copyLink(url, label) {
+  let ok = false;
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(url);
+      ok = true;
+    }
+  } catch (e) {}
+  if (!ok) {
+    // older browsers and file:// pages don't expose the async API
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand("copy");
+      ta.remove();
+    } catch (e) {}
+  }
+  showSnackbar(ok ? `Copied ${label} link` : "Couldn't copy — long-press the link instead");
+  if (ok) haptic(8);
 }
 
 /* =====================================================================
