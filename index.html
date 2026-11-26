@@ -66,7 +66,6 @@
     font-size: 17px;
     line-height: 1.4;
     -webkit-font-smoothing: antialiased;
-    padding-bottom: env(safe-area-inset-bottom);
   }
 
   .wrap {
@@ -983,7 +982,7 @@ const STORE_KEY = "bot.v1";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v11";
+const VERSION = "v12";
 
 /* ---------- Default lists (editable later) ---------- */
 const DEFAULT_LISTS = {
@@ -1062,6 +1061,18 @@ function load() {
    Nick Moss item; move it there from any older build that put it on Sangha,
    and add it if missing. Never touches your other edits. */
 function migrate(s) {
+  // Repair a partial or older export before anything reads from it. Nothing
+  // present is overwritten — only missing / wrongly shaped fields are filled.
+  if (!s.settings || typeof s.settings !== "object" || Array.isArray(s.settings)) s.settings = {};
+  if (!s.days || typeof s.days !== "object" || Array.isArray(s.days)) s.days = {};
+  if (!s.settings.lists || typeof s.settings.lists !== "object") s.settings.lists = {};
+  ["morning", "anchors", "instead"].forEach((k) => {
+    if (!Array.isArray(s.settings.lists[k])) {
+      s.settings.lists[k] = JSON.parse(JSON.stringify(DEFAULT_LISTS[k]));
+    }
+  });
+  if (typeof s.settings.targetBed !== "string") s.settings.targetBed = "22:30";
+
   const NICK_URL = DEFAULT_LISTS.morning.find((it) => it.id === "m_nick").url;
   const sangha = s.settings.lists.morning.find((it) => it.id === "m_sangha");
   const nick = s.settings.lists.morning.find((it) => it.id === "m_nick");
@@ -1081,6 +1092,16 @@ function save() {
   }
 }
 
+/* One place for the tiny confirmation buzz. Browsers refuse vibration before
+   a real user gesture, so skip it quietly instead of logging a console error. */
+function haptic(ms = 8) {
+  try {
+    if (!navigator.vibrate) return;
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+    navigator.vibrate(ms);
+  } catch (e) {}
+}
+
 /* ---------- Date helpers ---------- */
 function todayKey(d = new Date()) {
   const y = d.getFullYear();
@@ -1089,19 +1110,28 @@ function todayKey(d = new Date()) {
   return `${y}-${m}-${day}`;
 }
 
+function freshDay() {
+  return {
+    checks: {},
+    intention: "",
+    readingMinutes: null,
+    bedTime: null,
+    wakeTime: null,
+    mood: null,
+    note: "",
+  };
+}
+
 function dayRecord(key = todayKey()) {
-  if (!state.days[key]) {
-    state.days[key] = {
-      checks: {},
-      intention: "",
-      readingMinutes: null,
-      bedTime: null,
-      wakeTime: null,
-      mood: null,
-      note: "",
-    };
-  }
-  return state.days[key];
+  if (!state.days[key]) state.days[key] = freshDay();
+  const rec = state.days[key];
+  // An imported day may be missing fields — fill only what's absent.
+  const blank = freshDay();
+  Object.keys(blank).forEach((k) => {
+    if (!(k in rec)) rec[k] = blank[k];
+  });
+  if (!rec.checks || typeof rec.checks !== "object") rec.checks = {};
+  return rec;
 }
 
 /* =====================================================================
@@ -1140,8 +1170,11 @@ function applyPhase() {
 }
 
 /* ---------- Sunday mode: protected rest day ---------- */
+function isSunday() {
+  return new Date().getDay() === 0;
+}
 function applySunday() {
-  document.body.dataset.sunday = (new Date().getDay() === 0) ? "true" : "false";
+  document.body.dataset.sunday = isSunday() ? "true" : "false";
 }
 
 /* ---------- Focus mode: one section at a time ---------- */
@@ -1212,7 +1245,7 @@ function jumpToSection(id) {
 
 function focusableSections() {
   // Sunday tucks some cards away — skip those in focus mode too.
-  const sunday = new Date().getDay() === 0;
+  const sunday = isSunday();
   return FOCUS_SECTIONS.filter((s) =>
     !sunday || s.id === "bedCard" || s.id === "weekCard");
 }
@@ -1223,7 +1256,7 @@ function toggleFocus(on) {
     const n = focusableSections().length;
     if (focusIdx >= n) focusIdx = 0;
     renderFocus();
-    try { if (navigator.vibrate) navigator.vibrate(6); } catch (e) {}
+    haptic(6);
   } else {
     FOCUS_SECTIONS.forEach((s) => $("#" + s.id)?.classList.remove("focused"));
   }
@@ -1233,7 +1266,7 @@ function moveFocus(dir) {
   const n = focusableSections().length;
   focusIdx = (focusIdx + dir + n) % n;
   renderFocus();
-  try { if (navigator.vibrate) navigator.vibrate(5); } catch (e) {}
+  haptic(5);
 }
 function renderFocus() {
   const sections = focusableSections();
@@ -1587,7 +1620,7 @@ function toggleCheck(which, id) {
   renderWeek();
   renderProgress();
   // tiny haptic confirmation where supported (Android/PWA; iOS ignores it)
-  try { if (navigator.vibrate) navigator.vibrate(8); } catch (e) {}
+  haptic(8);
   // quiet celebration when an anchor is completed (not when un-ticking)
   if (which === "anchors" && rec.checks[id]) whisper();
 }
@@ -1736,7 +1769,7 @@ function renderWeek() {
 
     const dots = document.createElement("div");
     dots.className = "dots";
-    if (rec) {
+    if (rec && rec.checks) {
       const anchorIds = state.settings.lists.anchors.map((a) => a.id);
       anchorIds.forEach((id) => {
         if (rec.checks[id]) {
@@ -1806,8 +1839,9 @@ function importJSON(file) {
   reader.onload = () => {
     try {
       const parsed = JSON.parse(reader.result);
-      if (!parsed || !parsed.settings || !parsed.days) throw new Error("bad shape");
+      if (!parsed || typeof parsed !== "object") throw new Error("bad shape");
       // merge: imported days/settings win where present, keep the rest
+      migrate(parsed);
       state = mergeState(state, parsed);
       save();
       renderAll();
@@ -1820,12 +1854,15 @@ function importJSON(file) {
 }
 
 function mergeState(local, incoming) {
-  // settings: prefer incoming if it has lists
-  const merged = {
-    settings: incoming.settings || local.settings,
+  // Keep defaults for any setting the export predates, but never overwrite a
+  // list or value that actually came in.
+  const base = freshState().settings;
+  return {
+    settings: Object.assign({}, base, local.settings, incoming.settings, {
+      lists: Object.assign({}, base.lists, local.settings?.lists, incoming.settings?.lists),
+    }),
     days: Object.assign({}, local.days, incoming.days),
   };
-  return merged;
 }
 
 /* =====================================================================

@@ -50,12 +50,30 @@ The JS is organised in labelled sections inside one `<script>`:
 - **Rendering** — `renderAll()` and friends rebuild each section from state.
 - **Edit mode** — toggled by *Edit lists*; reveals add / remove / reorder (↑↓ and drag).
 
+## Screens
+
+The bottom menu keeps each screen light:
+
+- **Home** — greeting, rotating intention, a soft progress strip (tap *Morning* or
+  *Anchors* to drop straight into focus mode), morning checklist, daily anchors.
+- **Wind down** — "instead of gaming", bedtime/wake + mood, the soft-dot week.
+- **Focus** — one section at a time; `‹ / › / Done` steps through. Follows the card
+  onto its screen, and skips hidden sections on Sunday.
+- **Links** — The Door (`https://danieles-mac-mini.tailab1fd5.ts.net:8451/`) with
+  `?app=` / `?search=` shortcuts (ids come from `~/Projects/the-door/apps.yaml`),
+  the ⛈️ Tool kit button (`thecalmafter.vercel.app`), and Export/Import.
+
 ## Design notes
 
 - Kind by default: missed days render as empty dots, never red X's or streaks.
 - Big tap targets, few choices per screen, collapsible-by-done morning items.
-- Everything editable: add, remove, reorder any list.
-- Export / Import JSON for backup and merging into the anchor planner.
+- Swipe a row right to tick it, left to untick; a plain tap still works.
+- Sunday is a protected rest day: morning/anchors/"instead of gaming" are hidden,
+  leaving the bedtime log and a "rest is the practice" note.
+- Reduced-motion is respected; tiny haptics only fire after a real tap.
+- Everything editable: add, remove, reorder any list. Undo is offered on delete.
+- Export / Import JSON for backup and merging into the anchor planner. Imports
+  fill in missing fields and keep any settings the export didn't know about.
 
 ## Merging into your anchor planner
 
