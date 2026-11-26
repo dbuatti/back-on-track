@@ -1660,7 +1660,6 @@
       <button type="button" class="btn small" id="windWakeSave">Save</button>
       <button type="button" class="btn small" data-cancel-editor="#windWakeEdit">Cancel</button>
     </div>
-    <div class="hint" id="bedSummary"></div>
 
     <div class="mood-wrap">
       <div class="mood-label">How was today?</div>
@@ -1936,7 +1935,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v48";
+const VERSION = "v49";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3331,10 +3330,7 @@ function renderBedtime() {
   $("#targetBed").value = state.settings.targetBed || "";
   updateWindNote();
 
-  const bits = [];
-  if (rec.bedTime) bits.push("Bed " + rec.bedTime);
-  if (rec.wakeTime) bits.push("Woke " + rec.wakeTime);
-  $("#bedSummary").textContent = bits.length ? bits.join(" · ") : "";
+  // bedSummary removed; sleep trends card shows the logged times.
 }
 
 function updateWindNote() {
