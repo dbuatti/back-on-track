@@ -1304,17 +1304,21 @@
     background: var(--card);
     color: var(--ink);
     font: inherit;
+    font-size: 20px;
     min-width: 44px;
     min-height: 44px;
-    border-radius: 12px;
+    border-radius: 999px;
     cursor: pointer;
+    display: grid;
+    place-items: center;
   }
   .focus-bar button:active { background: var(--accent-soft); }
   .focus-bar .focus-label {
     flex: 1;
     text-align: center;
-    font-size: 15px;
-    color: var(--ink-soft);
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--ink);
   }
 
   /* ---------- Time-of-day shift ----------
@@ -1479,7 +1483,6 @@
   <div class="focus-bar" id="focusBar">
     <button type="button" id="focusPrev" aria-label="Previous section">‹</button>
     <span class="focus-label" id="focusLabel" aria-live="polite"></span>
-    <span class="focus-hint">One section at a time is enough.</span>
     <button type="button" id="focusNext" aria-label="Next section">›</button>
     <button type="button" id="focusExit">Done</button>
   </div>
@@ -1935,7 +1938,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v49";
+const VERSION = "v50";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
