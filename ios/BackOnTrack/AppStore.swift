@@ -50,6 +50,33 @@ final class AppStore: ObservableObject {
         Task { await supabase.pushState(state) }
     }
 
+    func setProgramLoaded(_ loaded: Bool) {
+        state.settings.program30.loaded = loaded
+        save()
+    }
+
+    @discardableResult
+    func completeProgramStep() -> Program30State? {
+        let p = state.settings.program30
+        let before = p
+        let index = min(max(p.step, 0), Program30.steps.count - 1)
+        let step = Program30.steps[index]
+        let today = todayKey()
+        state.settings.program30.done[step.id] = today
+        state.settings.program30.lastDoneAt = today
+        if state.settings.program30.startedAt.isEmpty { state.settings.program30.startedAt = today }
+        if state.settings.program30.step < Program30.steps.count - 1 {
+            state.settings.program30.step += 1
+        }
+        save()
+        return before
+    }
+
+    func undoProgramStep(_ before: Program30State) {
+        state.settings.program30 = before
+        save()
+    }
+
     func addNickToMorning() {
         let nickURL = "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260"
         if state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) { return }

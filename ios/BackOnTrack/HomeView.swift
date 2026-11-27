@@ -30,6 +30,7 @@ struct HomeView: View {
                     .padding(.top, 4)
 
                     intentionCard
+                    ProgramCard()
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
                         nickLoadCard
                     }

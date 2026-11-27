@@ -12,7 +12,7 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Personal links | ✅ | 🟡 | iPhone read/open/copy; editing planned |
 | Shelves and borrowing | ✅ | ✅ | On-loan state shown |
 | Task add/remove | ✅ | ✅ | Removal moves to Keep close |
-| Quiet 30 days | ✅ | ⬜ | Port next |
+| Quiet 30 days | ✅ | ✅ | Shared card on Home and Wind down; marks and reflection sync |
 | Sleep trend / week view | ✅ | ⬜ | Port after 30-day sequence |
 | Import / export JSON | ✅ | ⬜ | Needed for backup and recovery |
 | Supabase sync | ✅ | ✅ | Same table and RLS |
