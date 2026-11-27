@@ -225,6 +225,49 @@
     color: var(--ink-soft);
     line-height: 1.45;
   }
+  .right-now { padding: var(--s4); }
+  .right-now-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s2);
+    margin-bottom: var(--s3);
+  }
+  .right-now-kicker {
+    font-size: var(--t-cap);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+  .right-now-time {
+    font-size: var(--t-cap);
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .right-now-main {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+  }
+  .right-now-icon {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    font-size: 18px;
+  }
+  .right-now-copy strong {
+    display: block;
+    font-size: var(--t-lead);
+    color: var(--ink);
+  }
+  .right-now-copy .hint { margin: 2px 0 0; }
+  .right-now .btn { margin-top: var(--s3); }
   /* A cardless section: whitespace and a hairline do the dividing. */
   .home-section {
     background: transparent;
@@ -1522,6 +1565,21 @@
     </div>
   </section>
 
+  <section class="card right-now" id="rightNowCard" hidden aria-label="A quiet suggestion for right now">
+    <div class="right-now-head">
+      <span class="right-now-kicker">Right now</span>
+      <span class="right-now-time" id="rightNowTime"></span>
+    </div>
+    <div class="right-now-main">
+      <span class="right-now-icon" id="rightNowIcon" aria-hidden="true">✦</span>
+      <div class="right-now-copy">
+        <strong id="rightNowTitle">One small thing</strong>
+        <p class="hint" id="rightNowDetail"></p>
+      </div>
+    </div>
+    <button type="button" class="btn small" id="rightNowAction"></button>
+  </section>
+
   <div class="time-edit" id="wakeEdit" hidden>
     <label for="wakeInput">Woke at</label>
     <input type="time" id="wakeInput" />
@@ -1981,7 +2039,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v69";
+const VERSION = "v70";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2821,11 +2879,54 @@ function dayRecord(key = todayKey()) {
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
+function prefersReducedMotion() {
+  return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+}
+function renderRightNow() {
+  const card = $("#rightNowCard");
+  if (!card) return;
+  const today = todayKey();
+  const rec = state.days[today] || {};
+  const hour = new Date().getHours();
+  const mood = rec.mood;
+  const gap = daysSinceKey((state.settings.program30 || {}).lastDoneAt);
+  const focus = (state.settings.personalization && state.settings.personalization.focusLabel) || "a gentle pause";
+  let s = {
+    icon: "✦",
+    title: "Pick one small anchor",
+    detail: "One thing, given a minute or two.",
+    action: "anchor",
+    label: "Show me"
+  };
+  if (mood === "low") {
+    s = { icon: "·", title: "Make it smaller", detail: "One breath, one look around — whatever is least.", action: "anchor", label: "Show me" };
+  } else if (hour >= 5 && hour < 12 && !rec.wakeTime) {
+    s = { icon: "☀", title: "Log your wake time", detail: "Even after a rough night, the real time is useful.", action: "wake", label: "Log now" };
+  } else if (hour >= 20 && !rec.bedTime) {
+    s = { icon: "☾", title: "Log bedtime", detail: "Whenever you get there is the right time.", action: "bed", label: "Log now" };
+  } else if (gap >= 3 && state.settings.program30 && state.settings.program30.loaded) {
+    s = { icon: "✦", title: "Your invitation is waiting", detail: "Nothing to catch up on. Come back gently.", action: "anchor", label: "Show me" };
+  } else if (focus !== "a gentle pause") {
+    s = { icon: "‖", title: "A pause before " + focus.toLowerCase(), detail: "One minute to stop gently, if you want to.", action: "pause", label: "Open pause" };
+  } else if (!rec.intention) {
+    s = { icon: "✦", title: "Choose one intention", detail: "A word, a feeling, a direction. Nothing more.", action: "intention", label: "Add intention" };
+  }
+  card.hidden = false;
+  card.dataset.action = s.action;
+  $("#rightNowIcon").textContent = s.icon;
+  $("#rightNowTitle").textContent = s.title;
+  $("#rightNowDetail").textContent = s.detail;
+  $("#rightNowAction").textContent = s.label;
+  const now = new Date();
+  $("#rightNowTime").textContent = now.toLocaleDateString([], { weekday: "short" }) + ", " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+}
+
 function renderAll() {
   applyPhase();
   applySunday();
   renderHeader();
   renderGreeting();
+  renderRightNow();
   renderDoneForToday();
   renderMorningLine();
   renderQuietDayHint();
@@ -5064,6 +5165,19 @@ function wire() {
   // home shortcuts: plain-language labels, no guessing what they do
   $("#sundaySleepBtn").addEventListener("click", () => showTab("winddown"));
   $("#homeWakeBtn").addEventListener("click", () => openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
+  $("#rightNowAction").addEventListener("click", () => {
+    const card = $("#rightNowCard");
+    const action = card && card.dataset.action;
+    if (action === "wake") { openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"); return; }
+    if (action === "bed") { openTimeEditor("#bedEdit", "#bedInput", "bedTime"); return; }
+    if (action === "intention") {
+      const input = $("#intentionInput");
+      if (input) { input.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" }); input.focus(); }
+      return;
+    }
+    const invite = $("#inviteCard");
+    if (invite) invite.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" });
+  });
   $("#wakeSave").addEventListener("click", () => saveTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
 
   // focus mode

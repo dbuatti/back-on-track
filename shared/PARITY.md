@@ -19,7 +19,7 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Google / Gmail sign-in | ✅ | ✅ | Native uses Google OAuth; Gmail link in Links |
 | Local-only use | ✅ | ✅ | |
 | Personalised focus / support onboarding | ⬜ | ✅ | Native-first; can be ported to PWA later |
-| Dynamic “Right now” suggestion | ⬜ | ✅ | Time, mood, sleep log, program gap and focus aware |
+| Dynamic “Right now” suggestion | ✅ | ✅ | Time, mood, sleep log, program gap and focus aware |
 | Daily quiet line | ✅ | ✅ | Stable gentle wording per day |
 | Done for today | ✅ | ✅ | Hides edit controls and reverts task taps; reversible |
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |
