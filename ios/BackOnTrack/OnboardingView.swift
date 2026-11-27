@@ -25,7 +25,8 @@ struct OnboardingView: View {
         ("smallSteps", "Smallest steps", "Every task can shrink.", "minus.circle"),
         ("sleep", "Sleep logging", "Bed, wake and a soft pattern.", "moon.stars"),
         ("evening", "Evening alternatives", "Gentler things to do instead.", "gamecontroller"),
-        ("movement", "Movement", "Small walks and stretches.", "figure.walk")
+        ("movement", "Movement", "Small walks and stretches.", "figure.walk"),
+        ("selfreg", "Self-regulation", "Piano improvisation or a good shake.", "music.note")
     ]
 
     var body: some View {

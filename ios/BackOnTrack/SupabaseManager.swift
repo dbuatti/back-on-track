@@ -2,6 +2,8 @@ import Foundation
 import Combine
 import CryptoKit
 import Security
+import AuthenticationServices
+import UIKit
 
 struct SupabaseSession: Codable {
     let accessToken: String
@@ -18,17 +20,19 @@ struct SupabaseSession: Codable {
 }
 
 @MainActor
-final class SupabaseManager: ObservableObject {
+final class SupabaseManager: NSObject, ObservableObject {
     static let shared = SupabaseManager()
 
     @Published private(set) var session: SupabaseSession?
     @Published var status: String = "Not synced"
     @Published var lastSync: Date?
+    private var authSession: ASWebAuthenticationSession?
 
     private let baseURL = URL(string: "https://yfgapigmiyclgryqdgne.supabase.co")!
     private let anonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmZ2FwaWdtaXljbGdyeXFkZ25lIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0MTU3MDEsImV4cCI6MjA3Nzk5MTcwMX0.YPSk_2bOwLC3kTjJ9j-8YR3degNlMleymbo4X9F_bSo"
 
-    private init() {
+    private override init() {
+        super.init()
         if let data = UserDefaults.standard.data(forKey: "bot.supabaseSession"),
            let decoded = try? JSONDecoder().decode(SupabaseSession.self, from: data) {
             self.session = decoded
@@ -146,6 +150,7 @@ final class SupabaseManager: ObservableObject {
         var access: String?
         var refresh: String?
         var expires: Double?
+        var expiresIn: Double?
 
         if let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
             code = query.first(where: { $0.name == "code" })?.value
@@ -153,6 +158,9 @@ final class SupabaseManager: ObservableObject {
             refresh = query.first(where: { $0.name == "refresh_token" })?.value
             if let value = query.first(where: { $0.name == "expires_at" })?.value {
                 expires = Double(value)
+            }
+            if let value = query.first(where: { $0.name == "expires_in" })?.value {
+                expiresIn = Double(value)
             }
         }
         if let fragment = URLComponents(url: url, resolvingAgainstBaseURL: false)?.fragment {
@@ -166,6 +174,9 @@ final class SupabaseManager: ObservableObject {
             refresh = refresh ?? items.first(where: { $0.name == "refresh_token" })?.value
             if expires == nil, let value = items.first(where: { $0.name == "expires_at" })?.value {
                 expires = Double(value)
+            }
+            if expiresIn == nil, let value = items.first(where: { $0.name == "expires_in" })?.value {
+                expiresIn = Double(value)
             }
         }
 
@@ -195,11 +206,12 @@ final class SupabaseManager: ObservableObject {
                 status = "Signed in"
                 return true
             }
-            if let access, let refresh, let expires {
+            if let access, let refresh {
+                let expiry = expires ?? (Date().timeIntervalSince1970 + (expiresIn ?? 3600))
                 let payload: [String: Any] = [
                     "access_token": access,
                     "refresh_token": refresh,
-                    "expires_at": expires,
+                    "expires_at": expiry,
                     "user": ["id": decodeUserID(from: access)]
                 ]
                 let data = try JSONSerialization.data(withJSONObject: payload)
@@ -240,6 +252,37 @@ final class SupabaseManager: ObservableObject {
         guard let data = Data(base64Encoded: base64),
               let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return "" }
         return obj["sub"] as? String ?? ""
+    }
+
+    func signInWithGoogle() async -> Bool {
+        guard let authURL = URL(string: "\(baseURL.absoluteString)/auth/v1/authorize?provider=google&redirect_to=backontrack%3A%2F%2Fauth-callback") else {
+            status = "Couldn't start Google sign-in."
+            return false
+        }
+        do {
+            let callback = try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<URL, Error>) in
+                let session = ASWebAuthenticationSession(
+                    url: authURL,
+                    callbackURLScheme: "backontrack"
+                ) { url, error in
+                    if let error {
+                        continuation.resume(throwing: error)
+                    } else if let url {
+                        continuation.resume(returning: url)
+                    } else {
+                        continuation.resume(throwing: NSError(domain: "Google", code: 1, userInfo: [NSLocalizedDescriptionKey: "No callback from Google."]))
+                    }
+                }
+                session.presentationContextProvider = self
+                session.prefersEphemeralWebBrowserSession = false
+                self.authSession = session
+                session.start()
+            }
+            return await handleAuthCallback(callback)
+        } catch {
+            status = "Google sign-in was cancelled or failed."
+            return false
+        }
     }
 
     func signOut() {
@@ -367,5 +410,15 @@ final class SupabaseManager: ObservableObject {
         if let data = try? JSONEncoder().encode(session) {
             UserDefaults.standard.set(data, forKey: "bot.supabaseSession")
         }
+    }
+}
+
+extension SupabaseManager: ASWebAuthenticationPresentationContextProviding {
+    func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
+        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = scene.windows.first else {
+            return UIWindow()
+        }
+        return window
     }
 }

@@ -72,6 +72,8 @@ when changing wording. New custom tasks use a `custom_` prefix.
 ## Authentication
 
 - Web/PWA: Supabase email magic link.
-- iPhone: Supabase magic link, email/password, or one-time web sync key.
+- iPhone: Supabase magic link, Google OAuth via `ASWebAuthenticationSession`,
+  email/password, or one-time web sync key. All paths land on the same
+  `backontrack://auth-callback` URL scheme.
 - Android PWA: same web magic-link flow.
 - HealthKit is local/read-only and is not part of the shared JSON contract.

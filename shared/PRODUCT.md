@@ -22,7 +22,7 @@ This file is the source of truth for keeping them recognisably the same.
 | 4 | Links | Links | Personal links, sharing, sync |
 | 5 | Shelves | Shelves | Borrowable library, not a dumping drawer |
 
-The optional **quiet 30 days** lives inside Home and Wind down, not as a sixth tab.
+The optional **quiet 60 days** lives inside Home and Wind down, not as a sixth tab. It is adaptive: six phases, pace settings, focus-area substitutions and a gentle re-entry after gaps.
 
 ## Shared visual language
 
@@ -53,6 +53,13 @@ shopping, food, something else, or nothing specific), which support cards they
 want, and whether to begin with a gentle starter set or an empty slate. This is
 a preference, never a diagnosis or label. It can be changed later from Links →
 Make it yours.
+
+## Self-regulation
+
+Piano improvisation and shaking on the spot are first-class, shame-free
+self-regulation options. They live on the **Ways to settle** shelf, in the
+Focus screen, in onboarding, and as a grounding step in the pause sheet. They
+are not framed as symptoms, treatment or tasks to complete.
 
 ## Platform-specific additions
 

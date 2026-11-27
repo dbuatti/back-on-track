@@ -48,6 +48,20 @@ enum SeedData {
         }
     }
 
+    static func selfRegulationShelf() -> Shelf {
+        Shelf(
+            id: "sh_selfreg",
+            name: "Ways to settle",
+            note: "Self-regulation that does not need a screen.",
+            items: [
+                ShelfItem(id: "sr_piano", text: "Piano improvisation", note: "a way to self-regulate", small: "Play one phrase with no goal."),
+                ShelfItem(id: "sr_shake", text: "Shake on the spot", note: "release, not exercise", small: "Let your hands and shoulders shake for ten seconds."),
+                ShelfItem(id: "sr_hum", text: "Hum one note", note: "quiet regulation", small: "One note, then stop.")
+            ],
+            tone: "green"
+        )
+    }
+
     private static func appendMissing<T: Identifiable>(_ defaults: [T], to list: inout [T]) where T.ID: Hashable {
         let existing = Set(list.map(\.id))
         for item in defaults where !existing.contains(item.id) {

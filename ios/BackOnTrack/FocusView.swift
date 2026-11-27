@@ -5,7 +5,8 @@ struct FocusView: View {
     private let sections: [FocusSection] = [
         FocusSection(title: "Morning", icon: "sun.max", line: "Begin gently. Nothing needs to be perfect."),
         FocusSection(title: "Daily anchors", icon: "leaf", line: "One thing that keeps the day steady."),
-        FocusSection(title: "Instead of gaming", icon: "gamecontroller", line: "A softer way to land in the evening.")
+        FocusSection(title: "Instead of gaming", icon: "gamecontroller", line: "A softer way to land in the evening."),
+        FocusSection(title: "Self-regulation", icon: "music.note", line: "Piano improvisation, a good shake, or one quiet note.")
     ]
 
     var body: some View {

@@ -40,6 +40,21 @@ struct LinksView: View {
                     .botCard()
 
                     VStack(alignment: .leading, spacing: 10) {
+                        BotSectionHeader(title: "Gmail", systemImage: "envelope")
+                        Text("Open Gmail in Safari when you need it. Google sign-in above uses your Google account for sync.")
+                            .font(.subheadline).foregroundStyle(BotTheme.soft)
+                        Link(destination: URL(string: "https://mail.google.com/")!) {
+                            Text("Open Gmail")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(BotTheme.sageSoft, in: Capsule())
+                                .foregroundStyle(BotTheme.sage)
+                        }
+                    }
+                    .botCard()
+
+                    VStack(alignment: .leading, spacing: 10) {
                         BotSectionHeader(title: "Make it yours", systemImage: "slider.horizontal.3")
                         Text("Choose what pulls you in and which support cards appear. No diagnosis, no labels — just your preferences.")
                             .font(.subheadline).foregroundStyle(BotTheme.soft)

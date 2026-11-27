@@ -12,10 +12,11 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Personal links | ✅ | 🟡 | iPhone read/open/copy; editing planned |
 | Shelves and borrowing | ✅ | ✅ | On-loan state shown |
 | Task add/remove | ✅ | ✅ | Removal moves to Keep close |
-| Quiet 30 days | ✅ | ✅ | Shared card on Home and Wind down; marks and reflection sync |
+| Quiet program | ✅ 30 days | ✅ 60 days | Native version is adaptive with phases, pace and focus substitution |
 | Sleep trend / week view | ✅ | ✅ | Soft 14-night pattern, last 7 shown; no score |
 | Import / export JSON | ✅ | ⬜ | Needed for backup and recovery |
 | Supabase sync | ✅ | ✅ | Same table and RLS |
+| Google / Gmail sign-in | ✅ | ✅ | Native uses Google OAuth; Gmail link in Links |
 | Local-only use | ✅ | ✅ | |
 | Personalised focus / support onboarding | ⬜ | ✅ | Native-first; can be ported to PWA later |
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |

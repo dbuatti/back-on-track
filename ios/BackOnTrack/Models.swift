@@ -55,6 +55,7 @@ struct Program30State: Codable, Hashable {
     var done: [String: String] = [:] // step id -> date
     var reflection: String = ""
     var notes: [String: String] = [:]
+    var pace: String?
 }
 
 struct Personalization: Codable, Hashable {

@@ -17,6 +17,7 @@
 		2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */; };
 		46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF35C1265F196A8853B094F /* HomeView.swift */; };
 		4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F721963292C663E8C87902A4 /* SeedData.swift */; };
+		4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */; };
 		70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C81E688F6C56FB06803C98 /* ProgramCard.swift */; };
 		85DB54B4550749E9DC982B4E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE124CB61129605AE0815B65 /* Theme.swift */; };
 		86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */; };
@@ -39,6 +40,7 @@
 		31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingPauseView.swift; sourceTree = "<group>"; };
 		31C81E688F6C56FB06803C98 /* ProgramCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramCard.swift; sourceTree = "<group>"; };
 		3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackOnTrackApp.swift; sourceTree = "<group>"; };
+		4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramEngine.swift; sourceTree = "<group>"; };
 		559A11358AC1D6067046DCD0 /* PersonalizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationView.swift; sourceTree = "<group>"; };
 		6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSummaryCard.swift; sourceTree = "<group>"; };
 		72880D31775190369EF719C4 /* WindDownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDownView.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 				559A11358AC1D6067046DCD0 /* PersonalizationView.swift */,
 				0219275011AE3E910A692A7D /* Program30.swift */,
 				31C81E688F6C56FB06803C98 /* ProgramCard.swift */,
+				4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */,
 				DDBDC2A1495834028D50341F /* RootView.swift */,
 				F721963292C663E8C87902A4 /* SeedData.swift */,
 				1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */,
@@ -192,6 +195,7 @@
 				B2DA3834596A74C286D36B15 /* PersonalizationView.swift in Sources */,
 				CA740469DBA2772CAD6874B2 /* Program30.swift in Sources */,
 				70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */,
+				4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */,
 				DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */,
 				4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */,
 				DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */,

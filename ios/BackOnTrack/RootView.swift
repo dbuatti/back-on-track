@@ -70,6 +70,24 @@ struct SignInView: View {
                 }
                 .padding(.top, 12)
 
+                Button {
+                    Task { _ = await auth.signInWithGoogle() }
+                } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "g.circle.fill")
+                            .font(.title3)
+                        Text("Continue with Google")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(BotTheme.card, in: Capsule())
+                    .foregroundStyle(BotTheme.ink)
+                    .overlay(Capsule().stroke(BotTheme.line, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(auth.isBusy)
+
                 Picker("Account mode", selection: $mode) {
                     Text("Sign in").tag(Mode.signIn)
                     Text("Create account").tag(Mode.createAccount)

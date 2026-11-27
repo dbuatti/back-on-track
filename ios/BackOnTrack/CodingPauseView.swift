@@ -108,6 +108,7 @@ struct CodingPauseSheet: View {
                         groundingRow("Feet on the floor", "Notice the chair holding you.")
                         groundingRow("One slow breath", "Let it out a little longer.")
                         groundingRow("Look away", "Find one thing that isn't a screen.")
+                        groundingRow("Shake it out", "Let your hands and shoulders shake for ten seconds.")
                         groundingRow("Close the editor", "The code will still be there.")
                     }
                     .botCard()

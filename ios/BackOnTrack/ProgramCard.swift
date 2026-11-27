@@ -7,8 +7,8 @@ struct ProgramCard: View {
 
     var body: some View {
         let p = store.state.settings.program30
-        let index = min(max(p.step, 0), Program30.steps.count - 1)
-        let step = Program30.steps[index]
+        let index = min(max(p.step, 0), Program.steps.count - 1)
+        let step = Program.effectiveStep(state: store.state, index: index)
 
         if !p.loaded {
             nudgeCard
@@ -25,10 +25,10 @@ struct ProgramCard: View {
                 .frame(width: 38, height: 38)
                 .background(BotTheme.accentSoft, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text("A quiet 30 days")
+                Text("A quiet 60 days")
                     .font(BotTheme.headingFont)
                     .foregroundStyle(BotTheme.ink)
-                Text("Thirty small invitations, at your pace. Nothing to catch up on.")
+                Text("Sixty small invitations that adapt to your pace. Nothing to catch up on.")
                     .font(.caption).foregroundStyle(BotTheme.soft)
             }
             Spacer()
@@ -46,10 +46,11 @@ struct ProgramCard: View {
         .shadow(color: BotTheme.accent.opacity(0.06), radius: 14, x: 0, y: 7)
     }
 
-    private func loadedCard(p: Program30State, step: ProgramStep, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+    private func loadedCard(p: Program30State, step: ProgramInvitation, index: Int) -> some View {
+        let phase = Program.phases[step.phase]
+        return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Invitation \(index + 1) of \(Program30.steps.count)")
+                Text("Invitation \(index + 1) of \(Program.steps.count)")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(BotTheme.accent)
                 Spacer()
@@ -59,6 +60,14 @@ struct ProgramCard: View {
                     .padding(.vertical, 4)
                     .background(BotTheme.accentSoft, in: Capsule())
                     .foregroundStyle(BotTheme.accentDeep)
+            }
+            VStack(alignment: .leading, spacing: 2) {
+                Text(phase.title)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(BotTheme.ink)
+                Text(phase.subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(BotTheme.soft)
             }
 
             if gapDays >= 2 {
@@ -83,7 +92,7 @@ struct ProgramCard: View {
                     .foregroundStyle(BotTheme.soft)
             }
 
-            if let nick = step.nick, let url = URL(string: Program30.nickURL) {
+            if let nick = step.nick, let url = URL(string: Program.nickURL) {
                 Link(destination: url) {
                     HStack(spacing: 6) {
                         Image(systemName: "headphones")
@@ -106,8 +115,8 @@ struct ProgramCard: View {
             .font(.caption)
             .foregroundStyle(BotTheme.soft)
 
-            if index == Program30.steps.count - 1 {
-                Text("That's the thirty. Nothing to score — one line, if you want, about what you noticed. Just for you.")
+            if index == Program.steps.count - 1 {
+                Text("That's the sixty. Nothing to score — one line, if you want, about what you noticed. Just for you.")
                     .font(.caption).foregroundStyle(BotTheme.soft)
                 TextField("What did you notice? (optional)", text: $reflection, axis: .vertical)
                     .lineLimit(1...3)
@@ -122,7 +131,7 @@ struct ProgramCard: View {
                 Button {
                     undoState = store.completeProgramStep()
                 } label: {
-                    Text(index == Program30.steps.count - 1 ? "Keep this step" : "That's enough")
+                    Text(index == Program.steps.count - 1 ? "Keep this step" : "That's enough")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
@@ -141,11 +150,30 @@ struct ProgramCard: View {
                 }
             }
 
+            HStack(spacing: 6) {
+                ForEach(0..<Program.phases.count, id: \.self) { phaseIndex in
+                    Circle()
+                        .fill(phaseIndex <= step.phase ? BotTheme.accent : BotTheme.line)
+                        .frame(width: 7, height: 7)
+                }
+                Spacer()
+            }
+
             DisclosureGroup("Sequence settings") {
-                HStack {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Pace")
+                        .font(.caption.weight(.semibold)).foregroundStyle(BotTheme.ink)
+                    Picker("Pace", selection: Binding(
+                        get: { p.pace ?? "gentle" },
+                        set: { store.setProgramPace($0) }
+                    )) {
+                        Text("Gentle").tag("gentle")
+                        Text("Steady").tag("steady")
+                        Text("Minimal").tag("minimal")
+                    }
+                    .pickerStyle(.segmented)
                     Text(p.startedAt.isEmpty ? "No marks yet. Loading out keeps everything." : "Kept where you left it. Loading out keeps every mark.")
                         .font(.caption).foregroundStyle(BotTheme.soft)
-                    Spacer()
                     Button("Load out") { store.setProgramLoaded(false) }
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(BotTheme.accent)
@@ -162,11 +190,6 @@ struct ProgramCard: View {
     }
 
     private var gapDays: Int {
-        let p = store.state.settings.program30
-        guard !p.lastDoneAt.isEmpty else { return 0 }
-        let f = DateFormatter()
-        f.dateFormat = "yyyy-MM-dd"
-        guard let date = f.date(from: p.lastDoneAt) else { return 0 }
-        return max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: date), to: Calendar.current.startOfDay(for: Date())).day ?? 0)
+        Program.daysSince(store.state.settings.program30.lastDoneAt)
     }
 }

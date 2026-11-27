@@ -13,7 +13,7 @@ struct PersonalizationView: View {
     ]
     private let supportOptions = [
         ("pause", "60-second pause"), ("smallSteps", "Smallest steps"), ("sleep", "Sleep logging"),
-        ("evening", "Evening alternatives"), ("movement", "Movement")
+        ("evening", "Evening alternatives"), ("movement", "Movement"), ("selfreg", "Self-regulation")
     ]
 
     var body: some View {

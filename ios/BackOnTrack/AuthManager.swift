@@ -32,6 +32,22 @@ final class AuthManager: ObservableObject {
         return ok
     }
 
+    func signInWithGoogle() async -> Bool {
+        isBusy = true
+        error = nil
+        defer { isBusy = false }
+        let ok = await supabase.signInWithGoogle()
+        isSignedIn = ok
+        if ok {
+            isLocalOnly = false
+            UserDefaults.standard.set(false, forKey: "bot.localOnly")
+            displayName = "Google account"
+        } else {
+            error = supabase.status
+        }
+        return ok
+    }
+
     func signUp(email: String, password: String) async -> Bool {
         isBusy = true
         error = nil

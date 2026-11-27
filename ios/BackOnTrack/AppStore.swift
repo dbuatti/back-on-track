@@ -55,6 +55,15 @@ final class AppStore: ObservableObject {
                 if auth.isSignedIn { await supabase.pushState(state) }
             }
         }
+        if !UserDefaults.standard.bool(forKey: "bot.selfRegSeededV1") {
+            if !state.settings.shelves.contains(where: { $0.id == "sh_selfreg" }) {
+                state.settings.shelves.append(SeedData.selfRegulationShelf())
+                state.settings.updatedAt = Date().timeIntervalSince1970 * 1000
+                persistLocal()
+                if auth.isSignedIn { await supabase.pushState(state) }
+            }
+            UserDefaults.standard.set(true, forKey: "bot.selfRegSeededV1")
+        }
         isReady = true
         hasBootstrapped = true
     }
@@ -86,17 +95,22 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func setProgramPace(_ pace: String) {
+        state.settings.program30.pace = pace
+        save()
+    }
+
     @discardableResult
     func completeProgramStep() -> Program30State? {
         let p = state.settings.program30
         let before = p
-        let index = min(max(p.step, 0), Program30.steps.count - 1)
-        let step = Program30.steps[index]
+        let index = min(max(p.step, 0), Program.steps.count - 1)
+        let step = Program.effectiveStep(state: state, index: index)
         let today = todayKey()
         state.settings.program30.done[step.id] = today
         state.settings.program30.lastDoneAt = today
         if state.settings.program30.startedAt.isEmpty { state.settings.program30.startedAt = today }
-        if state.settings.program30.step < Program30.steps.count - 1 {
+        if state.settings.program30.step < Program.steps.count - 1 {
             state.settings.program30.step += 1
         }
         save()
