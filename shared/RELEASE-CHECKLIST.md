@@ -28,6 +28,16 @@
 - [ ] When paid account is enabled: TestFlight build, HealthKit entitlement,
       privacy descriptions and Health permission denial flow.
 
+## Remote / unplugged workflow
+
+When iPhones are not connected:
+
+- [ ] Work on source and shared contracts only.
+- [ ] Run `./scripts/ios.sh build` and `./scripts/ios.sh test`.
+- [ ] Do not promise an on-device install until a device is available.
+- [ ] Prepare archive/TestFlight once the paid account exists.
+- [ ] Share the PWA URL for immediate cross-platform updates.
+
 ## Version alignment
 
 The web footer and native build should identify the same release family, e.g.

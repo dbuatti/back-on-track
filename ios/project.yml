@@ -39,3 +39,19 @@ targets:
         DEVELOPMENT_TEAM: "6SPV96FZW9"
         PRODUCT_BUNDLE_IDENTIFIER: "com.danielebuatti.backontrack"
         ASSETCATALOG_COMPILER_APPICON_NAME: "AppIcon"
+
+  BackOnTrackTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: BackOnTrackTests
+    dependencies:
+      - target: BackOnTrack
+    settings:
+      base:
+        SWIFT_VERSION: "5.10"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "6SPV96FZW9"
+        PRODUCT_BUNDLE_IDENTIFIER: "com.danielebuatti.backontrack.tests"
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/BackOnTrack.app/BackOnTrack"
+        BUNDLE_LOADER: "$(TEST_HOST)"
