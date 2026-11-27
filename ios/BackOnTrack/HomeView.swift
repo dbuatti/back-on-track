@@ -3,6 +3,12 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var store: AppStore
     @State private var intention: String = ""
+    @State private var editing = false
+    @State private var addingTo: String?
+    @State private var newTask = ""
+    @State private var newSmall = ""
+    @State private var removing: ListItem?
+    @State private var removeFrom = ""
 
     var body: some View {
         NavigationStack {
@@ -18,8 +24,8 @@ struct HomeView: View {
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
                         nickLoadCard
                     }
-                    section(title: "Morning", systemImage: "sun.max", items: store.state.settings.lists.morning)
-                    section(title: "Daily anchors", systemImage: "leaf", items: store.state.settings.lists.anchors)
+                    section(title: "Morning", systemImage: "sun.max", items: store.state.settings.lists.morning, list: "morning")
+                    section(title: "Daily anchors", systemImage: "leaf", items: store.state.settings.lists.anchors, list: "anchors")
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
@@ -34,9 +40,39 @@ struct HomeView: View {
                     }
                     .accessibilityLabel("Sync now")
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(editing ? "Done" : "Edit") { editing.toggle() }
+                        .font(.subheadline)
+                }
             }
         }
         .tint(BotTheme.accent)
+        .alert("Add a small task", isPresented: Binding(
+            get: { addingTo != nil },
+            set: { if !$0 { addingTo = nil } }
+        )) {
+            TextField("Task", text: $newTask)
+            TextField("Smallest version (optional)", text: $newSmall)
+            Button("Add") {
+                if let list = addingTo { store.addTask(newTask, small: newSmall, to: list) }
+                addingTo = nil
+            }
+            Button("Cancel", role: .cancel) { addingTo = nil }
+        } message: {
+            Text("Keep it small enough for a hard day.")
+        }
+        .alert("Remove from Home?", isPresented: Binding(
+            get: { removing != nil },
+            set: { if !$0 { removing = nil } }
+        )) {
+            Button("Move to Keep close", role: .destructive) {
+                if let item = removing { store.removeTask(item.id, from: removeFrom) }
+                removing = nil
+            }
+            Button("Keep it", role: .cancel) { removing = nil }
+        } message: {
+            Text("It will wait on the Keep close shelf. You can borrow it back later.")
+        }
         .onAppear { intention = store.state.days[todayKey()]?.intention ?? "" }
     }
 
@@ -72,34 +108,51 @@ struct HomeView: View {
     }
 
     @ViewBuilder
-    private func section(title: String, systemImage: String, items: [ListItem]) -> some View {
+    private func section(title: String, systemImage: String, items: [ListItem], list: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Label(title, systemImage: systemImage)
                 .font(.headline)
                 .padding(.horizontal, 4)
-            if items.isEmpty {
-                Text("Nothing here yet.")
-                    .font(.subheadline)
-                    .foregroundStyle(BotTheme.soft)
-                    .padding(16)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-            } else {
-                VStack(spacing: 0) {
+            VStack(spacing: 0) {
+                if items.isEmpty {
+                    Text("Nothing here yet.")
+                        .font(.subheadline)
+                        .foregroundStyle(BotTheme.soft)
+                        .padding(16)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
                     ForEach(items) { item in
-                        row(item)
+                        row(item, editMode: editing, onRemove: {
+                            removing = item
+                            removeFrom = list
+                        })
                         if item.id != items.last?.id {
                             Divider().padding(.leading, 52)
                         }
                     }
                 }
-                .padding(.horizontal, 12)
-                .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                if editing {
+                    Divider().padding(.leading, 52)
+                    Button {
+                        addingTo = list
+                        newTask = ""
+                        newSmall = ""
+                    } label: {
+                        Label("Add a small task", systemImage: "plus")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(BotTheme.accent)
+                            .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, items.isEmpty ? 0 : 4)
+            .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
         }
     }
 
-    private func row(_ item: ListItem) -> some View {
+    private func row(_ item: ListItem, editMode: Bool, onRemove: @escaping () -> Void) -> some View {
         let checked = store.state.days[todayKey()]?.checks[item.id] ?? false
         return HStack(alignment: .center, spacing: 12) {
             Button { toggle(item.id) } label: {
@@ -136,6 +189,15 @@ struct HomeView: View {
                         .background(BotTheme.accent.opacity(0.14), in: Capsule())
                 }
                 .buttonStyle(.plain)
+            }
+
+            if editMode {
+                Button(action: onRemove) {
+                    Image(systemName: "minus.circle")
+                        .foregroundStyle(BotTheme.soft)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Move \(item.text) to Keep close")
             }
         }
         .padding(.vertical, 10)

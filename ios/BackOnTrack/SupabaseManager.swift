@@ -74,6 +74,34 @@ final class SupabaseManager: ObservableObject {
         }
     }
 
+    func signUp(email: String, password: String) async -> Bool {
+        do {
+            var request = URLRequest(url: baseURL.appendingPathComponent("auth/v1/signup"))
+            request.httpMethod = "POST"
+            request.setValue(anonKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                status = "Couldn't create the account. Check the email and password."
+                return false
+            }
+            let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+            if obj?["access_token"] != nil {
+                let token = try parseSession(data)
+                session = token
+                persist()
+                status = "Account created"
+                return true
+            }
+            status = "Account created. Check your email to confirm it, then sign in."
+            return false
+        } catch {
+            status = "Couldn't create the account: \(error.localizedDescription)"
+            return false
+        }
+    }
+
     func signOut() {
         session = nil
         UserDefaults.standard.removeObject(forKey: "bot.supabaseSession")

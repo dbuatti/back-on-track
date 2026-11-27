@@ -40,6 +40,35 @@ struct WindDownView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
+                        Label("Instead of gaming", systemImage: "gamecontroller")
+                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        VStack(spacing: 0) {
+                            ForEach(store.state.settings.lists.instead) { item in
+                                HStack(spacing: 12) {
+                                    Button { toggle(item.id) } label: {
+                                        Image(systemName: (store.state.days[todayKey()]?.checks[item.id] ?? false) ? "checkmark.circle.fill" : "circle")
+                                            .font(.title3)
+                                            .foregroundStyle((store.state.days[todayKey()]?.checks[item.id] ?? false) ? BotTheme.accent : BotTheme.soft)
+                                    }
+                                    .buttonStyle(.plain)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(item.text).font(.subheadline).foregroundStyle(BotTheme.ink)
+                                        DisclosureGroup("Even smaller") {
+                                            Text(item.small ?? "Just the smallest part.")
+                                                .font(.caption).foregroundStyle(BotTheme.soft)
+                                        }
+                                        .font(.caption).foregroundStyle(BotTheme.soft)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.vertical, 8)
+                                if item.id != store.state.settings.lists.instead.last?.id { Divider() }
+                            }
+                        }
+                    }
+                    .botCard()
+
+                    VStack(alignment: .leading, spacing: 8) {
                         Label("How it felt", systemImage: "heart")
                             .font(.headline).foregroundStyle(BotTheme.ink)
                         Picker("Mood", selection: $mood) {
@@ -160,6 +189,13 @@ struct WindDownView: View {
         ensureDay()
         store.state.days[todayKey()]?.mood = mood
         store.state.days[todayKey()]?.note = note
+        store.save()
+    }
+
+    private func toggle(_ id: String) {
+        ensureDay()
+        let current = store.state.days[todayKey()]?.checks[id] ?? false
+        store.state.days[todayKey()]?.checks[id] = !current
         store.save()
     }
 

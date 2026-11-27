@@ -80,6 +80,33 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func addTask(_ text: String, small: String, to list: String) {
+        let title = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return }
+        let id = "custom_\(UUID().uuidString.prefix(8))"
+        let item = ListItem(id: id, text: title, note: nil, small: small.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Just the smallest part." : small, url: nil)
+        if list == "morning" { state.settings.lists.morning.append(item) }
+        else { state.settings.lists.anchors.append(item) }
+        save()
+    }
+
+    func removeTask(_ id: String, from list: String) {
+        let source: [ListItem]
+        if list == "morning" { source = state.settings.lists.morning }
+        else { source = state.settings.lists.anchors }
+        guard let item = source.first(where: { $0.id == id }) else { return }
+
+        var keepIndex = state.settings.shelves.firstIndex(where: { $0.id == "sh_keepclose" })
+        if keepIndex == nil {
+            state.settings.shelves.append(Shelf(id: "sh_keepclose", name: "Keep close", note: "Good for you, just not in the daily rhythm.", items: [], tone: "slate"))
+            keepIndex = state.settings.shelves.count - 1
+        }
+        state.settings.shelves[keepIndex!].items.append(ShelfItem(id: item.id, text: item.text, note: item.note, small: item.small))
+        if list == "morning" { state.settings.lists.morning.removeAll(where: { $0.id == id }) }
+        else { state.settings.lists.anchors.removeAll(where: { $0.id == id }) }
+        save()
+    }
+
     func borrow(shelfId: String, itemId: String, into list: String) {
         guard let shelfIndex = state.settings.shelves.firstIndex(where: { $0.id == shelfId }),
               let item = state.settings.shelves[shelfIndex].items.first(where: { $0.id == itemId }) else { return }

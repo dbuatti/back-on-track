@@ -6,33 +6,11 @@ struct LinksView: View {
     @EnvironmentObject var auth: AuthManager
     @State private var copied: String?
 
-    private let door = URL(string: "https://danieles-mac-mini.tailab1fd5.ts.net:8451/")!
-
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     Text("Links").font(.largeTitle).bold().foregroundStyle(BotTheme.ink)
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        Label("The Door", systemImage: "door.right.hand.open")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
-                        Text("Open The Door").font(.subheadline).foregroundStyle(BotTheme.soft)
-                        HStack {
-                            Link(destination: door) {
-                                Text("Open")
-                                    .font(.subheadline.weight(.semibold))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .background(BotTheme.accent, in: Capsule())
-                                    .foregroundStyle(.white)
-                            }
-                            Button { copy(door.absoluteString) } label: {
-                                Image(systemName: "doc.on.doc")
-                            }
-                        }
-                    }
-                    .botCard()
 
                     VStack(alignment: .leading, spacing: 8) {
                         Text("My links").font(.headline).foregroundStyle(BotTheme.ink)
@@ -50,22 +28,33 @@ struct LinksView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Label("Sync", systemImage: "arrow.triangle.2.circlepath")
                             .font(.headline).foregroundStyle(BotTheme.ink)
-                        Text(store.supabase.status)
-                            .font(.subheadline).foregroundStyle(BotTheme.soft)
-                        HStack {
-                            Button { Task { await store.syncNow() } } label: {
-                                Text("Sync now")
-                                    .font(.subheadline.weight(.semibold))
-                                    .padding(.horizontal, 14)
-                                    .padding(.vertical, 10)
-                                    .background(BotTheme.accentSoft, in: Capsule())
-                                    .foregroundStyle(BotTheme.accent)
+                        if auth.isSignedIn {
+                            Text(store.supabase.status)
+                                .font(.subheadline).foregroundStyle(BotTheme.soft)
+                            HStack {
+                                Button { Task { await store.syncNow() } } label: {
+                                    Text("Sync now")
+                                        .font(.subheadline.weight(.semibold))
+                                        .padding(.horizontal, 14)
+                                        .padding(.vertical, 10)
+                                        .background(BotTheme.accentSoft, in: Capsule())
+                                        .foregroundStyle(BotTheme.accent)
+                                }
+                                Button("Sign out") {
+                                    auth.signOut()
+                                    store.isReady = false
+                                }
+                                .font(.subheadline)
                             }
-                            Button("Sign out", role: .destructive) {
-                                auth.signOut()
-                                store.isReady = false
+                        } else {
+                            Text("Your data is on this phone. Connect an account when you want it on your other devices.")
+                                .font(.subheadline).foregroundStyle(BotTheme.soft)
+                            Button("Sign in to sync") {
+                                auth.isLocalOnly = false
+                                UserDefaults.standard.set(false, forKey: "bot.localOnly")
                             }
-                            .font(.subheadline)
+                            .buttonStyle(.bordered)
+                            .tint(BotTheme.accent)
                         }
                     }
                     .botCard()
