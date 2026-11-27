@@ -1530,24 +1530,63 @@
     color: var(--cozy-ink);
   }
   .cozy-hint { color: var(--cozy-soft); margin: 0 0 var(--s3); }
-  .cozy-ring { position: relative; width: 220px; height: 220px; margin: var(--s4) auto; }
-  .cozy-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-  .cozy-ring .track { fill: none; stroke: var(--cozy-line); stroke-width: 12; }
-  .cozy-ring .fill { fill: none; stroke: url(#cozyGrad); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.8s linear; }
-  .cozy-ring-center {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-content: center;
-    text-align: center;
+  .cozy-meter {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s5);
+    margin: var(--s4) auto;
   }
-  .cozy-ring-center strong {
+  .cozy-meter-tube {
+    position: relative;
+    width: 78px;
+    height: 260px;
+    border-radius: 999px;
+    background: var(--cozy-card-2);
+    border: 1px solid var(--cozy-line);
+    overflow: hidden;
+    box-shadow: inset 0 2px 10px rgba(10,6,22,0.35), 0 14px 30px rgba(10,6,22,0.25);
+  }
+  .cozy-meter-fill {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(180deg, #d8c4ff 0%, #a886ef 55%, #8f6fd0 100%);
+    transition: height 0.8s linear, background 0.8s linear;
+  }
+  .cozy-meter-ticks {
+    position: absolute;
+    inset: 12px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+  }
+  .cozy-meter-ticks span {
+    display: block;
+    height: 1px;
+    width: 22px;
+    margin-left: 14px;
+    background: rgba(247,242,255,0.28);
+  }
+  .cozy-meter-gloss {
+    position: absolute;
+    top: 14px; bottom: 14px; left: 12px;
+    width: 12px;
+    border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0.02));
+    pointer-events: none;
+  }
+  .cozy-meter-readout { display: grid; gap: 4px; }
+  .cozy-meter-readout strong {
     font-family: Georgia, "Times New Roman", serif;
-    font-size: 44px;
+    font-size: 52px;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
+    color: var(--cozy-ink);
   }
-  .cozy-ring-center span { font-size: var(--t-small); color: var(--cozy-soft); }
+  .cozy-meter-readout span { font-size: var(--t-small); color: var(--cozy-soft); }
   .cozy-buttons { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }
   .cozy-btn {
     min-height: 48px;
@@ -1562,14 +1601,33 @@
   .cozy-btn.ghost { background: transparent; color: var(--cozy-ink); border-color: var(--cozy-line); }
   .cozy-btn:focus-visible { outline: 3px solid var(--cozy-ink); outline-offset: 3px; }
   .cozy-message { text-align: center; color: var(--cozy-soft); margin-top: var(--s3); min-height: 1.4em; }
-  .cozy-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .cozy-plain { margin-bottom: var(--s6); }
+  .cozy-list { list-style: none; padding: 0; margin: 0; }
   .cozy-list li {
-    background: var(--cozy-card-2);
-    border-radius: 16px;
-    padding: 12px 14px;
+    padding: 6px 0;
     color: var(--cozy-ink);
-    font-size: var(--t-body);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1.45;
   }
+  .dump-mic {
+    width: 124px;
+    height: 124px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.18);
+    background: radial-gradient(circle at 35% 30%, #e07a68 0%, #c85a50 48%, #9f3f3c 100%);
+    color: #fff6f2;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    margin: var(--s5) auto var(--s3);
+    box-shadow: 0 18px 40px rgba(160,60,60,0.32), inset 0 2px 12px rgba(255,255,255,0.18);
+  }
+  .dump-mic svg { width: 46px; height: 46px; }
+  .dump-mic:active { transform: scale(0.97); }
+  .dump-mic:focus-visible { outline: 3px solid #ffd9c8; outline-offset: 4px; }
   .cozy-add { margin-top: var(--s3); color: var(--cozy-soft); }
   .cozy-add input {
     width: 100%;
@@ -1593,7 +1651,7 @@
     font: inherit;
   }
   @media (prefers-reduced-motion: reduce) {
-    .cozy-ring .fill { transition: none; }
+    .cozy-meter-fill { transition: none; }
   }
 
   @media (prefers-color-scheme: dark) {
@@ -2004,18 +2062,15 @@
       <div class="cozy-kicker">Time, gently</div>
       <h2 id="cozyTitle">A little time, if you want it.</h2>
       <p class="cozy-hint" id="cozyIntro">This is not a restriction. It just makes the time visible while you do the thing you enjoy.</p>
-      <div class="cozy-ring" role="img" aria-label="Time remaining">
-        <svg viewBox="0 0 200 200" aria-hidden="true">
-          <defs>
-            <linearGradient id="cozyGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#d8c4ff" />
-              <stop offset="100%" stop-color="#8f6fd0" />
-            </linearGradient>
-          </defs>
-          <circle class="track" cx="100" cy="100" r="88" />
-          <circle class="fill" id="cozyRingFill" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="0" />
-        </svg>
-        <div class="cozy-ring-center">
+      <div class="cozy-meter" role="img" aria-label="Time remaining">
+        <div class="cozy-meter-tube">
+          <div class="cozy-meter-fill" id="cozyMeterFill"></div>
+          <div class="cozy-meter-ticks" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+          <div class="cozy-meter-gloss" aria-hidden="true"></div>
+        </div>
+        <div class="cozy-meter-readout">
           <strong id="cozyTime">30:00</strong>
           <span id="cozyUnit">minutes left</span>
         </div>
@@ -2028,18 +2083,10 @@
       <p class="cozy-message" id="cozyMessage" aria-live="polite"></p>
     </section>
 
-    <section class="cozy-card">
+    <section class="cozy-card" style="background:rgba(191,167,245,0.12)">
       <div class="cozy-kicker">Things you could be doing right now</div>
       <p class="cozy-hint">Not a to-do list. Just a reminder that these exist, even when you forget.</p>
       <ul class="cozy-list" id="cozyPossibilities"></ul>
-      <details class="cozy-add">
-        <summary>Brain dump / add your own</summary>
-        <p class="cozy-hint">Anything in your physical space or your head that deserves a quiet mention.</p>
-        <form id="cozyAddForm">
-          <input type="text" id="cozyAddInput" placeholder="e.g. the mug in the side drawer" autocomplete="off" />
-          <button type="submit" class="cozy-btn ghost">Add to reminders</button>
-        </form>
-      </details>
     </section>
 
     <section class="cozy-card">
@@ -2057,8 +2104,38 @@
     </section>
   </div>
 
+  <!-- ============ BRAIN DUMP ============ -->
+  <div class="screen cozy-screen dump-screen" id="screen-dump" hidden>
+    <section class="cozy-plain" style="text-align:center">
+      <div class="cozy-kicker">Brain dump</div>
+      <h2>Say it out. We'll write it down.</h2>
+      <p class="cozy-hint">For the mug in the drawer, the thing you meant to do, the small thing you forgot you could do. Nothing is saved until you review it.</p>
+      <button type="button" class="dump-mic" id="cozyVoiceStart" aria-label="Start voice brain dump">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="9" y="3" width="6" height="11" rx="3" />
+          <path d="M5 11a7 7 0 0 0 14 0" />
+          <path d="M12 18v3M9 21h6" />
+        </svg>
+      </button>
+      <button type="button" class="cozy-btn ghost" id="cozyVoiceStop" hidden>Stop listening</button>
+      <p class="cozy-hint" id="cozyVoiceStatus" aria-live="polite" style="min-height:1.4em"></p>
+      <form id="cozyAddForm" style="text-align:left;max-width:520px;margin:0 auto">
+        <label class="cozy-kicker" for="cozyAddInput">Your words — edit freely</label>
+        <textarea id="cozyAddInput" rows="3" placeholder="Whatever you just said, or type it yourself…"
+                  style="width:100%;min-height:110px;margin-top:8px;padding:14px;border-radius:16px;border:1px solid var(--cozy-line);background:var(--cozy-card);color:var(--cozy-ink);font:inherit;resize:vertical"></textarea>
+        <button type="submit" class="cozy-btn primary" style="margin-top:12px">Add to reminders</button>
+      </form>
+      <button type="button" class="cozy-btn ghost" data-go="time" style="margin-top:18px">Back to Time</button>
+    </section>
+  </div>
+
   <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
+    <section class="card" id="brainDumpCard">
+      <h2><span class="dot"></span>Brain dump</h2>
+      <p class="hint">Say the small things out loud, or type them. They become reminders, never a to-do list.</p>
+      <button type="button" class="btn small" data-go="dump">Open brain dump</button>
+    </section>
     <section class="card" id="programMoreCard">
       <h2><span class="dot"></span>A quiet 60 days</h2>
       <p class="hint" id="programMoreText"></p>
@@ -2204,7 +2281,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v71";
+const VERSION = "v73";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3155,8 +3232,15 @@ function renderCozy() {
   const remaining = cozyRemaining();
   const total = Math.max(ct.dailyMinutes, ct.remainingAtStart || ct.dailyMinutes);
   const frac = Math.max(0, Math.min(1, remaining / total));
-  const ring = $("#cozyRingFill");
-  if (ring) ring.setAttribute("stroke-dashoffset", String(552.9 * (1 - frac)));
+  const fill = $("#cozyMeterFill");
+  if (fill) {
+    fill.style.height = Math.round(frac * 100) + "%";
+    fill.style.background = frac > 0.66
+      ? "linear-gradient(180deg,#d8c4ff 0%,#a886ef 55%,#8f6fd0 100%)"
+      : frac > 0.33
+        ? "linear-gradient(180deg,#cdd9ff 0%,#94a9ee 55%,#6f83cf 100%)"
+        : "linear-gradient(180deg,#ffdcc4 0%,#f0b18a 55%,#d78a63 100%)";
+  }
   const mins = Math.floor(remaining);
   const secs = Math.floor((remaining - mins) * 60);
   const timeEl = $("#cozyTime");
@@ -3217,6 +3301,56 @@ function stopCozy(finished) {
   save();
   renderCozy();
   haptic(finished ? 12 : 6);
+}
+
+let cozyRecognition = null;
+let cozyFinalTranscript = "";
+function voiceDumpSupported() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+function startCozyVoice() {
+  const status = $("#cozyVoiceStatus");
+  const input = $("#cozyAddInput");
+  if (!voiceDumpSupported()) {
+    if (status) status.textContent = "Voice input isn't available in this browser. Type the thought instead.";
+    return;
+  }
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  cozyRecognition = new Recognition();
+  cozyRecognition.lang = "en-US";
+  cozyRecognition.continuous = true;
+  cozyRecognition.interimResults = true;
+  cozyFinalTranscript = "";
+  cozyRecognition.onresult = (event) => {
+    let interim = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const text = event.results[i][0].transcript;
+      if (event.results[i].isFinal) cozyFinalTranscript += text + " ";
+      else interim += text;
+    }
+    if (input) input.value = (cozyFinalTranscript + interim).trim();
+  };
+  cozyRecognition.onerror = (event) => {
+    if (status) status.textContent = "Listening stopped: " + event.error;
+  };
+  cozyRecognition.onend = () => {
+    const start = $("#cozyVoiceStart"), stop = $("#cozyVoiceStop");
+    if (start) start.hidden = false;
+    if (stop) stop.hidden = true;
+    if (status && cozyFinalTranscript) status.textContent = "Review the words above, then add them when you're happy.";
+  };
+  try {
+    cozyRecognition.start();
+    if (status) status.textContent = "Listening. Say the small things out loud — nothing is saved until you tap Add.";
+    const start = $("#cozyVoiceStart"), stop = $("#cozyVoiceStop");
+    if (start) start.hidden = true;
+    if (stop) stop.hidden = false;
+  } catch (e) {
+    if (status) status.textContent = "Couldn't start listening. Type the thought instead.";
+  }
+}
+function stopCozyVoice() {
+  if (cozyRecognition) { try { cozyRecognition.stop(); } catch (e) {} }
 }
 
 function renderAll() {
@@ -3302,6 +3436,7 @@ const TAB_SCREENS = {
   winddown: "screen-winddown",
   links: "screen-links",
   time: "screen-time",
+  dump: "screen-dump",
   more: "screen-gentle",
 };
 let activeTab = "home";
@@ -5619,6 +5754,9 @@ function wire() {
     if (!ct.active) { ct.remaining = ct.bankedMinutes; ct.remainingAtStart = ct.remaining; }
     save(); renderCozy();
   });
+  $$("[data-go]").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.go)));
+  $("#cozyVoiceStart").addEventListener("click", startCozyVoice);
+  $("#cozyVoiceStop").addEventListener("click", stopCozyVoice);
   $("#cozyAddForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const input = $("#cozyAddInput");

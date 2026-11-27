@@ -122,6 +122,7 @@ struct ProgramCard: View {
                 TextField("What did you notice? (optional)", text: $reflection, axis: .vertical)
                     .lineLimit(1...3)
                     .textFieldStyle(.roundedBorder)
+                    .keyboardDoneButton()
                     .onChange(of: reflection) { _, value in
                         store.state.settings.program30.reflection = value
                         store.save()

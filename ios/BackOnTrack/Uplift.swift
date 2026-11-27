@@ -30,6 +30,31 @@ final class WhisperManager: ObservableObject {
     }
 }
 
+private struct KeyboardDismissModifier: ViewModifier {
+    @FocusState private var focused: Bool
+
+    func body(content: Content) -> some View {
+        content
+            .focused($focused)
+            .submitLabel(.done)
+            .onSubmit { focused = false }
+            .toolbar {
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focused = false }
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(BotTheme.accent)
+                }
+            }
+    }
+}
+
+extension View {
+    func keyboardDoneButton() -> some View {
+        modifier(KeyboardDismissModifier())
+    }
+}
+
 enum Haptics {
     static func tap() {
         let generator = UIImpactFeedbackGenerator(style: .light)

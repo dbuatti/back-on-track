@@ -39,6 +39,10 @@
 	<string>Read today's steps, walking distance and mindful minutes so you can see them beside your daily rhythm.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Back on Track only reads Health data. It does not write to Health.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The brain dump uses the microphone to turn what you say into a reminder you can review.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Speech recognition turns your brain dump into editable text.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

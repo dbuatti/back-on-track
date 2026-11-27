@@ -112,6 +112,7 @@ struct HomeView: View {
                 .lineLimit(1...3)
                 .foregroundStyle(BotTheme.ink)
                 .onSubmit { saveIntention() }
+                .keyboardDoneButton()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)

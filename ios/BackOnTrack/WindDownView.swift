@@ -116,6 +116,7 @@ struct WindDownView: View {
                             .padding(8)
                             .background(BotTheme.field, in: RoundedRectangle(cornerRadius: 12))
                             .onChange(of: note) { _, _ in saveMoodAndNote() }
+                            .keyboardDoneButton()
                     }
                     .botCard()
                 }

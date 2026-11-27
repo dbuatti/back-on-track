@@ -2,6 +2,33 @@ import SwiftUI
 
 struct ShelvesView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
+    @State private var showingDump = false
+    @State private var activeShelfId: String = ""
+
+    private var shelves: [Shelf] { store.state.settings.shelves }
+
+    private var selectedShelf: Shelf? {
+        if let id = shelves.first(where: { $0.id == activeShelfId }) { return id }
+        return shelves.first
+    }
+
+    private var closeAtHand: [(String, String)] {
+        var rows: [(String, String)] = []
+        for loan in store.state.settings.loans {
+            let item = shelves.flatMap({ $0.items }).first(where: { $0.id == loan.itemId })
+            if let item {
+                rows.append((item.text, loan.list == "morning" ? "On Home" : "In Anchors"))
+            }
+        }
+        if let selfReg = shelves.first(where: { $0.id == "sh_selfreg" })?.items.first {
+            rows.append((selfReg.text, "Ways to settle"))
+        }
+        if let small = shelves.first(where: { $0.id == "sh_smallstarts" })?.items.first {
+            rows.append((small.text, "Small start"))
+        }
+        return Array(rows.prefix(5))
+    }
 
     var body: some View {
         NavigationStack {
@@ -22,12 +49,70 @@ struct ShelvesView: View {
                     .padding(.horizontal, 4)
                     .padding(.top, 4)
 
-                    if store.state.settings.shelves.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        BotSectionHeader(title: "Brain dump", systemImage: "mic", tint: Color(red: 0.784, green: 0.353, blue: 0.314))
+                        Text("Say the small things out loud. They become reminders, never tasks.")
+                            .font(.subheadline).foregroundStyle(BotTheme.soft)
+                        Button("Open brain dump") { showingDump = true }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(Color(red: 0.784, green: 0.353, blue: 0.314), in: Capsule())
+                            .buttonStyle(.plain)
+                    }
+                    .botCard()
+
+                    if !closeAtHand.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            BotSectionHeader(title: "Close at hand", systemImage: "hand.raised", tint: BotTheme.accent)
+                            ForEach(closeAtHand, id: \.0) { item in
+                                HStack(spacing: 8) {
+                                    Text(item.0)
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(BotTheme.ink)
+                                    Spacer()
+                                    Text(item.1)
+                                        .font(.caption2)
+                                        .foregroundStyle(BotTheme.soft)
+                                }
+                                .padding(.vertical, 6)
+                            }
+                        }
+                        .botCard()
+                    }
+
+                    if shelves.isEmpty {
                         Text("No shelves yet.")
                             .foregroundStyle(BotTheme.soft)
                             .botCard()
                     } else {
-                        ForEach(store.state.settings.shelves) { shelf in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 8) {
+                                ForEach(shelves) { shelf in
+                                    Button {
+                                        activeShelfId = shelf.id
+                                        Haptics.tap()
+                                    } label: {
+                                        Text(shelf.name)
+                                            .font(.caption.weight(.semibold))
+                                            .foregroundStyle(activeShelfId == shelf.id || (activeShelfId.isEmpty && shelf.id == shelves.first?.id) ? .white : BotTheme.soft)
+                                            .padding(.horizontal, 13)
+                                            .padding(.vertical, 9)
+                                            .background(
+                                                (activeShelfId == shelf.id || (activeShelfId.isEmpty && shelf.id == shelves.first?.id))
+                                                    ? BotTheme.accent : BotTheme.card,
+                                                in: Capsule()
+                                            )
+                                            .overlay(Capsule().stroke(BotTheme.line.opacity(0.4), lineWidth: 1))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+
+                        if let shelf = selectedShelf {
                             shelfCard(shelf)
                         }
                     }
@@ -37,6 +122,11 @@ struct ShelvesView: View {
             }
             .botBackground()
             .navigationBarHidden(true)
+            .fullScreenCover(isPresented: $showingDump) {
+                VoiceDumpView()
+                    .environmentObject(store)
+                    .environmentObject(whisper)
+            }
         }
     }
 
@@ -55,6 +145,9 @@ struct ShelvesView: View {
                     .background(tone.opacity(0.14), in: Capsule())
                     .foregroundStyle(tone)
             }
+            Text(shelf.note)
+                .font(.caption)
+                .foregroundStyle(BotTheme.soft)
             if shelf.items.isEmpty {
                 Text("Nothing here yet.").font(.caption).foregroundStyle(BotTheme.soft)
             } else {
@@ -96,16 +189,12 @@ struct ShelvesView: View {
                         }
                     }
                     .padding(.vertical, 7)
-                    .opacity(loan == nil ? 1 : 0.72)
-                    if item.id != shelf.items.last?.id {
-                        Divider()
-                    }
                 }
             }
         }
         .botCard()
         .overlay(
-            RoundedRectangle(cornerRadius: 22, style: .continuous)
+            RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(tone.opacity(0.22), lineWidth: 1)
         )
     }

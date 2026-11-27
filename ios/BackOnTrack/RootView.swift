@@ -119,9 +119,11 @@ struct SignInView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textFieldStyle(.roundedBorder)
+                        .keyboardDoneButton()
                     SecureField("Password", text: $password)
                         .textContentType(mode == .createAccount ? .newPassword : .password)
                         .textFieldStyle(.roundedBorder)
+                        .keyboardDoneButton()
                     if mode == .createAccount {
                         Text("At least 8 characters. You may get a confirmation email.")
                             .font(.caption).foregroundStyle(BotTheme.soft)
@@ -172,6 +174,7 @@ struct SignInView: View {
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
                         .textFieldStyle(.roundedBorder)
+                        .keyboardDoneButton()
                     Button("Connect with key") {
                         Task { _ = await auth.signIn(with: syncKey) }
                     }

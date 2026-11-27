@@ -24,6 +24,8 @@ targets:
         NSCloudKitUsageDescription: "Sync your daily rhythm across your devices."
         NSHealthShareUsageDescription: "Read today's steps, walking distance and mindful minutes so you can see them beside your daily rhythm."
         NSHealthUpdateUsageDescription: "Back on Track only reads Health data. It does not write to Health."
+        NSMicrophoneUsageDescription: "The brain dump uses the microphone to turn what you say into a reminder you can review."
+        NSSpeechRecognitionUsageDescription: "Speech recognition turns your brain dump into editable text."
         CFBundleURLTypes:
           - CFBundleURLName: "Back on Track auth"
             CFBundleTypeRole: "Editor"

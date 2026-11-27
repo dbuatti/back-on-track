@@ -13,7 +13,7 @@ private enum Cozy {
 struct CozyTimeView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
-    @State private var newPossibility = ""
+    @State private var showingDump = false
 
     private let starter = [
         "Fold clothes",
@@ -45,7 +45,52 @@ struct CozyTimeView: View {
             )
             .navigationBarHidden(true)
             .onAppear { store.creditCozy() }
+            .fullScreenCover(isPresented: $showingDump) {
+                VoiceDumpView()
+                    .environmentObject(store)
+                    .environmentObject(whisper)
+            }
         }
+    }
+
+    private func meter(fraction: CGFloat) -> some View {
+        let colors: [Color] = fraction > 0.66
+            ? [Color(red: 0.847, green: 0.769, blue: 1.0), Color(red: 0.561, green: 0.435, blue: 0.816)]
+            : fraction > 0.33
+                ? [Color(red: 0.804, green: 0.851, blue: 1.0), Color(red: 0.435, green: 0.514, blue: 0.812)]
+                : [Color(red: 1.0, green: 0.863, blue: 0.769), Color(red: 0.843, green: 0.541, blue: 0.388)]
+        return ZStack(alignment: .bottom) {
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .fill(Cozy.card2)
+                .frame(width: 78, height: 260)
+                .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).stroke(Cozy.line, lineWidth: 1))
+            RoundedRectangle(cornerRadius: 36, style: .continuous)
+                .fill(LinearGradient(colors: colors, startPoint: .top, endPoint: .bottom))
+                .frame(width: 78, height: 260 * fraction)
+                .animation(.linear(duration: 0.6), value: fraction)
+            VStack {
+                Spacer()
+                ForEach(0..<5, id: \.self) { _ in
+                    HStack {
+                        Rectangle().fill(Color.white.opacity(0.28)).frame(width: 22, height: 1)
+                        Spacer()
+                    }
+                    Spacer()
+                }
+            }
+            .padding(.vertical, 14)
+            .padding(.leading, 12)
+            HStack {
+                Rectangle()
+                    .fill(LinearGradient(colors: [Color.white.opacity(0.26), Color.white.opacity(0.02)], startPoint: .top, endPoint: .bottom))
+                    .frame(width: 10)
+                    .padding(.vertical, 14)
+                Spacer()
+            }
+            .padding(.leading, 12)
+        }
+        .frame(width: 78, height: 260)
+        .shadow(color: Color.black.opacity(0.22), radius: 14, x: 0, y: 8)
     }
 
     private func hero(ct: CozyTimerState, remaining: Double, date: Date) -> some View {
@@ -71,21 +116,11 @@ struct CozyTimeView: View {
                 .foregroundStyle(Cozy.soft)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            ZStack {
-                Circle()
-                    .stroke(Cozy.line, lineWidth: 12)
-                Circle()
-                    .trim(from: 0, to: CGFloat(fraction))
-                    .stroke(
-                        LinearGradient(colors: [Color(red: 0.847, green: 0.769, blue: 1.0), Color(red: 0.561, green: 0.435, blue: 0.816)],
-                                       startPoint: .topLeading, endPoint: .bottomTrailing),
-                        style: StrokeStyle(lineWidth: 12, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .animation(.linear(duration: 0.6), value: fraction)
-                VStack(spacing: 2) {
+            HStack(alignment: .center, spacing: 26) {
+                meter(fraction: fraction)
+                VStack(alignment: .leading, spacing: 4) {
                     Text(String(format: "%02d:%02d", mins, secs))
-                        .font(.system(size: 44, weight: .light, design: .serif))
+                        .font(.system(size: 46, weight: .light, design: .serif))
                         .monospacedDigit()
                         .foregroundStyle(Cozy.ink)
                     Text(ct.active ? "still here" : "minutes left")
@@ -93,7 +128,7 @@ struct CozyTimeView: View {
                         .foregroundStyle(Cozy.soft)
                 }
             }
-            .frame(width: 220, height: 220)
+            .frame(maxWidth: .infinity)
             .padding(.vertical, 6)
 
             HStack(spacing: 10) {
@@ -135,7 +170,7 @@ struct CozyTimeView: View {
     }
 
     private func possibilities(ct: CozyTimerState) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
             Text("THINGS YOU COULD BE DOING RIGHT NOW")
                 .font(.system(size: 11, weight: .bold))
                 .tracking(1.2)
@@ -143,41 +178,23 @@ struct CozyTimeView: View {
             Text("Not a to-do list. Just a reminder that these exist, even when you forget.")
                 .font(.subheadline)
                 .foregroundStyle(Cozy.soft)
-            VStack(spacing: 8) {
+            VStack(spacing: 0) {
                 ForEach(starter + ct.custom, id: \.self) { item in
                     HStack {
-                        Text(item)
-                            .font(.body)
+                        Text(item.uppercased())
+                            .font(.system(size: 12, weight: .semibold))
+                            .tracking(0.7)
                             .foregroundStyle(Cozy.ink)
                         Spacer()
                     }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Cozy.card2, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .padding(.vertical, 6)
                 }
             }
-            DisclosureGroup("Brain dump / add your own") {
-                HStack(spacing: 8) {
-                    TextField("e.g. the mug in the side drawer", text: $newPossibility)
-                        .textFieldStyle(.plain)
-                        .foregroundStyle(Cozy.ink)
-                        .padding(12)
-                        .background(Cozy.bg, in: RoundedRectangle(cornerRadius: 14))
-                    Button("Add") {
-                        store.addCozyPossibility(newPossibility)
-                        newPossibility = ""
-                        Haptics.tap()
-                    }
-                    .cozyGhost()
-                }
-            }
-            .font(.caption)
-            .foregroundStyle(Cozy.soft)
         }
-        .padding(22)
+        .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Cozy.card, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
-        .overlay(RoundedRectangle(cornerRadius: 30, style: .continuous).stroke(Cozy.line, lineWidth: 1))
+        .background(Cozy.card2.opacity(0.55), in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(Cozy.accent.opacity(0.16), lineWidth: 1))
     }
 
     private func settingsCard(ct: CozyTimerState) -> some View {
