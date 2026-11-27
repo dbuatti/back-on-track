@@ -12,10 +12,10 @@
 		1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */; };
 		1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9472C52958FE48DE519FC630 /* LinksView.swift */; };
 		27940C1FB0C5BFA2274E7A2C /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3280F3621456DEB1A2AF389 /* AppStore.swift */; };
+		2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */; };
 		46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF35C1265F196A8853B094F /* HomeView.swift */; };
 		9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04525C375C067B32E4631180 /* AuthManager.swift */; };
 		DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */; };
-		DE6D521BBD45238B4B1EE7B4 /* CloudKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7149233B1386D6F7015F0BF1 /* CloudKitManager.swift */; };
 		DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBDC2A1495834028D50341F /* RootView.swift */; };
 		F8E8BEF87A19FE2AB29A3445 /* WindDownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72880D31775190369EF719C4 /* WindDownView.swift */; };
 /* End PBXBuildFile section */
@@ -24,9 +24,7 @@
 		04525C375C067B32E4631180 /* AuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthManager.swift; sourceTree = "<group>"; };
 		1D8583B12F367651A9267318 /* FocusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusView.swift; sourceTree = "<group>"; };
 		1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelvesView.swift; sourceTree = "<group>"; };
-		2472B5F61B8A6FA2994F59BB /* BackOnTrack.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = BackOnTrack.entitlements; sourceTree = "<group>"; };
 		3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackOnTrackApp.swift; sourceTree = "<group>"; };
-		7149233B1386D6F7015F0BF1 /* CloudKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitManager.swift; sourceTree = "<group>"; };
 		72880D31775190369EF719C4 /* WindDownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDownView.swift; sourceTree = "<group>"; };
 		7F63E2DBF92C8073B90BD225 /* BackOnTrack.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BackOnTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8758932B3A77286EC8A0E427 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -35,6 +33,7 @@
 		CCAFA3A189EFC2A26C09BD92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		DDBDC2A1495834028D50341F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		E3280F3621456DEB1A2AF389 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -43,9 +42,7 @@
 			children = (
 				E3280F3621456DEB1A2AF389 /* AppStore.swift */,
 				04525C375C067B32E4631180 /* AuthManager.swift */,
-				2472B5F61B8A6FA2994F59BB /* BackOnTrack.entitlements */,
 				3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */,
-				7149233B1386D6F7015F0BF1 /* CloudKitManager.swift */,
 				1D8583B12F367651A9267318 /* FocusView.swift */,
 				BFF35C1265F196A8853B094F /* HomeView.swift */,
 				8758932B3A77286EC8A0E427 /* Info.plist */,
@@ -53,6 +50,7 @@
 				CCAFA3A189EFC2A26C09BD92 /* Models.swift */,
 				DDBDC2A1495834028D50341F /* RootView.swift */,
 				1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */,
+				EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */,
 				72880D31775190369EF719C4 /* WindDownView.swift */,
 			);
 			path = BackOnTrack;
@@ -104,6 +102,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					780C320140E88FEBDE2155A3 = {
+						DevelopmentTeam = 6SPV96FZW9;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -135,13 +134,13 @@
 				27940C1FB0C5BFA2274E7A2C /* AppStore.swift in Sources */,
 				9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */,
 				1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */,
-				DE6D521BBD45238B4B1EE7B4 /* CloudKitManager.swift in Sources */,
 				12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */,
 				46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */,
 				1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */,
 				163E0BA329AD4A7A1C5D2B2F /* Models.swift in Sources */,
 				DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */,
 				DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */,
+				2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */,
 				F8E8BEF87A19FE2AB29A3445 /* WindDownView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -272,15 +271,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = BackOnTrack/BackOnTrack.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6SPV96FZW9;
 				INFOPLIST_FILE = BackOnTrack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.danielebuatti.BackOnTrack;
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielebuatti.backontrack;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.10;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -291,15 +290,15 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = BackOnTrack/BackOnTrack.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6SPV96FZW9;
 				INFOPLIST_FILE = BackOnTrack/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.danielebuatti.BackOnTrack;
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielebuatti.backontrack;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 5.10;
 				TARGETED_DEVICE_FAMILY = 1;

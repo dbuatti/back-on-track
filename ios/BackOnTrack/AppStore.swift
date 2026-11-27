@@ -6,37 +6,56 @@ final class AppStore: ObservableObject {
     @Published var state: AppState = AppState()
     @Published var isReady: Bool = false
 
-    let cloud = CloudKitManager()
+    let supabase = SupabaseManager.shared
 
     func bootstrap(auth: AuthManager) async {
-        // Try CloudKit first
-        if let remote = await cloud.fetchState() {
-            // merge: remote wins if newer
-            let localStamp = state.settings.updatedAt
-            let remoteStamp = remote.settings.updatedAt
-            if remoteStamp > localStamp {
-                state = remote
-            } else if localStamp > remoteStamp {
-                await cloud.pushState(state)
+        loadLocal()
+        if auth.isSignedIn {
+            if let remote = await supabase.fetchState() {
+                let localStamp = state.settings.updatedAt
+                let remoteStamp = remote.settings.updatedAt
+                if remoteStamp > localStamp {
+                    state = remote
+                    persistLocal()
+                } else if localStamp > remoteStamp {
+                    await supabase.pushState(state)
+                }
+            } else {
+                await supabase.pushState(state)
             }
-        } else {
-            // no remote; push local if signed in
-            if auth.isSignedIn { await cloud.pushState(state) }
         }
         isReady = true
     }
 
     func save() {
         state.settings.updatedAt = Date().timeIntervalSince1970 * 1000
-        // persist locally
+        persistLocal()
+        Task { await supabase.pushState(state) }
+    }
+
+    func syncNow() async {
+        guard supabase.isSignedIn else { return }
+        if let remote = await supabase.fetchState() {
+            let localStamp = state.settings.updatedAt
+            let remoteStamp = remote.settings.updatedAt
+            if remoteStamp > localStamp {
+                state = remote
+                persistLocal()
+            } else if localStamp > remoteStamp {
+                await supabase.pushState(state)
+            }
+        } else {
+            await supabase.pushState(state)
+        }
+    }
+
+    private func persistLocal() {
         if let data = try? JSONEncoder().encode(state) {
             UserDefaults.standard.set(data, forKey: "bot.state")
         }
-        // push to cloud
-        Task { await cloud.pushState(state) }
     }
 
-    func loadLocal() {
+    private func loadLocal() {
         if let data = UserDefaults.standard.data(forKey: "bot.state"),
            let decoded = try? JSONDecoder().decode(AppState.self, from: data) {
             state = decoded

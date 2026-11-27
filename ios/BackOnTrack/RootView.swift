@@ -1,5 +1,4 @@
 import SwiftUI
-import AuthenticationServices
 
 struct RootView: View {
     @EnvironmentObject var auth: AuthManager
@@ -24,37 +23,42 @@ struct RootView: View {
                 }
             }
         }
+        .task { await store.bootstrap(auth: auth) }
+        .onChange(of: auth.isSignedIn) { _, signedIn in
+            if signedIn {
+                store.isReady = false
+                Task { await store.bootstrap(auth: auth) }
+            }
+        }
     }
 }
 
 struct SignInView: View {
     @EnvironmentObject var auth: AuthManager
+    @State private var syncKey: String = ""
+
     var body: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: 20) {
             Text("Back on Track").font(.largeTitle).bold()
-            Text("A calm daily rhythm.").foregroundStyle(.secondary)
+            Text("Connect this iPhone to your web app's sync.").foregroundStyle(.secondary)
             Spacer()
-            SignInWithAppleButton(.signIn) { request in
-                request.requestedScopes = [.fullName, .email]
-            } onCompletion: { result in
-                switch result {
-                case .success(let authz):
-                    if let cred = authz.credential as? ASAuthorizationAppleIDCredential {
-                        auth.userIdentifier = cred.user
-                        auth.isSignedIn = true
-                        UserDefaults.standard.set(cred.user, forKey: "bot.appleUserIdentifier")
-                        if let name = cred.fullName {
-                            auth.displayName = [name.givenName, name.familyName].compactMap { $0 }.joined(separator: " ")
-                        }
-                    }
-                case .failure(let error):
-                    auth.error = error.localizedDescription
-                }
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Sync key").font(.headline)
+                TextField("Paste from Links → Sync key", text: $syncKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .textFieldStyle(.roundedBorder)
+                Text("In the web app, open Links and tap Sync key. It stays on this device and is never shown in an export.")
+                    .font(.caption).foregroundStyle(.secondary)
             }
-            .signInWithAppleButtonStyle(.black)
-            .frame(height: 50)
-            .padding(.horizontal)
-            if let err = auth.error { Text(err).foregroundStyle(.red).font(.caption) }
+            Button(auth.isBusy ? "Connecting…" : "Connect") {
+                Task { _ = await auth.signIn(with: syncKey) }
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(auth.isBusy || syncKey.isEmpty)
+            if let err = auth.error {
+                Text(err).foregroundStyle(.red).font(.caption)
+            }
             Spacer()
         }
         .padding()

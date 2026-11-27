@@ -1810,6 +1810,7 @@
       <p class="hint">Your devices stay in step through your Supabase account. Sign in with your email — no pairing code needed.</p>
       <div class="btn-row">
         <button type="button" class="btn small" id="syncNow">Sync now</button>
+        <button type="button" class="btn small" id="syncKeyBtn">Sync key</button>
       </div>
       <div class="hint" id="syncStatus" aria-live="polite">Not signed in. Enter your email below to sync.</div>
       <div class="field">
@@ -1945,7 +1946,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v64";
+const VERSION = "v65";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3951,6 +3952,32 @@ async function syncSignIn(email) {
     return false;
   }
 }
+async function exportSyncKey() {
+  const { data } = await getSupabase().auth.getSession();
+  const token = data && data.session && data.session.refresh_token;
+  if (!token) {
+    showSnackbar("Sign in first, then show the sync key.");
+    return;
+  }
+  let ok = false;
+  try {
+    await navigator.clipboard.writeText(token);
+    ok = true;
+  } catch (e) {
+    // iOS fallback: selectable prompt
+    const el = document.createElement("textarea");
+    el.value = token;
+    el.setAttribute("readonly", "");
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    el.remove();
+  }
+  showSnackbar(ok ? "Sync key copied. Paste it into the iPhone app." : "Couldn't copy the sync key. Try again in Safari.");
+  if (ok) haptic(8);
+}
 async function syncSignOut() {
   try { await getSupabase().auth.signOut(); } catch (e) {}
   syncCfg.session = null;
@@ -5100,6 +5127,7 @@ function wire() {
     signOutBtn.addEventListener("click", syncSignOut);
   }
   $("#syncNow").addEventListener("click", syncNow);
+  $("#syncKeyBtn").addEventListener("click", exportSyncKey);
   const syncNudgeBtn = $("#syncNudgeBtn");
   if (syncNudgeBtn) syncNudgeBtn.addEventListener("click", () => {
     showTab("links");

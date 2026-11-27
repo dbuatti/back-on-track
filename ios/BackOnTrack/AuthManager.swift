@@ -1,65 +1,38 @@
-import SwiftUI
-import AuthenticationServices
+import Foundation
 import Combine
 
 @MainActor
-final class AuthManager: NSObject, ObservableObject {
-    @Published var userIdentifier: String?
+final class AuthManager: ObservableObject {
     @Published var isSignedIn: Bool = false
-    @Published var displayName: String = ""
+    @Published var isBusy: Bool = false
     @Published var error: String?
+    @Published var displayName: String = ""
 
-    private let key = "bot.appleUserIdentifier"
+    private let supabase = SupabaseManager.shared
 
-    override init() {
-        super.init()
-        if let id = UserDefaults.standard.string(forKey: key) {
-            self.userIdentifier = id
-            self.isSignedIn = true
-        }
+    init() {
+        isSignedIn = supabase.isSignedIn
     }
 
-    func signIn() {
-        let provider = ASAuthorizationAppleIDProvider()
-        let request = provider.createRequest()
-        request.requestedScopes = [.fullName, .email]
-        let controller = ASAuthorizationController(authorizationRequests: [request])
-        controller.delegate = self
-        controller.presentationContextProvider = self
-        controller.performRequests()
+    func signIn(with syncKey: String) async -> Bool {
+        let key = syncKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !key.isEmpty else {
+            error = "Paste the sync key from your web app first."
+            return false
+        }
+        isBusy = true
+        error = nil
+        defer { isBusy = false }
+        let ok = await supabase.signIn(with: key)
+        isSignedIn = ok
+        if ok { displayName = "Synced account" }
+        else { error = supabase.status }
+        return ok
     }
 
     func signOut() {
-        userIdentifier = nil
+        supabase.signOut()
         isSignedIn = false
         displayName = ""
-        UserDefaults.standard.removeObject(forKey: key)
-    }
-}
-
-extension AuthManager: ASAuthorizationControllerDelegate {
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
-        guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential else { return }
-        let id = credential.user
-        userIdentifier = id
-        isSignedIn = true
-        UserDefaults.standard.set(id, forKey: key)
-        if let name = credential.fullName {
-            let parts = [name.givenName, name.familyName].compactMap { $0 }
-            displayName = parts.joined(separator: " ")
-        }
-    }
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        self.error = error.localizedDescription
-    }
-}
-
-extension AuthManager: ASAuthorizationControllerPresentationContextProviding {
-    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = scene.windows.first else {
-            return UIWindow()
-        }
-        return window
     }
 }

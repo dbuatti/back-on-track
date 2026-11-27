@@ -22,19 +22,12 @@ targets:
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
         NSCloudKitUsageDescription: "Sync your daily rhythm across your devices."
-    entitlements:
-      path: BackOnTrack/BackOnTrack.entitlements
-      properties:
-        com.apple.developer.applesignin:
-          - Default
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.danielebuatti.backontrack
-        com.apple.developer.icloud-services:
-          - CloudKit
-        com.apple.security.application-groups: []
+
     dependencies: []
     settings:
       base:
         SWIFT_VERSION: "5.10"
         TARGETED_DEVICE_FAMILY: "1"
         CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: "6SPV96FZW9"
+        PRODUCT_BUNDLE_IDENTIFIER: "com.danielebuatti.backontrack"

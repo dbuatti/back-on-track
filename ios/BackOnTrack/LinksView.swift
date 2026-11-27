@@ -10,7 +10,7 @@ struct LinksView: View {
                 }
                 Section("My links") {
                     ForEach(store.state.settings.myLinks) { link in
-                        Link(link.name, destination: URL(string: link.url ?? "") ?? URL(string: "https://example.com")!)
+                        Link(link.text, destination: URL(string: link.url ?? "") ?? URL(string: "https://example.com")!)
                     }
                 }
             }
