@@ -27,7 +27,6 @@ struct RootView: View {
                 }
             }
         }
-        .preferredColorScheme(.light)
         .onOpenURL { url in
             Task { await auth.handleAuthCallback(url) }
         }

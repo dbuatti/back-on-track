@@ -30,7 +30,7 @@ The optional **quiet 60 days** lives inside Home and Wind down, not as a sixth t
 - Rounded cards, soft borders, restrained shadows.
 - Large tap targets and clear focus states.
 - Rounded, friendly headings with readable body text.
-- Light and dark mode must both pass WCAG AA.
+- Light and dark mode must both pass WCAG AA; iPhone uses dynamic colour tokens.
 - Motion is optional and respects Reduce Motion.
 
 Platform-specific polish is welcome, but colour, hierarchy, spacing and wording

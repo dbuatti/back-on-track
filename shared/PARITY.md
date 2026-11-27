@@ -8,7 +8,7 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Wind down sleep logging | ✅ | ✅ | One-tap log + adjust on iPhone |
 | Mood and waking note | ✅ | ✅ | |
 | Instead of gaming | ✅ | ✅ | |
-| Focus mode | ✅ | 🟡 | iPhone needs live task content |
+| Focus mode | ✅ | ✅ | Live task lists, smallest steps, Sunday rest, program section |
 | Personal links | ✅ | 🟡 | iPhone read/open/copy; editing planned |
 | Shelves and borrowing | ✅ | ✅ | On-loan state shown |
 | Task add/remove | ✅ | ✅ | Removal moves to Keep close |
@@ -23,7 +23,7 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |
 | HealthKit summary | ⬜ | 🍎 | Paid capability required |
 | Share web app | ✅ | 🍎 | Native share sheet |
-| Dark mode | ✅ | ⬜ | iPhone currently forces light |
+| Dark mode | ✅ | ✅ | Dynamic colour tokens adapt to device appearance |
 | App icon / PWA icon | ✅ | ✅ | Shared artwork |
 
 ## Release rule
