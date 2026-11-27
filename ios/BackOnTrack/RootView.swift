@@ -64,9 +64,11 @@ struct SignInView: View {
     @State private var password = ""
     @State private var syncKey = ""
     @State private var magicLinkSent = false
+    @State private var showPassword = false
     @State private var mode: Mode = .signIn
 
     enum Mode { case signIn, createAccount }
+    @FocusState private var emailFocused: Bool
 
     var body: some View {
         ScrollView {
@@ -105,69 +107,73 @@ struct SignInView: View {
                 .buttonStyle(.plain)
                 .disabled(auth.isBusy)
 
-                Picker("Account mode", selection: $mode) {
-                    Text("Sign in").tag(Mode.signIn)
-                    Text("Create account").tag(Mode.createAccount)
-                }
-                .pickerStyle(.segmented)
-
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Email").font(.headline).foregroundStyle(BotTheme.ink)
                     TextField("you@example.com", text: $email)
                         .textContentType(.emailAddress)
-                        .keyboardType(.emailAddress)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .keyboardType(.emailAddress)
                         .textFieldStyle(.roundedBorder)
+                        .focused($emailFocused)
                         .keyboardDoneButton()
-                    SecureField("Password", text: $password)
-                        .textContentType(mode == .createAccount ? .newPassword : .password)
-                        .textFieldStyle(.roundedBorder)
-                        .keyboardDoneButton()
-                    if mode == .createAccount {
-                        Text("At least 8 characters. You may get a confirmation email.")
-                            .font(.caption).foregroundStyle(BotTheme.soft)
-                    }
+                    Text("We'll use this to send a secure link. Your address is filled from your iPhone when available.")
+                        .font(.caption).foregroundStyle(BotTheme.soft)
                 }
                 .botCard()
 
                 Button {
-                    Task {
-                        if mode == .signIn {
-                            _ = await auth.signInWithPassword(email: email, password: password)
-                        } else {
-                            _ = await auth.signUp(email: email, password: password)
-                        }
-                    }
-                } label: {
-                    Text(auth.isBusy ? "Please wait…" : (mode == .signIn ? "Sign in" : "Create account"))
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .background(BotTheme.accentGradient, in: Capsule())
-                        .foregroundStyle(.white)
-                        .shadow(color: BotTheme.accent.opacity(0.18), radius: 10, x: 0, y: 6)
-                }
-                .buttonStyle(.plain)
-                .disabled(auth.isBusy || email.isEmpty || password.count < 8)
-
-                Button {
-                    Task {
-                        magicLinkSent = await auth.sendMagicLink(email: email)
-                    }
+                    emailFocused = false
+                    Task { magicLinkSent = await auth.sendMagicLink(email: email) }
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "envelope")
+                        Image(systemName: magicLinkSent ? "checkmark.circle" : "envelope")
                         Text(magicLinkSent ? "Link sent — check your email" : "Email me a sign-in link")
                     }
-                    .font(.subheadline.weight(.semibold))
+                    .font(.headline)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 46)
-                    .background(BotTheme.accentSoft, in: Capsule())
-                    .foregroundStyle(BotTheme.accentDeep)
+                    .frame(height: 52)
+                    .background(BotTheme.accentGradient, in: Capsule())
+                    .foregroundStyle(.white)
+                    .shadow(color: BotTheme.accent.opacity(0.18), radius: 10, x: 0, y: 6)
                 }
                 .buttonStyle(.plain)
                 .disabled(auth.isBusy || !email.contains("@"))
+
+                DisclosureGroup("Use a password instead") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Picker("Mode", selection: $mode) {
+                            Text("Sign in").tag(Mode.signIn)
+                            Text("Create account").tag(Mode.createAccount)
+                        }
+                        .pickerStyle(.segmented)
+                        SecureField("Password", text: $password)
+                            .textContentType(mode == .createAccount ? .newPassword : .password)
+                            .textFieldStyle(.roundedBorder)
+                            .keyboardDoneButton()
+                        Button {
+                            Task {
+                                if mode == .signIn {
+                                    _ = await auth.signInWithPassword(email: email, password: password)
+                                } else {
+                                    _ = await auth.signUp(email: email, password: password)
+                                }
+                            }
+                        } label: {
+                            Text(auth.isBusy ? "Please wait…" : (mode == .signIn ? "Sign in with password" : "Create account"))
+                                .font(.subheadline.weight(.semibold))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 46)
+                                .background(BotTheme.accentSoft, in: Capsule())
+                                .foregroundStyle(BotTheme.accentDeep)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(auth.isBusy || email.isEmpty || password.count < 8)
+                    }
+                    .padding(.top, 6)
+                }
+                .font(.footnote)
+                .foregroundStyle(BotTheme.soft)
 
                 DisclosureGroup("Connect from the web app") {
                     TextField("Paste your sync key", text: $syncKey)
