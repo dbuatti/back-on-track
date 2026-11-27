@@ -14,11 +14,18 @@ struct FocusView: View {
                 Spacer()
 
                 Image(systemName: sections[index].icon)
-                    .font(.system(size: 44, weight: .light))
+                    .font(.system(size: 38, weight: .light))
                     .foregroundStyle(BotTheme.accent)
+                    .frame(width: 96, height: 96)
+                    .background(
+                        RadialGradient(colors: [BotTheme.accentSoft, BotTheme.card], center: .center, startRadius: 4, endRadius: 70),
+                        in: Circle()
+                    )
+                    .overlay(Circle().stroke(BotTheme.accent.opacity(0.12), lineWidth: 1))
+                    .shadow(color: BotTheme.accent.opacity(0.10), radius: 18, x: 0, y: 10)
 
                 Text(sections[index].title)
-                    .font(.largeTitle.bold())
+                    .font(BotTheme.titleFont)
                     .foregroundStyle(BotTheme.ink)
                     .multilineTextAlignment(.center)
 
@@ -55,8 +62,9 @@ struct FocusView: View {
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 52)
-                            .background(BotTheme.accent, in: Capsule())
+                            .background(BotTheme.accentGradient, in: Capsule())
                             .foregroundStyle(.white)
+                            .shadow(color: BotTheme.accent.opacity(0.18), radius: 10, x: 0, y: 6)
                     }
                     .buttonStyle(.plain)
 

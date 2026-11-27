@@ -22,6 +22,10 @@
 	<string>1</string>
 	<key>NSCloudKitUsageDescription</key>
 	<string>Sync your daily rhythm across your devices.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Read today's steps, walking distance and mindful minutes so you can see them beside your daily rhythm.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Back on Track only reads Health data. It does not write to Health.</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

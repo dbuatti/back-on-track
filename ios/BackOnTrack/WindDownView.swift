@@ -11,18 +11,43 @@ struct WindDownView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Wind down").font(.largeTitle).bold().foregroundStyle(BotTheme.ink)
-                        Text("One small thing at a time.").font(.subheadline).foregroundStyle(BotTheme.soft)
+                    HStack(spacing: 14) {
+                        Image(systemName: "moon.stars.fill")
+                            .font(.title2)
+                            .foregroundStyle(BotTheme.evening)
+                            .frame(width: 46, height: 46)
+                            .background(BotTheme.eveningSoft, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Wind down").font(BotTheme.titleFont).foregroundStyle(BotTheme.ink)
+                            Text("One small thing at a time.").font(.subheadline).foregroundStyle(BotTheme.soft)
+                        }
+                        Spacer()
                     }
+                    .padding(.horizontal, 4)
+                    .padding(.top, 4)
+
+                    HStack(spacing: 12) {
+                        Image(systemName: "leaf")
+                            .foregroundStyle(BotTheme.evening)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Let the day be enough.")
+                                .font(BotTheme.headingFont)
+                                .foregroundStyle(BotTheme.ink)
+                            Text("Nothing to catch up on.").font(.caption).foregroundStyle(BotTheme.soft)
+                        }
+                        Spacer()
+                    }
+                    .padding(16)
+                    .background(BotTheme.eveningGradient, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(BotTheme.evening.opacity(0.12), lineWidth: 1))
+                    .shadow(color: BotTheme.evening.opacity(0.08), radius: 16, x: 0, y: 8)
 
                     if let rec = store.state.days[todayKey()], rec.bedTime != nil || rec.wakeTime != nil {
                         lastNightCard(rec)
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Sleep", systemImage: "moon.stars")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "Sleep", systemImage: "moon.stars", tint: BotTheme.evening)
                         timeCard(
                             title: "Bedtime",
                             systemImage: "bed.double",
@@ -40,8 +65,7 @@ struct WindDownView: View {
                     }
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("Instead of gaming", systemImage: "gamecontroller")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "Instead of gaming", systemImage: "gamecontroller", tint: BotTheme.evening)
                         VStack(spacing: 0) {
                             ForEach(store.state.settings.lists.instead) { item in
                                 HStack(spacing: 12) {
@@ -69,8 +93,7 @@ struct WindDownView: View {
                     .botCard()
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("How it felt", systemImage: "heart")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "How it felt", systemImage: "heart", tint: BotTheme.evening)
                         Picker("Mood", selection: $mood) {
                             Text("Low").tag("low")
                             Text("Okay").tag("okay")
@@ -82,8 +105,7 @@ struct WindDownView: View {
                     .botCard()
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Label("A note on waking", systemImage: "note.text")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "A note on waking", systemImage: "note.text", tint: BotTheme.evening)
                         TextEditor(text: $note)
                             .frame(minHeight: 96)
                             .padding(8)
@@ -106,8 +128,10 @@ struct WindDownView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 Image(systemName: systemImage)
-                    .font(.title2)
+                    .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(BotTheme.evening)
+                    .frame(width: 36, height: 36)
+                    .background(BotTheme.eveningSoft, in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.headline).foregroundStyle(BotTheme.ink)
                     Text(value ?? "Not logged")
@@ -120,8 +144,9 @@ struct WindDownView: View {
                         .font(.subheadline.weight(.semibold))
                         .padding(.horizontal, 12)
                         .padding(.vertical, 9)
-                        .background(BotTheme.accent, in: Capsule())
+                        .background(BotTheme.accentGradient, in: Capsule())
                         .foregroundStyle(.white)
+                        .shadow(color: BotTheme.accent.opacity(0.18), radius: 7, x: 0, y: 4)
                 }
                 .buttonStyle(.plain)
             }

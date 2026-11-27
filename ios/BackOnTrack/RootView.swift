@@ -46,8 +46,16 @@ struct SignInView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
-                VStack(spacing: 6) {
-                    Text("Back on Track").font(.largeTitle.bold()).foregroundStyle(BotTheme.ink)
+                VStack(spacing: 12) {
+                    Image(systemName: "leaf.circle")
+                        .font(.system(size: 58, weight: .light))
+                        .foregroundStyle(BotTheme.sage)
+                        .frame(width: 92, height: 92)
+                        .background(BotTheme.sageSoft, in: Circle())
+                        .shadow(color: BotTheme.sage.opacity(0.12), radius: 16, x: 0, y: 8)
+                    Text("Back on Track")
+                        .font(BotTheme.titleFont)
+                        .foregroundStyle(BotTheme.ink)
                     Text("A calm daily rhythm. Start on this phone, or connect for sync.")
                         .font(.subheadline).foregroundStyle(BotTheme.soft)
                         .multilineTextAlignment(.center)
@@ -91,8 +99,9 @@ struct SignInView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(BotTheme.accent, in: Capsule())
+                        .background(BotTheme.accentGradient, in: Capsule())
                         .foregroundStyle(.white)
+                        .shadow(color: BotTheme.accent.opacity(0.18), radius: 10, x: 0, y: 6)
                 }
                 .buttonStyle(.plain)
                 .disabled(auth.isBusy || email.isEmpty || password.count < 8)

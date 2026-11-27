@@ -8,14 +8,17 @@
 
 /* Begin PBXBuildFile section */
 		12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8583B12F367651A9267318 /* FocusView.swift */; };
+		1514B8251BADE97C438FC0FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7444F1A2608F75AA12EBD74B /* Assets.xcassets */; };
 		163E0BA329AD4A7A1C5D2B2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCAFA3A189EFC2A26C09BD92 /* Models.swift */; };
 		1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */; };
 		1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9472C52958FE48DE519FC630 /* LinksView.swift */; };
 		27940C1FB0C5BFA2274E7A2C /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3280F3621456DEB1A2AF389 /* AppStore.swift */; };
+		282354AFB8A6F3D146811524 /* HealthSummaryCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */; };
 		2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */; };
 		46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF35C1265F196A8853B094F /* HomeView.swift */; };
 		4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F721963292C663E8C87902A4 /* SeedData.swift */; };
 		85DB54B4550749E9DC982B4E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE124CB61129605AE0815B65 /* Theme.swift */; };
+		8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA7826C4B7A32212B34833A /* HealthKitManager.swift */; };
 		9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04525C375C067B32E4631180 /* AuthManager.swift */; };
 		DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */; };
 		DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBDC2A1495834028D50341F /* RootView.swift */; };
@@ -27,10 +30,14 @@
 		1D8583B12F367651A9267318 /* FocusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusView.swift; sourceTree = "<group>"; };
 		1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShelvesView.swift; sourceTree = "<group>"; };
 		3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackOnTrackApp.swift; sourceTree = "<group>"; };
+		6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSummaryCard.swift; sourceTree = "<group>"; };
 		72880D31775190369EF719C4 /* WindDownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDownView.swift; sourceTree = "<group>"; };
+		743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "BackOnTrack-HealthKit.entitlements"; sourceTree = "<group>"; };
+		7444F1A2608F75AA12EBD74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7F63E2DBF92C8073B90BD225 /* BackOnTrack.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BackOnTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8758932B3A77286EC8A0E427 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9472C52958FE48DE519FC630 /* LinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksView.swift; sourceTree = "<group>"; };
+		9FA7826C4B7A32212B34833A /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		BFF35C1265F196A8853B094F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CCAFA3A189EFC2A26C09BD92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		DDBDC2A1495834028D50341F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -45,9 +52,13 @@
 			isa = PBXGroup;
 			children = (
 				E3280F3621456DEB1A2AF389 /* AppStore.swift */,
+				7444F1A2608F75AA12EBD74B /* Assets.xcassets */,
 				04525C375C067B32E4631180 /* AuthManager.swift */,
+				743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */,
 				3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */,
 				1D8583B12F367651A9267318 /* FocusView.swift */,
+				9FA7826C4B7A32212B34833A /* HealthKitManager.swift */,
+				6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */,
 				BFF35C1265F196A8853B094F /* HomeView.swift */,
 				8758932B3A77286EC8A0E427 /* Info.plist */,
 				9472C52958FE48DE519FC630 /* LinksView.swift */,
@@ -86,6 +97,7 @@
 			buildConfigurationList = 167EA176B4B90B2CF61C39E2 /* Build configuration list for PBXNativeTarget "BackOnTrack" */;
 			buildPhases = (
 				5CCB3B1E2162735BDD9E0FB6 /* Sources */,
+				9F72124C89AD758F8B1A3CE7 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -132,6 +144,17 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		9F72124C89AD758F8B1A3CE7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1514B8251BADE97C438FC0FA /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		5CCB3B1E2162735BDD9E0FB6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -141,6 +164,8 @@
 				9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */,
 				1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */,
 				12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */,
+				8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */,
+				282354AFB8A6F3D146811524 /* HealthSummaryCard.swift in Sources */,
 				46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */,
 				1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */,
 				163E0BA329AD4A7A1C5D2B2F /* Models.swift in Sources */,

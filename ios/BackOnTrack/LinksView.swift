@@ -10,10 +10,23 @@ struct LinksView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Links").font(.largeTitle).bold().foregroundStyle(BotTheme.ink)
+                    HStack(spacing: 14) {
+                        Image(systemName: "link")
+                            .font(.title2)
+                            .foregroundStyle(BotTheme.accent)
+                            .frame(width: 46, height: 46)
+                            .background(BotTheme.accentSoft, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Links").font(BotTheme.titleFont).foregroundStyle(BotTheme.ink)
+                            Text("The useful things, close by.").font(.subheadline).foregroundStyle(BotTheme.soft)
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.top, 4)
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("My links").font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "My links", systemImage: "bookmark")
                         if store.state.settings.myLinks.isEmpty {
                             Text("No personal links yet.")
                                 .font(.subheadline).foregroundStyle(BotTheme.soft)
@@ -26,8 +39,7 @@ struct LinksView: View {
                     .botCard()
 
                     VStack(alignment: .leading, spacing: 10) {
-                        Label("Sync", systemImage: "arrow.triangle.2.circlepath")
-                            .font(.headline).foregroundStyle(BotTheme.ink)
+                        BotSectionHeader(title: "Sync", systemImage: "arrow.triangle.2.circlepath")
                         if auth.isSignedIn {
                             Text(store.supabase.status)
                                 .font(.subheadline).foregroundStyle(BotTheme.soft)
@@ -37,8 +49,9 @@ struct LinksView: View {
                                         .font(.subheadline.weight(.semibold))
                                         .padding(.horizontal, 14)
                                         .padding(.vertical, 10)
-                                        .background(BotTheme.accentSoft, in: Capsule())
-                                        .foregroundStyle(BotTheme.accent)
+                                        .background(BotTheme.accentGradient, in: Capsule())
+                                        .foregroundStyle(.white)
+                                        .shadow(color: BotTheme.accent.opacity(0.16), radius: 8, x: 0, y: 4)
                                 }
                                 Button("Sign out") {
                                     auth.signOut()

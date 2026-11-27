@@ -14,11 +14,20 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(greeting).font(.largeTitle).bold()
-                        Text(todayString).font(.subheadline).foregroundStyle(BotTheme.soft)
+                    HStack(spacing: 14) {
+                        Image(systemName: "sun.max.fill")
+                            .font(.title2)
+                            .foregroundStyle(BotTheme.sun)
+                            .frame(width: 46, height: 46)
+                            .background(BotTheme.sunSoft, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(greeting).font(BotTheme.titleFont).foregroundStyle(BotTheme.ink)
+                            Text(todayString).font(.subheadline).foregroundStyle(BotTheme.soft)
+                        }
+                        Spacer()
                     }
                     .padding(.horizontal, 4)
+                    .padding(.top, 4)
 
                     intentionCard
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
@@ -26,6 +35,7 @@ struct HomeView: View {
                     }
                     section(title: "Morning", systemImage: "sun.max", items: store.state.settings.lists.morning, list: "morning")
                     section(title: "Daily anchors", systemImage: "leaf", items: store.state.settings.lists.anchors, list: "anchors")
+                    HealthSummaryCard()
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
@@ -77,41 +87,63 @@ struct HomeView: View {
     }
 
     private var intentionCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Label("One intention", systemImage: "sparkles")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .foregroundStyle(BotTheme.accent)
+                Text("One intention")
+                    .font(BotTheme.headingFont)
+                    .foregroundStyle(BotTheme.ink)
+            }
             TextField("A word, a feeling, a direction…", text: $intention, axis: .vertical)
                 .lineLimit(1...3)
+                .foregroundStyle(BotTheme.ink)
                 .onSubmit { saveIntention() }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(16)
-        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .padding(18)
+        .background(
+            LinearGradient(colors: [BotTheme.card, BotTheme.accentSoft.opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .stroke(BotTheme.accent.opacity(0.14), lineWidth: 1)
+        )
+        .shadow(color: BotTheme.accent.opacity(0.08), radius: 16, x: 0, y: 8)
     }
 
     private var nickLoadCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "headphones")
                 .font(.title2)
-                .foregroundStyle(BotTheme.accent)
+                .foregroundStyle(.white)
+                .frame(width: 42, height: 42)
+                .background(BotTheme.accentGradient, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text("Nick Moss daily meditation").font(.headline)
+                Text("Nick Moss daily meditation")
+                    .font(BotTheme.headingFont)
+                    .foregroundStyle(BotTheme.ink)
                 Text("A gentle place to begin").font(.caption).foregroundStyle(BotTheme.soft)
             }
             Spacer()
             Button("Load in") { store.addNickToMorning() }
-                .buttonStyle(.bordered)
-                .tint(BotTheme.accent)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 9)
+                .background(BotTheme.accentGradient, in: Capsule())
+                .buttonStyle(.plain)
         }
         .padding(16)
-        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+        .shadow(color: BotTheme.ink.opacity(0.05), radius: 12, x: 0, y: 6)
     }
 
     @ViewBuilder
     private func section(title: String, systemImage: String, items: [ListItem], list: String) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Label(title, systemImage: systemImage)
-                .font(.headline)
+            BotSectionHeader(title: title, systemImage: systemImage)
                 .padding(.horizontal, 4)
             VStack(spacing: 0) {
                 if items.isEmpty {
@@ -148,7 +180,9 @@ struct HomeView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, items.isEmpty ? 0 : 4)
-            .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(BotTheme.line.opacity(0.35), lineWidth: 1))
+            .shadow(color: BotTheme.ink.opacity(0.045), radius: 12, x: 0, y: 6)
         }
     }
 

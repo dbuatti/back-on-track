@@ -7,9 +7,20 @@ struct ShelvesView: View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
-                    Text("Shelves").font(.largeTitle).bold().foregroundStyle(BotTheme.ink)
-                    Text("A quiet library of things you can borrow when you need them.")
-                        .font(.subheadline).foregroundStyle(BotTheme.soft)
+                    HStack(spacing: 14) {
+                        Image(systemName: "tray.full")
+                            .font(.title2)
+                            .foregroundStyle(BotTheme.sage)
+                            .frame(width: 46, height: 46)
+                            .background(BotTheme.sageSoft, in: Circle())
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text("Shelves").font(BotTheme.titleFont).foregroundStyle(BotTheme.ink)
+                            Text("A quiet library, not a to-do list.").font(.subheadline).foregroundStyle(BotTheme.soft)
+                        }
+                        Spacer()
+                    }
+                    .padding(.horizontal, 4)
+                    .padding(.top, 4)
 
                     if store.state.settings.shelves.isEmpty {
                         Text("No shelves yet.")
