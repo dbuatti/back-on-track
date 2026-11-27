@@ -1539,7 +1539,7 @@
     <div class="idea-card" id="ideaEntry">
       <button type="button" class="btn" id="ideaBtn">I don't know what to do</button>
     </div>
-    <button type="button" class="see-shelf program-home-nudge" id="programHomeNudge" hidden>A quiet 30 days is here, if you want it.</button>
+    <button type="button" class="see-shelf program-home-nudge" id="programHomeNudge" hidden>A quiet 60 days is here, if you want it.</button>
     <div class="shelf-option" id="shelfOption" hidden>
       <div class="so-head">A small start</div>
       <div class="so-body" aria-live="polite"><span id="shelfOptionText"></span><small id="shelfOptionName"></small></div>
@@ -1561,7 +1561,7 @@
 
    <!-- ============ 30-DAY SEQUENCE (hidden until loaded in) ============ -->
   <section class="card program-card" id="programCard" hidden>
-    <h2><span class="dot"></span>A quiet 30 days</h2>
+    <h2><span class="dot"></span>A quiet 60 days</h2>
     <p class="program-meta" id="programMeta"></p>
     <p class="program-gap" id="programGap" hidden></p>
     <span class="program-kind" id="programKind"></span>
@@ -1624,7 +1624,7 @@
 
   <!-- ============ 30-DAY SEQUENCE — evening view ============ -->
   <section class="card program-card" id="programEveCard" hidden>
-    <h2><span class="dot"></span>A quiet 30 days</h2>
+    <h2><span class="dot"></span>A quiet 60 days</h2>
     <p class="program-meta" id="programEveMeta"></p>
     <p class="program-gap" id="programEveGap" hidden></p>
     <span class="program-kind" id="programEveKind"></span>
@@ -1840,11 +1840,35 @@
   <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
     <section class="card" id="programMoreCard">
-      <h2><span class="dot"></span>A quiet 30 days</h2>
+      <h2><span class="dot"></span>A quiet 60 days</h2>
       <p class="hint" id="programMoreText"></p>
       <div class="btn-row">
         <button type="button" class="btn small" id="programLoadBtn">Load in</button>
       </div>
+      <details class="disclosure">
+        <summary>Tune the sequence</summary>
+        <div class="field">
+          <label for="programPace">Pace</label>
+          <select id="programPace">
+            <option value="gentle">Gentle</option>
+            <option value="steady">Steady</option>
+            <option value="minimal">Minimal</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="focusArea">What tends to pull you in?</label>
+          <select id="focusArea">
+            <option value="none">Nothing specific</option>
+            <option value="coding">Coding / AI</option>
+            <option value="gaming">Gaming</option>
+            <option value="scrolling">Scrolling</option>
+            <option value="shopping">Shopping</option>
+            <option value="food">Food</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+        <p class="hint">A preference, not a label. Used only to make the focus invitations feel relevant.</p>
+      </details>
     </section>
 
     <section class="card" id="gentlePractices">
@@ -1957,7 +1981,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v68";
+const VERSION = "v69";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2057,38 +2081,111 @@ const DEFAULT_SHELVES = [
 /* Thirty quiet invitations, sequenced by the agent brief. The current step only
    moves on when it is gently marked enough; a missed day leaves it waiting.
    Nick listening grows from 30 seconds to eight minutes with repeat days. */
-const PROGRAM30 = [
-  { id: "d01", title: "Press play once", invitation: "If you want, press play on the Nick Moss meditation and hear how it starts.", nick: "first 30 seconds", kind: "nick", optional: "You can stop at any point. That is still enough." },
-  { id: "d02", title: "One quiet breath", invitation: "Notice one slow breath, then let it go. That's the whole invitation.", nick: null, kind: "rest", optional: "If you like, take one more, then stop." },
-  { id: "d03", title: "Nothing to play", invitation: "Today's invitation is to leave the meditation closed. One quiet breath is enough.", nick: null, kind: "rest", optional: null },
-  { id: "d04", title: "One gentle stretch", invitation: "Reach up once, slowly, and let your arms come down again.", nick: null, kind: "body", optional: "If you like, follow it with one more stretch, at your pace." },
-  { id: "d05", title: "A little longer", invitation: "If you want, press play and stay for a minute and a half.", nick: "through the first minute and a half", kind: "nick", optional: "Or stop now — a minute is plenty." },
-  { id: "d06", title: "Log waking up", invitation: "If you want, note the time you woke, just as it was.", nick: null, kind: "sleep", optional: "If you like, add a line about how the night felt." },
-  { id: "d07", title: "One small anchor", invitation: "Pick one anchor you fancy and give it a minute or two.", nick: null, kind: "day", optional: "If you want, follow it with one more small anchor." },
-  { id: "d08", title: "A short pause", invitation: "If you like, sit for half a minute without playing anything. Stopping early is fine.", nick: null, kind: "rest", optional: null },
-  { id: "d09", title: "Two minutes of sound", invitation: "Press play when you like and let two minutes of it be enough.", nick: "through the first two minutes", kind: "nick", optional: "If you want, stay a little longer, then stop whenever." },
-  { id: "d10", title: "One short message", invitation: "If you want, send one brief message to someone you like.", nick: null, kind: "connection", optional: "If you like, reply to one more, whenever suits." },
-  { id: "d11", title: "Three quiet minutes", invitation: "Open the meditation if you like and listen for three gentle minutes.", nick: "through the first three minutes", kind: "nick", optional: "If you want, choose a shorter stretch instead — two minutes is plenty." },
-  { id: "d12", title: "Feel your feet", invitation: "Notice your feet on the floor for a few slow breaths.", nick: null, kind: "body", optional: "If you like, press them gently into the floor, then let go." },
-  { id: "d13", title: "Come back to something easy", invitation: "If you want, return to any earlier invitation and take just its smallest version.", nick: null, kind: "rest", optional: null },
-  { id: "d14", title: "A simple bedtime note", invitation: "If you want, log your bed time when you get there.", nick: null, kind: "sleep", optional: "If you like, add one word about the day before sleeping." },
-  { id: "d15", title: "Four easy minutes", invitation: "Press play when it suits and let four minutes pass.", nick: "through the first four minutes", kind: "nick", optional: "If you want, rest your hands and stay a little longer." },
-  { id: "d16", title: "Tidy one surface", invitation: "If you want, put three things back where they belong.", nick: null, kind: "day", optional: "If you like, clear one more corner, then stop whenever." },
-  { id: "d17", title: "Walk to the corner", invitation: "Step outside if you like and walk to the nearest corner.", nick: null, kind: "body", optional: "If you want, go a little further, at your own pace." },
-  { id: "d18", title: "Let it be shorter", invitation: "If you want, listen to two minutes or less. Two is plenty.", nick: "through the first two minutes", kind: "rest", optional: null },
-  { id: "d19", title: "Five minutes of rest", invitation: "If you want, press play and let five minutes be enough.", nick: "through the first five minutes", kind: "nick", optional: "If you like, stay for one more minute, then stop." },
-  { id: "d20", title: "A kind check-in", invitation: "If you want, ask someone how they are and listen briefly.", nick: null, kind: "connection", optional: "If you like, tell them one small thing about your day." },
-  { id: "d21", title: "Keep wake time soft", invitation: "Log your wake time if you like, even after a rough night.", nick: null, kind: "sleep", optional: "If you want, note one thing that made the morning easier." },
-  { id: "d22", title: "Six unhurried minutes", invitation: "Open the meditation when you like and let it run six minutes.", nick: "through the first six minutes", kind: "nick", optional: "Turning it off early is fine. Five minutes is just as welcome." },
-  { id: "d23", title: "Quiet, not listening", invitation: "If you like, sit without sound for a minute. Nothing else is needed.", nick: null, kind: "rest", optional: null },
-  { id: "d24", title: "Read one page", invitation: "Open whatever is on the table and read one page.", nick: null, kind: "day", optional: "If you like, read a few more pages, then stop whenever." },
-  { id: "d25", title: "One long stretch", invitation: "Reach up slowly if you like and hold the stretch for a moment.", nick: null, kind: "body", optional: "If you want, stretch one more time, gently." },
-  { id: "d26", title: "Seven calm minutes", invitation: "Press play when you like and stay for seven gentle minutes.", nick: "through the first seven minutes", kind: "nick", optional: "If you like, sit quietly for a moment after it ends." },
-  { id: "d27", title: "Share a small thing", invitation: "If you want, tell someone one small thing you noticed.", nick: null, kind: "connection", optional: "If you like, let them answer whenever they can." },
-  { id: "d28", title: "Five, or none", invitation: "If you want, listen to five minutes. If not, five quiet breaths are just as welcome.", nick: "through the first five minutes", kind: "rest", optional: null },
-  { id: "d29", title: "Lights low early", invitation: "If you want, lower the lights a little earlier tonight.", nick: null, kind: "sleep", optional: "If you like, log your bed time and leave the rest." },
-  { id: "d30", title: "Eight minutes, if you want", invitation: "Press play when you like and listen for eight minutes.", nick: "through the first eight minutes", kind: "nick", optional: "If you want, stop early and just sit quietly for a moment." },
+const PROGRAM60 = [
+  { id: "p1_01", title: "Press play once", invitation: "If you want, hear how the Nick Moss meditation begins.", nick: "first 30 seconds", kind: "nick", optional: "You can stop at any point.", phase: 0 },
+  { id: "p1_02", title: "One quiet breath", invitation: "Notice one slow breath, then let it go.", nick: null, kind: "rest", optional: "One more is welcome, not required.", phase: 0 },
+  { id: "p1_03", title: "Nothing to play", invitation: "Leave the meditation closed. One quiet breath is enough.", nick: null, kind: "rest", optional: null, phase: 0 },
+  { id: "p1_04", title: "Feel your feet", invitation: "Notice where your feet meet the floor.", nick: null, kind: "body", optional: "Press them gently once, then let go.", phase: 0 },
+  { id: "p1_05", title: "Look around once", invitation: "Name three things you can see. No need to do anything with them.", nick: null, kind: "day", optional: null, phase: 0 },
+  { id: "p1_06", title: "One small anchor", invitation: "Pick one tiny thing from your day and give it a minute.", nick: null, kind: "day", optional: "Stop whenever it feels like enough.", phase: 0 },
+  { id: "p1_07", title: "A short pause", invitation: "Sit for half a minute without sound or input.", nick: null, kind: "rest", optional: "Stopping early is fine.", phase: 0 },
+  { id: "p1_08", title: "Step outside", invitation: "Open the door and take one step into the air.", nick: null, kind: "body", optional: "Go to the corner only if you want.", phase: 0 },
+  { id: "p1_09", title: "One short message", invitation: "Send one brief message to someone you like.", nick: null, kind: "connection", optional: "No reply is needed.", phase: 0 },
+  { id: "p1_10", title: "Notice what helped", invitation: "Think of one small thing that made today easier.", nick: null, kind: "day", optional: "You can leave it unspoken.", phase: 0 },
+  { id: "p2_01", title: "Reach up once", invitation: "Stretch slowly toward the light, then let your arms come down.", nick: null, kind: "body", optional: "One more only if it feels good.", phase: 1 },
+  { id: "p2_02", title: "Drink some water", invitation: "Take one sip and notice the temperature.", nick: null, kind: "body", optional: "That is the whole invitation.", phase: 1 },
+  { id: "p2_03", title: "Daylight, briefly", invitation: "Stand near a window or step outside for a moment.", nick: null, kind: "body", optional: "No walk required.", phase: 1 },
+  { id: "p2_04", title: "Log waking up", invitation: "Note the time you woke, just as it was.", nick: null, kind: "sleep", optional: "A rough night still counts as information.", phase: 1 },
+  { id: "p2_05", title: "Lower the lights", invitation: "Make the room a little dimmer for one minute.", nick: null, kind: "sleep", optional: "No perfect bedtime routine needed.", phase: 1 },
+  { id: "p2_06", title: "Put the phone down", invitation: "Place it out of reach for one slow breath.", nick: null, kind: "sleep", optional: "You can pick it up whenever you choose.", phase: 1 },
+  { id: "p2_07", title: "A bedtime note", invitation: "Write one word about the day before sleeping.", nick: null, kind: "sleep", optional: "One word is plenty.", phase: 1 },
+  { id: "p2_08", title: "Gentle movement", invitation: "Move one part of your body in a way that feels kind.", nick: null, kind: "body", optional: "Stillness is also welcome.", phase: 1 },
+  { id: "p2_09", title: "Rest without earning it", invitation: "Pause before finishing anything else.", nick: null, kind: "rest", optional: "Nothing needs to be completed first.", phase: 1 },
+  { id: "p2_10", title: "A kinder wake-up", invitation: "Tomorrow, notice one thing that makes waking a little easier.", nick: null, kind: "sleep", optional: "No new routine required.", phase: 1 },
+  { id: "p3_01", title: "One page", invitation: "Open whatever is nearby and read one page.", nick: null, kind: "day", optional: "One paragraph is enough.", phase: 2 },
+  { id: "p3_02", title: "One surface", invitation: "Put one thing back where it belongs.", nick: null, kind: "day", optional: "Stop after one thing.", phase: 2 },
+  { id: "p3_03", title: "One phrase", invitation: "Play, draw, sing or make one small thing for fun.", nick: null, kind: "day", optional: "It does not need to be good.", phase: 2 },
+  { id: "p3_04", title: "Close one loop", invitation: "Finish the smallest open loop you can see.", nick: null, kind: "day", optional: "Leaving it open is also allowed.", phase: 2 },
+  { id: "p3_05", title: "One tab", invitation: "Close or minimise one extra tab.", nick: null, kind: "focus", optional: "The work will still be there.", phase: 2 },
+  { id: "p3_06", title: "A short focus", invitation: "Choose one task and give it two unhurried minutes.", nick: null, kind: "day", optional: "A timer is optional.", phase: 2 },
+  { id: "p3_07", title: "Write the next step", invitation: "Leave yourself one clear sentence for later.", nick: null, kind: "focus", optional: "Vague is fine if it helps you stop.", phase: 2 },
+  { id: "p3_08", title: "No phone for one breath", invitation: "Let one breath happen before checking anything.", nick: null, kind: "focus", optional: "You can check afterwards.", phase: 2 },
+  { id: "p3_09", title: "Notice the urge", invitation: "When you want to switch tasks, pause for one breath first.", nick: null, kind: "focus", optional: "No need to resist the urge perfectly.", phase: 2 },
+  { id: "p3_10", title: "Review without scoring", invitation: "Look at today and notice one thing that was enough.", nick: null, kind: "day", optional: "No grade, no catch-up.", phase: 2 },
+  { id: "p4_01", title: "Ask someone how they are", invitation: "Send one kind check-in and listen briefly.", nick: null, kind: "connection", optional: "A one-line reply is enough.", phase: 3 },
+  { id: "p4_02", title: "Say one small thing", invitation: "Tell someone one small thing you noticed.", nick: null, kind: "connection", optional: "They can answer whenever.", phase: 3 },
+  { id: "p4_03", title: "Thank someone", invitation: "Name one thing you appreciate about someone.", nick: null, kind: "connection", optional: "You do not have to send it.", phase: 3 },
+  { id: "p4_04", title: "Ask for one small thing", invitation: "Let one person know what would help today.", nick: null, kind: "connection", optional: "Asking quietly still counts.", phase: 3 },
+  { id: "p4_05", title: "Shared quiet", invitation: "Spend a few minutes near someone without needing to entertain.", nick: null, kind: "connection", optional: "A message or call works too.", phase: 3 },
+  { id: "p4_06", title: "One boundary", invitation: "Notice one thing you would like to say no to.", nick: null, kind: "connection", optional: "No message required.", phase: 3 },
+  { id: "p4_07", title: "Kindness inward", invitation: "Speak to yourself as you would to someone tired.", nick: null, kind: "rest", optional: "One sentence is enough.", phase: 3 },
+  { id: "p4_08", title: "Notice a value", invitation: "Name one thing you want your day to make room for.", nick: null, kind: "day", optional: "It can be very small.", phase: 3 },
+  { id: "p4_09", title: "Make room for support", invitation: "Choose one person, place or practice that steadies you.", nick: null, kind: "connection", optional: "No action needed.", phase: 3 },
+  { id: "p4_10", title: "Quiet company", invitation: "Let yourself be around something or someone calming.", nick: null, kind: "rest", optional: "Silence is welcome.", phase: 3 },
+  { id: "p5_01", title: "Notice the pull", invitation: "When {focus} starts pulling you in, pause for one breath before deciding.", nick: null, kind: "focus", optional: "No need to fight the pull.", phase: 4 },
+  { id: "p5_02", title: "Name the next step", invitation: "Write one next step for {focus}, then stop.", nick: null, kind: "focus", optional: "A rough note is enough.", phase: 4 },
+  { id: "p5_03", title: "Close the loop", invitation: "Close the {focus} window, tab or app for one minute.", nick: null, kind: "focus", optional: "You can reopen it whenever you choose.", phase: 4 },
+  { id: "p5_04", title: "Choose a stopping cue", invitation: "Pick a phrase: ‘This is enough for now.’", nick: null, kind: "focus", optional: "Say it silently if that is easier.", phase: 4 },
+  { id: "p5_05", title: "Change the space", invitation: "Put one cue for {focus} out of reach for ten minutes.", nick: null, kind: "focus", optional: "Small changes count.", phase: 4 },
+  { id: "p5_06", title: "Delay by one breath", invitation: "Wait one slow breath before returning to {focus}.", nick: null, kind: "focus", optional: "Then choose freely.", phase: 4 },
+  { id: "p5_07", title: "Stop before tired", invitation: "End {focus} while you still have a little energy.", nick: null, kind: "focus", optional: "There is no perfect stopping point.", phase: 4 },
+  { id: "p5_08", title: "No catch-up", invitation: "Missed {focus} time does not need to be repaid.", nick: null, kind: "rest", optional: "Let the day be enough.", phase: 4 },
+  { id: "p5_09", title: "One small alternative", invitation: "Choose one small thing that is not {focus}.", nick: null, kind: "focus", optional: "It can last one minute.", phase: 4 },
+  { id: "p5_10", title: "Rest without finishing", invitation: "Take a pause without completing {focus} first.", nick: null, kind: "rest", optional: "The unfinished part can wait.", phase: 4 },
+  { id: "p6_01", title: "Your own rhythm", invitation: "Notice which part of this sequence felt most supportive.", nick: null, kind: "day", optional: "No need to explain it.", phase: 5 },
+  { id: "p6_02", title: "Keep one small thing", invitation: "Choose one invitation to keep using after the sequence.", nick: null, kind: "day", optional: "One is enough.", phase: 5 },
+  { id: "p6_03", title: "Sleep kindness", invitation: "Notice one way to make bedtime a little less demanding.", nick: null, kind: "sleep", optional: "No perfect routine needed.", phase: 5 },
+  { id: "p6_04", title: "Movement kindness", invitation: "Choose one way to move that feels welcoming.", nick: null, kind: "body", optional: "Stillness is welcome too.", phase: 5 },
+  { id: "p6_05", title: "Connection kindness", invitation: "Let one person know support matters.", nick: null, kind: "connection", optional: "A small message is enough.", phase: 5 },
+  { id: "p6_06", title: "A quiet minute", invitation: "Sit without sound or input for one minute.", nick: null, kind: "rest", optional: "Thirty seconds is plenty.", phase: 5 },
+  { id: "p6_07", title: "Return to a favourite", invitation: "Repeat any earlier invitation in its smallest form.", nick: null, kind: "rest", optional: "Nothing new is required.", phase: 5 },
+  { id: "p6_08", title: "Plan for a hard day", invitation: "Choose one support you want easy to reach when things feel heavy.", nick: null, kind: "day", optional: "Prepare gently, not perfectly.", phase: 5 },
+  { id: "p6_09", title: "Nothing to score", invitation: "Look back without grading yourself.", nick: null, kind: "rest", optional: "You did not need to earn rest.", phase: 5 },
+  { id: "p6_10", title: "An open invitation", invitation: "Choose one kind thing to carry forward. There is no final task.", nick: null, kind: "day", optional: "Stop here whenever you are ready.", phase: 5 },
 ];
+const PROGRAM30 = PROGRAM60;
+const PROGRAM_PHASES = [
+  { title: "Arrive", subtitle: "Small ways back to yourself." },
+  { title: "Body & sleep", subtitle: "Care without optimisation." },
+  { title: "Attention & anchors", subtitle: "One thing at a time." },
+  { title: "Connection & meaning", subtitle: "Let support be part of the rhythm." },
+  { title: "Your focus", subtitle: "A gentler relationship with what pulls you in." },
+  { title: "Integration", subtitle: "Build a rhythm that is yours." }
+];
+const PROGRAM_KIND_LABELS = { nick: "Awareness", sleep: "Sleep", body: "Movement", connection: "Connection", day: "Everyday", focus: "Your focus", rest: "Quiet repeat" };
+const PROGRAM_SMALLER = {
+  nick: "Just open the page. No listening needed — that's enough.",
+  sleep: "Just notice what time it is. That's all.",
+  body: "Just feel your feet for a moment.",
+  connection: "Just think of someone. No message needed.",
+  day: "Just look around once. No need to do anything.",
+  focus: "Pause for one breath before choosing. That is enough.",
+  rest: "One breath, then you can stop."
+};
+function effectiveProgramStep() {
+  const p = state.settings.program30 || {};
+  const i = Math.max(0, Math.min(PROGRAM60.length - 1, Math.round(Number(p.step) || 0)));
+  const base = PROGRAM60[i];
+  const pace = p.pace || "gentle";
+  const mood = state.days[todayKey()] && state.days[todayKey()].mood;
+  const gap = daysSinceKey(p.lastDoneAt);
+  const focus = (state.settings.personalization && state.settings.personalization.focusLabel) || "this pull";
+  let step = { ...base };
+  step.title = (step.title || "").replace(/\{focus\}/g, focus);
+  step.invitation = (step.invitation || "").replace(/\{focus\}/g, focus);
+  if (gap >= 3) {
+    step.id = "return_" + base.id;
+    step.title = "Come back gently";
+    step.invitation = "Your place is right where you left it. Take one breath, one look around, or nothing at all. Nothing to catch up on.";
+    step.optional = "When this feels like enough, the next invitation can wait until you are ready.";
+  } else if (pace === "minimal" || mood === "low") {
+    step.invitation = (PROGRAM_SMALLER[step.kind] || "One breath, then you can stop.").replace(/\{focus\}/g, focus);
+    if (mood === "low") step.optional = "If even this feels like too much, stop here. That is allowed.";
+  }
+  step.phaseInfo = PROGRAM_PHASES[step.phase] || PROGRAM_PHASES[0];
+  return step;
+}
+
 
 /* One gentle line per day — never a task, and no tap-to-cycle. */
 const INTENTIONS = [
@@ -2431,8 +2528,9 @@ function migrate(s) {
   // clears the step, the dates or the gentle per-step marks.
   const p = s.settings.program30;
   if (!p || typeof p !== "object" || Array.isArray(p)) {
-    s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {}, reflection: "" };
+    s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {}, reflection: "", pace: "gentle" };
   } else {
+    if (typeof p.pace !== "string") p.pace = "gentle";
     p.loaded = !!p.loaded;
     p.step = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
     if (typeof p.startedAt !== "string") p.startedAt = "";
@@ -2440,6 +2538,9 @@ function migrate(s) {
     if (!p.done || typeof p.done !== "object" || Array.isArray(p.done)) p.done = {};
     if (!p.notes || typeof p.notes !== "object" || Array.isArray(p.notes)) p.notes = {};
      if (typeof p.reflection !== "string") p.reflection = "";
+  }
+  if (!s.settings.personalization || typeof s.settings.personalization !== "object") {
+    s.settings.personalization = { onboardingComplete: true, focusArea: "none", focusLabel: "a gentle pause", supports: ["pause", "smallSteps", "sleep"], starterSet: "gentle" };
   }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
@@ -2548,6 +2649,20 @@ function mergeState(local, incoming) {
       done,
       notes: { ...(pa.notes || {}), ...(pb.notes || {}) },
       reflection,
+      pace: typeof winner.pace === "string" ? winner.pace : (typeof other.pace === "string" ? other.pace : "gentle"),
+    };
+  }
+  if (a.personalization || b.personalization) {
+    const x = a.personalization || {}, y = b.personalization || {};
+    const wx = (Number(b.updatedAt) || 0) > (Number(a.updatedAt) || 0) ? y : x;
+    const oy = wx === y ? x : y;
+    mergedSettings.personalization = {
+      onboardingComplete: wx.onboardingComplete ?? oy.onboardingComplete ?? true,
+      focusArea: wx.focusArea || oy.focusArea || "none",
+      focusLabel: wx.focusLabel || oy.focusLabel || "a gentle pause",
+      customFocus: wx.customFocus || oy.customFocus || "",
+      supports: Array.from(new Set([...(x.supports || []), ...(y.supports || [])])),
+      starterSet: wx.starterSet || oy.starterSet || "gentle",
     };
   }
   // Lists merged by id, with deleted-tombstone respect.
@@ -4740,30 +4855,8 @@ function renderShelfOption() {
    card; the step, the dates and the gentle marks stay exactly where they were.
    There is no calendar pressure and nothing to catch up on. */
 function currentProgramStep() {
-  const p = state.settings.program30 || {};
-  const i = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
-  return PROGRAM30[i] || null;
+  return effectiveProgramStep();
 }
-/* Quiet labels drawn from the focus-area words used in Med Log, so both apps
-   describe the same kinds of care the same way. */
-const PROGRAM_KIND_LABELS = {
-  nick: "Awareness",
-  rest: "Quiet repeat",
-  sleep: "Sleep",
-  body: "Movement",
-  day: "Everyday",
-  connection: "Connection",
-};
-/* When even the invitation feels like too much, there is a smaller way in.
-   Each line is permission to stop, never a second thing to do. */
-const PROGRAM_SMALLER = {
-  nick: "Just open the page. No listening needed — that's enough.",
-  rest: "One breath, then you can stop.",
-  sleep: "Just notice what time it is. That's all.",
-  body: "Just feel your feet for a moment.",
-  day: "Just look around once. No need to do anything.",
-  connection: "Just think of someone. No message needed.",
-};
 function fillProgramCard(prefix, p, step, at) {
   const q = (name) => $("#" + prefix + name);
   const card = q("Card");
@@ -4771,7 +4864,7 @@ function fillProgramCard(prefix, p, step, at) {
   card.hidden = !p.loaded || !step;
   if (card.hidden) return;
   const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
-  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + ", at your pace";
+  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + " · " + (step.phaseInfo ? step.phaseInfo.title : "Quiet") + ", at your pace";
   const gap = q("Gap");
   if (gap) {
     const days = daysSinceKey(p.lastDoneAt);
@@ -4808,7 +4901,7 @@ function fillProgramCard(prefix, p, step, at) {
   const close = q("Close");
   if (close) {
     close.hidden = !last;
-    if (last) close.textContent = "That's the thirty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
+    if (last) close.textContent = "That's the sixty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
   }
   const reflect = q("Reflect");
   if (reflect) {
@@ -4841,9 +4934,14 @@ function renderProgram() {
       ? "Your place is kept."
       : (marks || p.startedAt)
         ? "Kept where you left it. Loading in resumes there — nothing is lost."
-        : "Thirty small invitations, at your pace. Nothing to catch up on.";
+        : "Sixty small invitations, at your pace. Nothing to catch up on.";
   }
   if (load) load.textContent = p.loaded ? "Load out" : "Load in";
+  const paceSel = $("#programPace");
+  if (paceSel && paceSel.value !== (p.pace || "gentle")) paceSel.value = p.pace || "gentle";
+  const focusSel = $("#focusArea");
+  const focus = (state.settings.personalization && state.settings.personalization.focusArea) || "none";
+  if (focusSel && focusSel.value !== focus) focusSel.value = focus;
   fillProgramCard("program", p, step, at);
   fillProgramCard("programEve", p, step, at);
   renderProgramNote();
@@ -5093,6 +5191,18 @@ function wire() {
   });
   $("#programLoadBtn").addEventListener("click", () => {
     setProgramLoaded(!state.settings.program30.loaded);
+  });
+  $("#programPace").addEventListener("change", (e) => {
+    state.settings.program30.pace = e.target.value;
+    save(); renderProgram();
+  });
+  $("#focusArea").addEventListener("change", (e) => {
+    const value = e.target.value;
+    const labels = { coding: "Coding", gaming: "Gaming", scrolling: "Scrolling", shopping: "Shopping", food: "Food", other: "This", none: "a gentle pause" };
+    state.settings.personalization = state.settings.personalization || {};
+    state.settings.personalization.focusArea = value;
+    state.settings.personalization.focusLabel = labels[value] || "a gentle pause";
+    save(); renderProgram();
   });
   $("#programHomeNudge").addEventListener("click", () => setProgramLoaded(true));
   $("#programDone").addEventListener("click", completeProgramStep);
