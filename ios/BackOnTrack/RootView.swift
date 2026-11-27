@@ -35,6 +35,8 @@ struct RootView: View {
 
 struct SignInView: View {
     @EnvironmentObject var auth: AuthManager
+    @State private var email: String = ""
+    @State private var password: String = ""
     @State private var syncKey: String = ""
 
     var body: some View {
@@ -43,19 +45,33 @@ struct SignInView: View {
             Text("Connect this iPhone to your web app's sync.").foregroundStyle(.secondary)
             Spacer()
             VStack(alignment: .leading, spacing: 8) {
-                Text("Sync key").font(.headline)
-                TextField("Paste from Links → Sync key", text: $syncKey)
+                Text("Email").font(.headline)
+                TextField("you@example.com", text: $email)
+                    .textContentType(.emailAddress)
+                    .keyboardType(.emailAddress)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .textFieldStyle(.roundedBorder)
-                Text("In the web app, open Links and tap Sync key. It stays on this device and is never shown in an export.")
-                    .font(.caption).foregroundStyle(.secondary)
+                SecureField("Password", text: $password)
+                    .textContentType(.password)
+                    .textFieldStyle(.roundedBorder)
             }
-            Button(auth.isBusy ? "Connecting…" : "Connect") {
-                Task { _ = await auth.signIn(with: syncKey) }
+            Button(auth.isBusy ? "Signing in…" : "Sign in") {
+                Task { _ = await auth.signInWithPassword(email: email, password: password) }
             }
             .buttonStyle(.borderedProminent)
-            .disabled(auth.isBusy || syncKey.isEmpty)
+            .disabled(auth.isBusy || email.isEmpty || password.isEmpty)
+            DisclosureGroup("Use a sync key instead") {
+                TextField("Paste from web → Links → Sync key", text: $syncKey)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled()
+                    .textFieldStyle(.roundedBorder)
+                Button("Connect with key") {
+                    Task { _ = await auth.signIn(with: syncKey) }
+                }
+                .disabled(auth.isBusy || syncKey.isEmpty)
+            }
+            .font(.footnote)
             if let err = auth.error {
                 Text(err).foregroundStyle(.red).font(.caption)
             }

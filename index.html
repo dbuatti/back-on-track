@@ -1822,6 +1822,16 @@
         <button type="button" class="btn small" id="syncPair">Send sign-in link</button>
         <button type="button" class="btn small" id="syncSetup">Sign out</button>
       </div>
+      <details class="disclosure">
+        <summary>Sign in to the iPhone app</summary>
+        <div class="field">
+          <label for="nativePassword">Set an app password</label>
+          <input type="password" id="nativePassword" minlength="8" placeholder="At least 8 characters"
+                 autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        </div>
+        <button type="button" class="btn small" id="nativePasswordBtn">Save app password</button>
+        <p class="hint">Use your email and this password in the iPhone app. The password is stored only by Supabase; it never appears in an export or on this page.</p>
+      </details>
     </section>
 
   </div><!-- /screen-links -->
@@ -1946,7 +1956,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v65";
+const VERSION = "v66";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3952,6 +3962,26 @@ async function syncSignIn(email) {
     return false;
   }
 }
+async function setNativePassword() {
+  const el = $("#nativePassword");
+  const password = el ? el.value : "";
+  if (password.length < 8) {
+    showSnackbar("Choose at least 8 characters for the app password.");
+    return;
+  }
+  const { data: { session } } = await getSupabase().auth.getSession();
+  if (!session) {
+    showSnackbar("Sign in first, then set an app password.");
+    return;
+  }
+  const { error } = await getSupabase().auth.updateUser({ password });
+  if (error) {
+    showSnackbar("Couldn't save the app password: " + error.message);
+    return;
+  }
+  if (el) el.value = "";
+  showSnackbar("App password saved. Use it with your email in the iPhone app.");
+}
 async function exportSyncKey() {
   const { data } = await getSupabase().auth.getSession();
   const token = data && data.session && data.session.refresh_token;
@@ -5128,6 +5158,7 @@ function wire() {
   }
   $("#syncNow").addEventListener("click", syncNow);
   $("#syncKeyBtn").addEventListener("click", exportSyncKey);
+  $("#nativePasswordBtn").addEventListener("click", setNativePassword);
   const syncNudgeBtn = $("#syncNudgeBtn");
   if (syncNudgeBtn) syncNudgeBtn.addEventListener("click", () => {
     showTab("links");

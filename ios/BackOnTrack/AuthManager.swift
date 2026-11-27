@@ -30,6 +30,17 @@ final class AuthManager: ObservableObject {
         return ok
     }
 
+    func signInWithPassword(email: String, password: String) async -> Bool {
+        isBusy = true
+        error = nil
+        defer { isBusy = false }
+        let ok = await supabase.signInWithPassword(email: email, password: password)
+        isSignedIn = ok
+        if ok { displayName = "Synced account" }
+        else { error = supabase.status }
+        return ok
+    }
+
     func signOut() {
         supabase.signOut()
         isSignedIn = false

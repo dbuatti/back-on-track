@@ -48,6 +48,32 @@ final class SupabaseManager: ObservableObject {
         }
     }
 
+    func signInWithPassword(email: String, password: String) async -> Bool {
+        do {
+            var request = URLRequest(url: baseURL.appendingPathComponent("auth/v1/token"))
+            request.httpMethod = "POST"
+            request.setValue(anonKey, forHTTPHeaderField: "apikey")
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            var comps = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+            comps.queryItems = [URLQueryItem(name: "grant_type", value: "password")]
+            request.url = comps.url
+            request.httpBody = try JSONSerialization.data(withJSONObject: ["email": email, "password": password])
+            let (data, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                status = "Sign-in failed. Check your email and password."
+                return false
+            }
+            let token = try parseSession(data)
+            session = token
+            persist()
+            status = "Signed in"
+            return true
+        } catch {
+            status = "Sign-in failed: \(error.localizedDescription)"
+            return false
+        }
+    }
+
     func signOut() {
         session = nil
         UserDefaults.standard.removeObject(forKey: "bot.supabaseSession")
@@ -154,6 +180,10 @@ final class SupabaseManager: ObservableObject {
         guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
             throw NSError(domain: "Supabase", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid or expired sync key"])
         }
+        return try parseSession(data)
+    }
+
+    private func parseSession(_ data: Data) throws -> SupabaseSession {
         let obj = try JSONSerialization.jsonObject(with: data) as? [String: Any]
         guard let access = obj?["access_token"] as? String,
               let refresh = obj?["refresh_token"] as? String,
