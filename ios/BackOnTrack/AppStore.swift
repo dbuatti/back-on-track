@@ -7,20 +7,26 @@ final class AppStore: ObservableObject {
     @Published var isReady: Bool = false
 
     let supabase = SupabaseManager.shared
+    private let localKey = "bot.state"
 
     func bootstrap(auth: AuthManager) async {
+        let hadLocal = UserDefaults.standard.data(forKey: localKey) != nil
         loadLocal()
         if auth.isSignedIn {
             if let remote = await supabase.fetchState() {
+                UserDefaults.standard.set(true, forKey: "bot.syncedOnce")
                 let localStamp = state.settings.updatedAt
                 let remoteStamp = remote.settings.updatedAt
-                if remoteStamp > localStamp {
+                // First launch on a device must take the cloud copy even when
+                // both timestamps are zero (older web exports can be zero).
+                if !hadLocal || remoteStamp >= localStamp {
                     state = remote
                     persistLocal()
-                } else if localStamp > remoteStamp {
+                } else if hasMeaningfulData {
                     await supabase.pushState(state)
                 }
-            } else {
+            } else if hasMeaningfulData {
+                // Never turn a failed pull or an empty fresh install into a push.
                 await supabase.pushState(state)
             }
         }
@@ -33,30 +39,71 @@ final class AppStore: ObservableObject {
         Task { await supabase.pushState(state) }
     }
 
+    func addNickToMorning() {
+        let nickURL = "https://functional-neuro-health.mykajabi.com/products/neuro-pro-mastery-program/categories/2154161935/posts/2202064260"
+        if state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) { return }
+
+        let shelfIndex: Int
+        if let existing = state.settings.shelves.firstIndex(where: { $0.id == "sh_notfeeling" }) {
+            shelfIndex = existing
+        } else {
+            state.settings.shelves.insert(Shelf(id: "sh_notfeeling", name: "Not feeling it", note: "Small ways through", items: [], tone: "clay"), at: 0)
+            shelfIndex = 0
+        }
+        if !state.settings.shelves[shelfIndex].items.contains(where: { $0.id == "g_nick" }) {
+            state.settings.shelves[shelfIndex].items.insert(
+                ShelfItem(id: "g_nick", text: "Nick Moss daily meditation", note: "a gentle place to begin", small: "Just open the page."),
+                at: 0
+            )
+        }
+        state.settings.lists.morning.insert(ListItem(
+            id: "m_nick",
+            text: "Nick Moss daily meditation",
+            note: "Not feeling it",
+            small: "Just open the page. No listening needed — that's enough.",
+            url: nickURL
+        ), at: 0)
+        if !state.settings.loans.contains(where: { $0.id == "ln_g_nick_morning" }) {
+            state.settings.loans.insert(Loan(id: "ln_g_nick_morning", itemId: "g_nick", shelfId: "sh_notfeeling", list: "morning"), at: 0)
+        }
+        save()
+    }
+
     func syncNow() async {
         guard supabase.isSignedIn else { return }
         if let remote = await supabase.fetchState() {
             let localStamp = state.settings.updatedAt
             let remoteStamp = remote.settings.updatedAt
-            if remoteStamp > localStamp {
+            if !UserDefaults.standard.bool(forKey: "bot.syncedOnce") || remoteStamp >= localStamp {
                 state = remote
                 persistLocal()
-            } else if localStamp > remoteStamp {
+            } else if localStamp > remoteStamp && hasMeaningfulData {
                 await supabase.pushState(state)
             }
-        } else {
+            UserDefaults.standard.set(true, forKey: "bot.syncedOnce")
+        } else if hasMeaningfulData {
             await supabase.pushState(state)
         }
     }
 
+    private var hasMeaningfulData: Bool {
+        !state.days.isEmpty ||
+        !state.settings.lists.morning.isEmpty ||
+        !state.settings.lists.anchors.isEmpty ||
+        !state.settings.lists.instead.isEmpty ||
+        !state.settings.shelves.isEmpty ||
+        !state.settings.myLinks.isEmpty ||
+        !state.settings.program30.done.isEmpty
+    }
+
     private func persistLocal() {
         if let data = try? JSONEncoder().encode(state) {
-            UserDefaults.standard.set(data, forKey: "bot.state")
+            UserDefaults.standard.set(data, forKey: localKey)
         }
     }
 
     private func loadLocal() {
-        if let data = UserDefaults.standard.data(forKey: "bot.state"),
+        if let data = UserDefaults.standard.data(forKey: localKey),
            let decoded = try? JSONDecoder().decode(AppState.self, from: data) {
             state = decoded
         }
