@@ -1493,6 +1493,109 @@
   }
 
   /* Device dark mode — warm charcoal, not black. No manual toggle. */
+  /* A dedicated, cosier space for time awareness. Deliberately local. */
+  .cozy-screen {
+    --cozy-bg: #241a3a;
+    --cozy-card: #2e2350;
+    --cozy-card-2: #3a2c63;
+    --cozy-ink: #f7f2ff;
+    --cozy-soft: #cbb8e8;
+    --cozy-accent: #bfa7f5;
+    --cozy-line: #4a3a76;
+    background: radial-gradient(circle at 50% 0%, #3a2c63 0%, var(--cozy-bg) 62%);
+    color: var(--cozy-ink);
+    min-height: 100%;
+    padding: var(--s4) var(--s4) 120px;
+  }
+  .cozy-card {
+    background: var(--cozy-card);
+    border: 1px solid var(--cozy-line);
+    border-radius: 30px;
+    padding: var(--s5);
+    margin-bottom: var(--s4);
+    box-shadow: 0 18px 40px rgba(10, 6, 22, 0.25);
+  }
+  .cozy-kicker {
+    font-size: var(--t-cap);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--cozy-accent);
+  }
+  .cozy-card h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin: var(--s2) 0;
+    color: var(--cozy-ink);
+  }
+  .cozy-hint { color: var(--cozy-soft); margin: 0 0 var(--s3); }
+  .cozy-ring { position: relative; width: 220px; height: 220px; margin: var(--s4) auto; }
+  .cozy-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .cozy-ring .track { fill: none; stroke: var(--cozy-line); stroke-width: 12; }
+  .cozy-ring .fill { fill: none; stroke: url(#cozyGrad); stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 0.8s linear; }
+  .cozy-ring-center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+  }
+  .cozy-ring-center strong {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 44px;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+  .cozy-ring-center span { font-size: var(--t-small); color: var(--cozy-soft); }
+  .cozy-buttons { display: flex; gap: var(--s2); flex-wrap: wrap; justify-content: center; }
+  .cozy-btn {
+    min-height: 48px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    padding: 0 22px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .cozy-btn.primary { background: var(--cozy-accent); color: #241a3a; }
+  .cozy-btn.ghost { background: transparent; color: var(--cozy-ink); border-color: var(--cozy-line); }
+  .cozy-btn:focus-visible { outline: 3px solid var(--cozy-ink); outline-offset: 3px; }
+  .cozy-message { text-align: center; color: var(--cozy-soft); margin-top: var(--s3); min-height: 1.4em; }
+  .cozy-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+  .cozy-list li {
+    background: var(--cozy-card-2);
+    border-radius: 16px;
+    padding: 12px 14px;
+    color: var(--cozy-ink);
+    font-size: var(--t-body);
+  }
+  .cozy-add { margin-top: var(--s3); color: var(--cozy-soft); }
+  .cozy-add input {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--cozy-line);
+    background: var(--cozy-bg);
+    color: var(--cozy-ink);
+    padding: 0 12px;
+    font: inherit;
+  }
+  .cozy-add button { margin-top: var(--s2); }
+  .cozy-field { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); color: var(--cozy-soft); }
+  .cozy-field select {
+    min-height: 46px;
+    border-radius: 14px;
+    border: 1px solid var(--cozy-line);
+    background: var(--cozy-bg);
+    color: var(--cozy-ink);
+    padding: 0 10px;
+    font: inherit;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cozy-ring .fill { transition: none; }
+  }
+
   @media (prefers-color-scheme: dark) {
     :root {
       color-scheme: dark;
@@ -1895,6 +1998,65 @@
 
   </div><!-- /screen-links -->
 
+  <!-- ============ TIME (sixth tab) ============ -->
+  <div class="screen cozy-screen" id="screen-time" hidden>
+    <section class="cozy-card">
+      <div class="cozy-kicker">Time, gently</div>
+      <h2 id="cozyTitle">A little time, if you want it.</h2>
+      <p class="cozy-hint" id="cozyIntro">This is not a restriction. It just makes the time visible while you do the thing you enjoy.</p>
+      <div class="cozy-ring" role="img" aria-label="Time remaining">
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <defs>
+            <linearGradient id="cozyGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#d8c4ff" />
+              <stop offset="100%" stop-color="#8f6fd0" />
+            </linearGradient>
+          </defs>
+          <circle class="track" cx="100" cy="100" r="88" />
+          <circle class="fill" id="cozyRingFill" cx="100" cy="100" r="88" stroke-dasharray="552.9" stroke-dashoffset="0" />
+        </svg>
+        <div class="cozy-ring-center">
+          <strong id="cozyTime">30:00</strong>
+          <span id="cozyUnit">minutes left</span>
+        </div>
+      </div>
+      <div class="cozy-buttons">
+        <button type="button" class="cozy-btn primary" id="cozyStart">Begin gently</button>
+        <button type="button" class="cozy-btn ghost" id="cozyPause" hidden>Pause</button>
+        <button type="button" class="cozy-btn ghost" id="cozyClose" hidden>Close</button>
+      </div>
+      <p class="cozy-message" id="cozyMessage" aria-live="polite"></p>
+    </section>
+
+    <section class="cozy-card">
+      <div class="cozy-kicker">Things you could be doing right now</div>
+      <p class="cozy-hint">Not a to-do list. Just a reminder that these exist, even when you forget.</p>
+      <ul class="cozy-list" id="cozyPossibilities"></ul>
+      <details class="cozy-add">
+        <summary>Brain dump / add your own</summary>
+        <p class="cozy-hint">Anything in your physical space or your head that deserves a quiet mention.</p>
+        <form id="cozyAddForm">
+          <input type="text" id="cozyAddInput" placeholder="e.g. the mug in the side drawer" autocomplete="off" />
+          <button type="submit" class="cozy-btn ghost">Add to reminders</button>
+        </form>
+      </details>
+    </section>
+
+    <section class="cozy-card">
+      <div class="cozy-field">
+        <label for="cozyDaily">Daily minutes</label>
+        <select id="cozyDaily">
+          <option value="15">15</option>
+          <option value="20">20</option>
+          <option value="30">30</option>
+          <option value="45">45</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <p class="cozy-hint" id="cozyBank" style="margin-top:12px"></p>
+    </section>
+  </div>
+
   <!-- ============ MORE (fifth bottom tab) ============ -->
   <div class="screen" id="screen-gentle" hidden>
     <section class="card" id="programMoreCard">
@@ -1998,6 +2160,9 @@
   <button type="button" class="nav-btn" data-tab="links">
     Links
   </button>
+  <button type="button" class="nav-btn" data-tab="time">
+    Time
+  </button>
   <button type="button" class="nav-btn" data-tab="more">
     Shelves
   </button>
@@ -2039,7 +2204,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v70";
+const VERSION = "v71";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2288,13 +2453,25 @@ function freshState() {
       smallStartsAdded: false, // one-time seed guard for the Small starts shelf
       movementAdded: false,    // one-time seed guard for the Movement shelf
       walkStartMinutes: 10,    // only used to sketch a gradual walking ladder
-      program30: {             // 30 quiet invitations; load in/out keeps this intact
+      program30: {             // 60 quiet invitations; load in/out keeps this intact
         loaded: false,
-        step: 0,             // index into PROGRAM30; moves only when marked enough
+        step: 0,             // index into PROGRAM60; moves only when marked enough
         startedAt: "",
         lastDoneAt: "",
         done: {},            // step id -> date, kept but never scored
         reflection: "",      // one optional closing line, never shown as a score
+        pace: "gentle",
+      },
+      personalization: { onboardingComplete: true, focusArea: "none", focusLabel: "a gentle pause", supports: ["pause", "smallSteps", "sleep"], starterSet: "gentle" },
+      cozyTimer: {           // a gentle daily allowance that never punishes you
+        dailyMinutes: 30,
+        bankedMinutes: 30,   // unused time rolls over without a cap
+        active: false,
+        remaining: 30,
+        remainingAtStart: 30,
+        startedAt: 0,
+        lastCreditedDay: "", // set on first load
+        custom: [],          // user-added possibilities; starter list is fixed
       },
       updatedAt: 0,        // last change, used to decide which device wins a sync
        doneForToday: "",    // YYYY-MM-DD; when set, edit controls hide for the day
@@ -2599,6 +2776,19 @@ function migrate(s) {
   }
   if (!s.settings.personalization || typeof s.settings.personalization !== "object") {
     s.settings.personalization = { onboardingComplete: true, focusArea: "none", focusLabel: "a gentle pause", supports: ["pause", "smallSteps", "sleep"], starterSet: "gentle" };
+  }
+  const ct = s.settings.cozyTimer;
+  if (!ct || typeof ct !== "object" || Array.isArray(ct)) {
+    s.settings.cozyTimer = { dailyMinutes: 30, bankedMinutes: 30, active: false, remaining: 30, remainingAtStart: 30, startedAt: 0, lastCreditedDay: "", custom: [] };
+  } else {
+    ct.dailyMinutes = Math.max(5, Math.min(240, Number(ct.dailyMinutes) || 30));
+    ct.bankedMinutes = Math.max(0, Number(ct.bankedMinutes) || 30);
+    ct.remaining = Math.max(0, Number(ct.remaining) || ct.bankedMinutes);
+    ct.remainingAtStart = Math.max(0, Number(ct.remainingAtStart) || ct.remaining);
+    ct.active = !!ct.active;
+    ct.startedAt = Number(ct.startedAt) || 0;
+    ct.lastCreditedDay = typeof ct.lastCreditedDay === "string" ? ct.lastCreditedDay : "";
+    if (!Array.isArray(ct.custom)) ct.custom = [];
   }
   if (typeof s.settings.shelfOptionIndex !== "number") s.settings.shelfOptionIndex = 0;
   if (typeof s.settings.shelfOptionDay !== "string") s.settings.shelfOptionDay = "";
@@ -2921,12 +3111,121 @@ function renderRightNow() {
   $("#rightNowTime").textContent = now.toLocaleDateString([], { weekday: "short" }) + ", " + now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+const COZY_STARTER = [
+  "Fold clothes",
+  "Piano practice & gig preparation",
+  "Write a piece of music",
+  "Journal",
+  "Study",
+  "A short walk or stretch",
+  "Tidy one surface",
+  "Reply to one message"
+];
+function daysBetweenKeys(a, b) {
+  const pa = Date.parse(a + "T00:00:00"), pb = Date.parse(b + "T00:00:00");
+  if (!isFinite(pa) || !isFinite(pb)) return 0;
+  return Math.max(0, Math.round((pb - pa) / 86400000));
+}
+function creditCozyTime() {
+  const ct = state.settings.cozyTimer;
+  if (!ct) return;
+  const today = todayKey();
+  if (!ct.lastCreditedDay) { ct.lastCreditedDay = today; saveQuiet(); return; }
+  if (ct.lastCreditedDay !== today) {
+    const days = daysBetweenKeys(ct.lastCreditedDay, today);
+    const added = ct.dailyMinutes * days;
+    ct.bankedMinutes += added;
+    if (ct.active) ct.remainingAtStart += added;
+    else { ct.remaining = ct.bankedMinutes; ct.remainingAtStart = ct.remaining; }
+    ct.lastCreditedDay = today;
+    saveQuiet();
+  }
+}
+function cozyRemaining() {
+  const ct = state.settings.cozyTimer;
+  if (!ct) return 0;
+  if (!ct.active) return Math.max(0, Number(ct.remaining) || 0);
+  const elapsed = (Date.now() - (ct.startedAt || Date.now())) / 60000;
+  return Math.max(0, (Number(ct.remainingAtStart) || 0) - elapsed);
+}
+function renderCozy() {
+  creditCozyTime();
+  const ct = state.settings.cozyTimer;
+  if (!ct) return;
+  const remaining = cozyRemaining();
+  const total = Math.max(ct.dailyMinutes, ct.remainingAtStart || ct.dailyMinutes);
+  const frac = Math.max(0, Math.min(1, remaining / total));
+  const ring = $("#cozyRingFill");
+  if (ring) ring.setAttribute("stroke-dashoffset", String(552.9 * (1 - frac)));
+  const mins = Math.floor(remaining);
+  const secs = Math.floor((remaining - mins) * 60);
+  const timeEl = $("#cozyTime");
+  if (timeEl) timeEl.textContent = String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  const unit = $("#cozyUnit");
+  if (unit) unit.textContent = ct.active ? "still here" : "minutes left";
+  const start = $("#cozyStart"), pause = $("#cozyPause"), close = $("#cozyClose");
+  if (start) { start.hidden = ct.active; start.textContent = ct.bankedMinutes > 0 ? "Begin gently" : "Nothing banked yet"; start.disabled = ct.bankedMinutes <= 0; }
+  if (pause) pause.hidden = !ct.active;
+  if (close) close.hidden = remaining > 0;
+  const msg = $("#cozyMessage");
+  if (msg) {
+    if (ct.active) {
+      const spent = Math.max(0, (ct.remainingAtStart || 0) - remaining);
+      msg.textContent = "You've been here about " + Math.floor(spent) + " minutes. No need to feel anything about it.";
+    } else if (remaining <= 0) {
+      msg.textContent = "That's your time for now. The things below are still here whenever you want them.";
+    } else {
+      msg.textContent = "Unused time waits here for you. Nothing is lost.";
+    }
+  }
+  const bank = $("#cozyBank");
+  if (bank) bank.textContent = "You have " + Math.round(ct.bankedMinutes) + " minutes available. Unused minutes roll over — there is no cap and no score.";
+  const daily = $("#cozyDaily");
+  if (daily && daily.value !== String(ct.dailyMinutes)) daily.value = String(ct.dailyMinutes);
+  const list = $("#cozyPossibilities");
+  if (list) {
+    const items = COZY_STARTER.concat(Array.isArray(ct.custom) ? ct.custom : []);
+    list.innerHTML = "";
+    items.forEach((text) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      list.appendChild(li);
+    });
+  }
+}
+function startCozy() {
+  const ct = state.settings.cozyTimer;
+  if (!ct || ct.bankedMinutes <= 0) return;
+  if (ct.remaining <= 0) ct.remaining = ct.bankedMinutes;
+  ct.remainingAtStart = ct.remaining;
+  ct.startedAt = Date.now();
+  ct.active = true;
+  save();
+  renderCozy();
+  haptic(8);
+}
+function stopCozy(finished) {
+  const ct = state.settings.cozyTimer;
+  if (!ct) return;
+  const left = cozyRemaining();
+  ct.bankedMinutes = left;
+  ct.remaining = left;
+  ct.remainingAtStart = left;
+  ct.active = false;
+  ct.startedAt = 0;
+  if (finished) { ct.bankedMinutes = 0; ct.remaining = 0; ct.remainingAtStart = 0; }
+  save();
+  renderCozy();
+  haptic(finished ? 12 : 6);
+}
+
 function renderAll() {
   applyPhase();
   applySunday();
   renderHeader();
   renderGreeting();
   renderRightNow();
+  renderCozy();
   renderDoneForToday();
   renderMorningLine();
   renderQuietDayHint();
@@ -3002,6 +3301,7 @@ const TAB_SCREENS = {
   home: "screen-home",
   winddown: "screen-winddown",
   links: "screen-links",
+  time: "screen-time",
   more: "screen-gentle",
 };
 let activeTab = "home";
@@ -5310,6 +5610,28 @@ function wire() {
     state.settings.program30.pace = e.target.value;
     save(); renderProgram();
   });
+  $("#cozyStart").addEventListener("click", startCozy);
+  $("#cozyPause").addEventListener("click", () => stopCozy(false));
+  $("#cozyClose").addEventListener("click", () => stopCozy(true));
+  $("#cozyDaily").addEventListener("change", (e) => {
+    const ct = state.settings.cozyTimer;
+    ct.dailyMinutes = Math.max(5, Math.min(240, Number(e.target.value) || 30));
+    if (!ct.active) { ct.remaining = ct.bankedMinutes; ct.remainingAtStart = ct.remaining; }
+    save(); renderCozy();
+  });
+  $("#cozyAddForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+    const input = $("#cozyAddInput");
+    const text = (input.value || "").trim();
+    if (!text) return;
+    state.settings.cozyTimer.custom.push(text);
+    input.value = "";
+    save(); renderCozy();
+    showSnackbar("Added to your reminders.");
+  });
+  setInterval(() => {
+    if (state.settings.cozyTimer && state.settings.cozyTimer.active) renderCozy();
+  }, 1000);
   $("#focusArea").addEventListener("change", (e) => {
     const value = e.target.value;
     const labels = { coding: "Coding", gaming: "Gaming", scrolling: "Scrolling", shopping: "Shopping", food: "Food", other: "This", none: "a gentle pause" };

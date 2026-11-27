@@ -27,6 +27,17 @@ final class ModelTests: XCTestCase {
         XCTAssertEqual(decoded.settings.targetBed, "22:30")
     }
 
+    func testCozyTimerDefaultsWhenMissingFields() throws {
+        let json = """
+        {"dailyMinutes":30,"bankedMinutes":75,"active":false}
+        """.data(using: .utf8)!
+        let decoded = try JSONDecoder().decode(CozyTimerState.self, from: json)
+        XCTAssertEqual(decoded.dailyMinutes, 30)
+        XCTAssertEqual(decoded.bankedMinutes, 75)
+        XCTAssertEqual(decoded.remaining, 75)
+        XCTAssertTrue(decoded.custom.isEmpty)
+    }
+
     func testProgramStateWithoutPaceDecodes() throws {
         let json = """
         {"loaded":false,"step":0,"startedAt":"","lastDoneAt":"","done":{},"reflection":""}

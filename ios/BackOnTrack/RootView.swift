@@ -6,7 +6,7 @@ struct RootView: View {
     @StateObject private var whisper = WhisperManager()
     @State private var tab: Tab = .home
 
-    enum Tab { case home, windDown, focus, links, shelves }
+    enum Tab { case home, windDown, focus, links, time, shelves }
 
     var body: some View {
         Group {
@@ -24,6 +24,7 @@ struct RootView: View {
                     WindDownView().tabItem { Label("Wind down", systemImage: "moon") }.tag(Tab.windDown)
                     FocusView().tabItem { Label("Focus", systemImage: "target") }.tag(Tab.focus)
                     LinksView().tabItem { Label("Links", systemImage: "link") }.tag(Tab.links)
+                    CozyTimeView().tabItem { Label("Time", systemImage: "timer") }.tag(Tab.time)
                     ShelvesView().tabItem { Label("Shelves", systemImage: "tray") }.tag(Tab.shelves)
                 }
             }

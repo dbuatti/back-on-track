@@ -139,6 +139,89 @@ final class AppStore: ObservableObject {
         }
     }
 
+    func creditCozy() {
+        if state.settings.cozyTimer == nil { state.settings.cozyTimer = CozyTimerState() }
+        guard var ct = state.settings.cozyTimer else { return }
+        defer { state.settings.cozyTimer = ct }
+        let today = todayKey()
+        if ct.lastCreditedDay.isEmpty {
+            ct.lastCreditedDay = today
+            persistLocal()
+            return
+        }
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        guard let start = f.date(from: ct.lastCreditedDay), let end = f.date(from: today) else { return }
+        let days = max(0, Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: start), to: Calendar.current.startOfDay(for: end)).day ?? 0)
+        if days > 0 {
+            let added = ct.dailyMinutes * Double(days)
+            ct.bankedMinutes += added
+            if ct.active { ct.remainingAtStart += added }
+            else {
+                ct.remaining = ct.bankedMinutes
+                ct.remainingAtStart = ct.remaining
+            }
+            ct.lastCreditedDay = today
+            persistLocal()
+        }
+    }
+
+    func cozyRemaining(now: Date = Date()) -> Double {
+        guard let ct = state.settings.cozyTimer else { return 30 }
+        if !ct.active { return max(0, ct.remaining) }
+        let elapsed = now.timeIntervalSince1970 - ct.startedAt
+        return max(0, ct.remainingAtStart - elapsed / 60)
+    }
+
+    func startCozy(now: Date = Date()) {
+        creditCozy()
+        guard var ct = state.settings.cozyTimer, ct.bankedMinutes > 0 else { return }
+        if ct.remaining <= 0 { ct.remaining = ct.bankedMinutes }
+        ct.remainingAtStart = ct.remaining
+        ct.startedAt = now.timeIntervalSince1970
+        ct.active = true
+        state.settings.cozyTimer = ct
+        save()
+    }
+
+    func stopCozy(finished: Bool, now: Date = Date()) {
+        guard var ct = state.settings.cozyTimer else { return }
+        let left = cozyRemaining(now: now)
+        if finished {
+            ct.bankedMinutes = 0
+            ct.remaining = 0
+            ct.remainingAtStart = 0
+        } else {
+            ct.bankedMinutes = left
+            ct.remaining = left
+            ct.remainingAtStart = left
+        }
+        ct.active = false
+        ct.startedAt = 0
+        state.settings.cozyTimer = ct
+        save()
+    }
+
+    func setCozyDaily(_ minutes: Double) {
+        guard var ct = state.settings.cozyTimer else { return }
+        ct.dailyMinutes = minutes
+        if !ct.active {
+            ct.remaining = ct.bankedMinutes
+            ct.remainingAtStart = ct.remaining
+        }
+        state.settings.cozyTimer = ct
+        save()
+    }
+
+    func addCozyPossibility(_ text: String) {
+        let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        guard var ct = state.settings.cozyTimer else { return }
+        if !ct.custom.contains(value) { ct.custom.append(value) }
+        state.settings.cozyTimer = ct
+        save()
+    }
+
     func setDoneForToday(_ done: Bool) {
         state.settings.doneForToday = done ? todayKey() : ""
         save()

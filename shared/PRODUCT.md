@@ -71,6 +71,21 @@ sleep was logged, mood, program gaps and the chosen focus. It suggests exactly
 one small next action — log wake, log bed, pause, set an intention or pick an
 anchor. It never adds a score or pressure.
 
+## Time, gently
+
+A dedicated **Time** tab holds a daily allowance (default 30 minutes) for the
+thing that brings joy and also crowds out life. It is a visibility tool, not a
+restriction or a fix. Time is shown with a large purple ring and gentle numbers.
+Unused minutes roll over without a cap: nothing is lost, and there is no score.
+
+A fixed **possibilities** menu reminds the user of things they forget they can
+do — folding clothes, piano/gig preparation, composition, journal, study, a
+short walk. It is a memory aid, not a to-do list: no checkboxes, no completion
+pressure. Users can add their own entries; the starter menu cannot be removed.
+
+Voice brain-dumping is a deliberately deferred extension: speech-to-text would
+need permissions, accuracy testing and an editing step before anything is saved.
+
 ## Self-regulation
 
 Piano improvisation and shaking on the spot are first-class, shame-free

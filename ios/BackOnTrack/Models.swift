@@ -106,6 +106,31 @@ struct Program30State: Codable, Hashable {
     }
 }
 
+struct CozyTimerState: Codable, Hashable {
+    var dailyMinutes: Double = 30
+    var bankedMinutes: Double = 30
+    var active: Bool = false
+    var remaining: Double = 30
+    var remainingAtStart: Double = 30
+    var startedAt: Double = 0
+    var lastCreditedDay: String = ""
+    var custom: [String] = []
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        dailyMinutes = try c.decodeIfPresent(Double.self, forKey: .dailyMinutes) ?? 30
+        bankedMinutes = try c.decodeIfPresent(Double.self, forKey: .bankedMinutes) ?? 30
+        active = try c.decodeIfPresent(Bool.self, forKey: .active) ?? false
+        remaining = try c.decodeIfPresent(Double.self, forKey: .remaining) ?? bankedMinutes
+        remainingAtStart = try c.decodeIfPresent(Double.self, forKey: .remainingAtStart) ?? remaining
+        startedAt = try c.decodeIfPresent(Double.self, forKey: .startedAt) ?? 0
+        lastCreditedDay = try c.decodeIfPresent(String.self, forKey: .lastCreditedDay) ?? ""
+        custom = try c.decodeIfPresent([String].self, forKey: .custom) ?? []
+    }
+}
+
 struct Personalization: Codable, Hashable {
     var onboardingComplete: Bool
     var focusArea: String
@@ -151,6 +176,7 @@ struct AppSettings: Codable, Hashable {
     var walkStartMinutes: Int
     var program30: Program30State
     var personalization: Personalization?
+    var cozyTimer: CozyTimerState?
     var updatedAt: Double
     var doneForToday: String
     var lists: Lists
@@ -184,6 +210,7 @@ struct AppSettings: Codable, Hashable {
         walkStartMinutes = 10
         program30 = Program30State()
         personalization = nil
+        cozyTimer = CozyTimerState()
         updatedAt = 0
         doneForToday = ""
         lists = Lists()
@@ -200,6 +227,7 @@ struct AppSettings: Codable, Hashable {
         walkStartMinutes = try c.decodeIfPresent(Int.self, forKey: .walkStartMinutes) ?? 10
         program30 = try c.decodeIfPresent(Program30State.self, forKey: .program30) ?? Program30State()
         personalization = try c.decodeIfPresent(Personalization.self, forKey: .personalization)
+        cozyTimer = try c.decodeIfPresent(CozyTimerState.self, forKey: .cozyTimer)
         updatedAt = try c.decodeIfPresent(Double.self, forKey: .updatedAt) ?? 0
         doneForToday = try c.decodeIfPresent(String.self, forKey: .doneForToday) ?? ""
         lists = try c.decodeIfPresent(Lists.self, forKey: .lists) ?? Lists()
