@@ -51,7 +51,9 @@ Unix milliseconds value.
 
 Unknown fields must be preserved by imports and merges. Missing fields are
 filled with defaults; an empty incoming value must not erase a meaningful
-local value.
+local value. The Swift models decode every key with `decodeIfPresent`, so older
+exports and partial remote states must load without throwing. Unit tests cover
+missing `intentionIndex`, `notes`, `personalization` and `codingNextStep`.
 
 ## Stable ids
 

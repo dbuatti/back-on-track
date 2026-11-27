@@ -23,7 +23,7 @@ final class ProgramTests: XCTestCase {
             supports: ["pause"],
             starterSet: "gentle"
         )
-        let focusStep = Program.steps.first(where: { $0.kind == "focus" })!
+        let focusStep = Program.steps.first(where: { $0.invitation.contains("{focus}") })!
         let index = Program.steps.firstIndex(where: { $0.id == focusStep.id })!
         let effective = Program.effectiveStep(state: state, index: index)
         XCTAssertTrue(effective.invitation.contains("Coding"))
