@@ -676,9 +676,10 @@
 
   /* ---------- Header ---------- */
   header.top {
-    display: block;
+    display: none;
     margin: 4px 4px var(--s5);
   }
+  body[data-tab="home"] header.top { display: block; }
   header.top h1 {
     font-family: Georgia, "Times New Roman", serif;
     font-size: 23px;
@@ -2154,6 +2155,18 @@
     </section>
   </div>
 
+  <!-- ============ CONTROL HUB / LAB ============ -->
+  <div class="screen" id="screen-lab" hidden>
+    <section class="card">
+      <h2><span class="dot"></span>Control hub</h2>
+      <p class="hint">A quiet place for all the small things you've been carrying. Nothing here is a to-do list. Say it, sort it if you like, and leave it here.</p>
+      <div class="btn-row">
+        <button type="button" class="btn small" data-go="dump">Brain dump a thought</button>
+      </div>
+      <div id="labList" aria-live="polite"></div>
+    </section>
+  </div>
+
   <!-- ============ BRAIN DUMP ============ -->
   <div class="screen cozy-screen dump-screen" id="screen-dump" hidden>
     <section class="cozy-plain" style="text-align:center">
@@ -2175,7 +2188,7 @@
                   style="width:100%;min-height:110px;margin-top:8px;padding:14px;border-radius:16px;border:1px solid var(--cozy-line);background:var(--cozy-card);color:var(--cozy-ink);font:inherit;resize:vertical"></textarea>
         <button type="submit" class="cozy-btn primary" style="margin-top:12px">Add to reminders</button>
       </form>
-      <button type="button" class="cozy-btn ghost" data-go="time" style="margin-top:18px">Back to Time</button>
+      <button type="button" class="cozy-btn ghost" data-go="lab" style="margin-top:18px">Go to control hub</button>
     </section>
   </div>
 
@@ -2183,8 +2196,11 @@
   <div class="screen" id="screen-gentle" hidden>
     <section class="card" id="brainDumpCard">
       <h2><span class="dot"></span>Brain dump</h2>
-      <p class="hint">Say the small things out loud, or type them. They become reminders, never a to-do list.</p>
-      <button type="button" class="btn small" data-go="dump">Open brain dump</button>
+      <p class="hint">Say the small things out loud, or type them. Then sort them in the control hub.</p>
+      <div class="btn-row">
+        <button type="button" class="btn small" data-go="lab">Open control hub</button>
+        <button type="button" class="btn small" data-go="dump">Brain dump</button>
+      </div>
     </section>
     <section class="card" id="programMoreCard">
       <h2><span class="dot"></span>A quiet 60 days</h2>
@@ -2350,7 +2366,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v77";
+const VERSION = "v78";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2903,6 +2919,7 @@ function migrate(s) {
     }
     s.settings.selfRegAdded = true;
   }
+  if (!Array.isArray(s.settings.labItems)) s.settings.labItems = [];
   if (typeof s.settings.walkStartMinutes !== "number" || s.settings.walkStartMinutes < 5) {
     s.settings.walkStartMinutes = 10;
   }
@@ -3455,6 +3472,46 @@ function stopCozyVoice() {
   if (cozyRecognition) { try { cozyRecognition.stop(); } catch (e) {} }
 }
 
+function renderLab() {
+  const box = $("#labList");
+  if (!box) return;
+  const items = (state.settings.labItems || []).filter((it) => !it.archived);
+  box.innerHTML = "";
+  if (!items.length) {
+    const p = document.createElement("p");
+    p.className = "hint";
+    p.textContent = "Nothing here yet. Brain dump a thought whenever you like.";
+    box.appendChild(p);
+    return;
+  }
+  items.forEach((item) => {
+    const row = document.createElement("div");
+    row.className = "my-link-row";
+    const label = document.createElement("span");
+    label.textContent = item.text;
+    label.style.flex = "1";
+    row.appendChild(label);
+    const cat = document.createElement("span");
+    cat.className = "hint";
+    cat.textContent = item.category || "Small things";
+    row.appendChild(cat);
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "btn small";
+    del.textContent = "Put away";
+    del.setAttribute("aria-label", "Put away " + item.text);
+    del.addEventListener("click", () => {
+      item.archived = true;
+      save(); renderLab();
+      showSnackbar("Put away. It isn't lost.", () => {
+        item.archived = false; save(); renderLab();
+      });
+    });
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
 function renderAll() {
   applyPhase();
   applySunday();
@@ -3462,6 +3519,7 @@ function renderAll() {
   renderGreeting();
   renderRightNow();
   renderCozy();
+  renderLab();
   renderDoneForToday();
   renderMorningLine();
   renderQuietDayHint();
@@ -3538,6 +3596,7 @@ const TAB_SCREENS = {
   winddown: "screen-winddown",
   links: "screen-links",
   time: "screen-time",
+  lab: "screen-lab",
   dump: "screen-dump",
   more: "screen-gentle",
 };
@@ -3562,6 +3621,7 @@ function initialTab() {
 function showTab(name, opts = {}) {
   if (!TAB_SCREENS[name]) return;
   activeTab = name;
+  document.body.dataset.tab = name;
   Object.keys(TAB_SCREENS).forEach((k) => {
     const el = $("#" + TAB_SCREENS[k]);
     if (el) el.hidden = (k !== name);
@@ -5891,10 +5951,11 @@ function wire() {
     const input = $("#cozyAddInput");
     const text = (input.value || "").trim();
     if (!text) return;
-    state.settings.cozyTimer.custom.push(text);
+    state.settings.labItems = state.settings.labItems || [];
+    state.settings.labItems.unshift({ id: "lab_" + Date.now().toString(36), text: text, category: "Small things", effort: "small", archived: false });
     input.value = "";
-    save(); renderCozy();
-    showSnackbar("Added to your reminders.");
+    save(); renderCozy(); renderLab();
+    showSnackbar("Added to your control hub.");
   });
   setInterval(() => {
     if (state.settings.cozyTimer && state.settings.cozyTimer.active) renderCozy();
