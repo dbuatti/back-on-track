@@ -10,11 +10,13 @@ struct HomeView: View {
     @State private var newSmall = ""
     @State private var removing: ListItem?
     @State private var removeFrom = ""
+    @FocusState private var intentionFocused: Bool
 
     private var doneForToday: Bool { store.state.settings.doneForToday == todayKey() }
 
     var body: some View {
         NavigationStack {
+            ScrollViewReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 14) {
@@ -33,11 +35,19 @@ struct HomeView: View {
                     .padding(.top, 4)
 
                     DailyLine()
-                    RightNowCard()
+                    RightNowCard(
+                        onIntention: { intentionFocused = true },
+                        onAnchor: {
+                            withAnimation {
+                                proxy.scrollTo("invite", anchor: .center)
+                            }
+                        }
+                    )
                     SmallWinCard()
                     DoneForTodayCard()
                     intentionCard
                     ProgramCard()
+                        .id("invite")
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
                         nickLoadCard
                     }
@@ -50,6 +60,7 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
+            }
             }
             .background(BotTheme.cream.ignoresSafeArea())
             .navigationTitle("")
@@ -112,6 +123,7 @@ struct HomeView: View {
                 .lineLimit(1...3)
                 .foregroundStyle(BotTheme.ink)
                 .onSubmit { saveIntention() }
+                .focused($intentionFocused)
                 .keyboardDoneButton()
         }
         .frame(maxWidth: .infinity, alignment: .leading)

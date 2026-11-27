@@ -3,6 +3,8 @@ import SwiftUI
 struct RightNowCard: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
+    var onIntention: () -> Void = {}
+    var onAnchor: () -> Void = {}
     @State private var showingPause = false
 
     private struct Suggestion {
@@ -119,8 +121,8 @@ struct RightNowCard: View {
         case .pause:
             Haptics.gentle()
             showingPause = true
-        case .intention: break
-        case .anchor: break
+        case .intention: onIntention()
+        case .anchor: onAnchor()
         }
     }
 

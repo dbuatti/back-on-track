@@ -62,6 +62,8 @@
     --t-lead: 17px;
     --t-card: 16px;
     --t-title: 20px;
+    --font-round: ui-rounded, "SF Pro Rounded", "Hiragino Maru Gothic ProN", "Segoe UI", system-ui, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
 
     /* Four quiet shelf colours. Known shelves keep their own; a shelf you add
        simply borrows the next tone, so there is nothing to configure. */
@@ -142,9 +144,9 @@
     max-width: var(--content);
     z-index: 40;
     display: flex;
-    justify-content: space-around;
-    gap: var(--s1);
-    padding: 8px;
+    justify-content: space-between;
+    gap: 2px;
+    padding: 6px;
     background: color-mix(in srgb, var(--card) 86%, transparent);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -158,9 +160,11 @@
     background: transparent;
     color: var(--ink-soft);
     font: inherit;
-    font-size: var(--t-small);
-    line-height: 1.2;
-    min-width: 58px;
+    font-size: 11px;
+    line-height: 1.15;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 4px 2px;
     min-height: 48px;
     display: flex;
     align-items: center;
@@ -801,20 +805,20 @@
   /* ---------- Section cards ---------- */
   .card {
     background: var(--card);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    padding: var(--s5);
-    margin-bottom: var(--s6);
-    border: 1px solid var(--line);
+    border-radius: 26px;
+    box-shadow: 0 2px 6px rgba(58,47,40,0.05), 0 16px 36px rgba(58,47,40,0.07);
+    padding: 22px;
+    margin-bottom: 20px;
+    border: 1px solid color-mix(in srgb, var(--line) 70%, transparent);
   }
   .sync-nudge {
     background: var(--accent-soft);
     border-color: var(--accent);
   }
   .card > h2, .card > .card-heading h2 {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: var(--t-card);
-    font-weight: 500;
+    font-family: var(--font-round);
+    font-size: 17px;
+    font-weight: 600;
     letter-spacing: -0.01em;
     text-transform: none;
     color: var(--ink);
@@ -1062,8 +1066,9 @@
     background: var(--card);
     color: var(--ink);
     font: inherit;
-    font-weight: 500;
-    padding: var(--s3) var(--s4);
+    font-family: var(--font-round);
+    font-weight: 600;
+    padding: 10px 18px;
     border-radius: 999px;
     cursor: pointer;
     min-height: var(--tap);
@@ -1082,11 +1087,12 @@
     .btn.has-time:hover { border-color: var(--evening); }
   }
   .btn.primary {
-    background: var(--accent-deep);
-    border-color: var(--accent-deep);
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    border-color: transparent;
     color: var(--on-accent);
     width: 100%;
     font-size: var(--t-lead);
+    box-shadow: 0 8px 20px rgba(154,74,48,0.18);
   }
   .btn.ghost { background: transparent; }
   .btn.small { min-height: var(--tap); padding: var(--s2) var(--s3); font-size: var(--t-small); }
@@ -1493,6 +1499,45 @@
   }
 
   /* Device dark mode — warm charcoal, not black. No manual toggle. */
+  .pause-dialog {
+    border: 0;
+    padding: 0;
+    background: transparent;
+    color: var(--ink);
+    max-width: 420px;
+    width: calc(100% - 32px);
+  }
+  .pause-dialog::backdrop { background: rgba(24,18,32,0.55); backdrop-filter: blur(4px); }
+  .pause-card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 30px;
+    padding: var(--s5);
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(20,12,8,0.25);
+  }
+  .pause-kicker {
+    font-size: var(--t-cap);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent-deep);
+  }
+  .pause-card h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 28px;
+    font-weight: 400;
+    margin: var(--s2) 0;
+  }
+  .pause-count {
+    font-size: 56px;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    margin: var(--s3) 0;
+  }
+  .pause-steps p { margin: 4px 0; color: var(--ink-soft); font-size: var(--t-small); }
+  .pause-card .btn-row { justify-content: center; margin-top: var(--s4); }
+
   /* A dedicated, cosier space for time awareness. Deliberately local. */
   .cozy-screen {
     --cozy-bg: #241a3a;
@@ -1713,7 +1758,11 @@
 
   <div class="sunday-note">
     Rest is the practice. Nothing to log today.
-    <button type="button" class="btn" id="sundaySleepBtn">Log sleep</button>
+    <div class="btn-row">
+      <button type="button" class="btn small" id="sundayWakeBtn">Log wake</button>
+      <button type="button" class="btn small" id="sundayBedBtn">Log bed</button>
+      <button type="button" class="btn small" id="sundaySleepBtn">Go to sleep log</button>
+    </div>
   </div>
 
   <section class="card today-intro" id="todayCard">
@@ -1776,6 +1825,7 @@
      <h2><span class="dot"></span>Done for today</h2>
      <p class="hint">Nothing to change right now. Come back tomorrow.</p>
      <button type="button" class="btn small" id="doneTodayBtn">That's enough for today</button>
+        <button type="button" class="btn small" id="doneTodayReopenBtn" hidden>Reopen</button>
    </section>
 
    <!-- ============ 30-DAY SEQUENCE (hidden until loaded in) ============ -->
@@ -2245,6 +2295,25 @@
   </button>
 </nav>
 
+<dialog id="pauseDialog" class="pause-dialog" aria-label="A sixty-second pause">
+  <div class="pause-card">
+    <div class="pause-kicker">A pause</div>
+    <h2>You can stop here.</h2>
+    <p class="hint">Nothing needs to be finished in this minute.</p>
+    <div class="pause-count" id="pauseCount">60</div>
+    <div class="pause-steps">
+      <p>Feet on the floor</p>
+      <p>One slow breath</p>
+      <p>Look away from the screen</p>
+      <p>Shake out your hands</p>
+    </div>
+    <div class="btn-row">
+      <button type="button" class="btn primary" id="pauseStart">Begin</button>
+      <button type="button" class="btn small" id="pauseClose">Close</button>
+    </div>
+  </div>
+</dialog>
+
 <div id="whisper" role="status" aria-live="polite"></div>
 <div id="snackbar" role="status" aria-live="polite" inert aria-hidden="true">
   <span id="snackText"></span>
@@ -2281,7 +2350,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v73";
+const VERSION = "v75";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2538,6 +2607,7 @@ function freshState() {
         done: {},            // step id -> date, kept but never scored
         reflection: "",      // one optional closing line, never shown as a score
         pace: "gentle",
+        notToday: "",        // YYYY-MM-DD the invitation was gently deferred
       },
       personalization: { onboardingComplete: true, focusArea: "none", focusLabel: "a gentle pause", supports: ["pause", "smallSteps", "sleep"], starterSet: "gentle" },
       cozyTimer: {           // a gentle daily allowance that never punishes you
@@ -2843,6 +2913,7 @@ function migrate(s) {
     s.settings.program30 = { loaded: false, step: 0, startedAt: "", lastDoneAt: "", done: {}, reflection: "", pace: "gentle" };
   } else {
     if (typeof p.pace !== "string") p.pace = "gentle";
+    if (typeof p.notToday !== "string") p.notToday = "";
     p.loaded = !!p.loaded;
     p.step = Math.max(0, Math.min(PROGRAM30.length - 1, Math.round(Number(p.step) || 0)));
     if (typeof p.startedAt !== "string") p.startedAt = "";
@@ -2975,6 +3046,7 @@ function mergeState(local, incoming) {
       notes: { ...(pa.notes || {}), ...(pb.notes || {}) },
       reflection,
       pace: typeof winner.pace === "string" ? winner.pace : (typeof other.pace === "string" ? other.pace : "gentle"),
+      notToday: winner.notToday || other.notToday || "",
     };
   }
   if (a.personalization || b.personalization) {
@@ -3145,6 +3217,41 @@ function dayRecord(key = todayKey()) {
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+let pauseTimer = null;
+function openPauseDialog() {
+  const dialog = $("#pauseDialog");
+  if (!dialog) return;
+  const count = $("#pauseCount");
+  if (count) count.textContent = "60";
+  const start = $("#pauseStart");
+  if (start) start.textContent = "Begin";
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+}
+function closePauseDialog() {
+  if (pauseTimer) { clearInterval(pauseTimer); pauseTimer = null; }
+  const dialog = $("#pauseDialog");
+  if (!dialog) return;
+  if (typeof dialog.close === "function") dialog.close();
+  else dialog.removeAttribute("open");
+}
+function startPauseCountdown() {
+  if (pauseTimer) clearInterval(pauseTimer);
+  const count = $("#pauseCount");
+  let remaining = 60;
+  const start = $("#pauseStart");
+  if (start) start.textContent = "Pause";
+  pauseTimer = setInterval(() => {
+    remaining -= 1;
+    if (count) count.textContent = String(Math.max(0, remaining));
+    if (remaining <= 0) {
+      clearInterval(pauseTimer); pauseTimer = null;
+      if (count) count.textContent = "done.";
+      if (start) start.textContent = "Begin";
+    }
+  }, 1000);
+}
 
 function prefersReducedMotion() {
   return !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -3606,7 +3713,11 @@ function renderDoneForToday() {
   const card = $("#doneTodayCard");
   if (!card) return;
   const done = state.settings.doneForToday === todayKey();
-  card.hidden = done;
+  const setBtn = $("#doneTodayBtn"), reopenBtn = $("#doneTodayReopenBtn");
+  if (setBtn) setBtn.hidden = done;
+  if (reopenBtn) reopenBtn.hidden = !done;
+  const hint = card.querySelector(".hint");
+  if (hint) hint.textContent = done ? "Nothing to change right now. Come back tomorrow." : "Hide the edit controls and stop tinkering whenever you like.";
   document.body.classList.toggle("done-for-today", done);
 }
 function renderGreeting() {
@@ -4039,6 +4150,7 @@ function mkIcon(txt, title, onClick) {
 }
 
 function toggleCheck(which, id) {
+  if (state.settings.doneForToday === todayKey()) return;
   const now = Date.now();
   const key = which + ":" + id;
   if (lastToggle.key === key && now - lastToggle.at < 400) return; // ignore double-fire
@@ -5404,8 +5516,13 @@ function fillProgramCard(prefix, p, step, at) {
   const gap = q("Gap");
   if (gap) {
     const days = daysSinceKey(p.lastDoneAt);
-    gap.hidden = !(p.loaded && days !== null && days >= 2);
-    if (!gap.hidden) gap.textContent = "Your step is right where you left it. Nothing to catch up on.";
+    if (p.notToday === todayKey()) {
+      gap.hidden = false;
+      gap.textContent = "Left right where it is. Nothing to catch up on.";
+    } else {
+      gap.hidden = !(p.loaded && days !== null && days >= 2);
+      if (!gap.hidden) gap.textContent = "Your step is right where you left it. Nothing to catch up on.";
+    }
   }
   if (kind) kind.textContent = PROGRAM_KIND_LABELS[step.kind] || "";
   if (title) title.textContent = step.title;
@@ -5598,6 +5715,8 @@ function wire() {
   });
 
   // home shortcuts: plain-language labels, no guessing what they do
+  $("#sundayWakeBtn").addEventListener("click", () => openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
+  $("#sundayBedBtn").addEventListener("click", () => openTimeEditor("#bedEdit", "#bedInput", "bedTime"));
   $("#sundaySleepBtn").addEventListener("click", () => showTab("winddown"));
   $("#homeWakeBtn").addEventListener("click", () => openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"));
   $("#rightNowAction").addEventListener("click", () => {
@@ -5605,6 +5724,7 @@ function wire() {
     const action = card && card.dataset.action;
     if (action === "wake") { openTimeEditor("#wakeEdit", "#wakeInput", "wakeTime"); return; }
     if (action === "bed") { openTimeEditor("#bedEdit", "#bedInput", "bedTime"); return; }
+    if (action === "pause") { openPauseDialog(); return; }
     if (action === "intention") {
       const input = $("#intentionInput");
       if (input) { input.scrollIntoView({ block: "center", behavior: prefersReducedMotion() ? "auto" : "smooth" }); input.focus(); }
@@ -5670,7 +5790,14 @@ function wire() {
   const doneTodayBtn = $("#doneTodayBtn");
   if (doneTodayBtn) doneTodayBtn.addEventListener("click", () => {
     state.settings.doneForToday = todayKey();
-    saveQuiet();
+    save();
+    renderDoneForToday();
+    haptic(8);
+  });
+  const doneTodayReopen = $("#doneTodayReopenBtn");
+  if (doneTodayReopen) doneTodayReopen.addEventListener("click", () => {
+    state.settings.doneForToday = "";
+    save();
     renderDoneForToday();
     haptic(8);
   });
@@ -5755,6 +5882,13 @@ function wire() {
     save(); renderCozy();
   });
   $$("[data-go]").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.go)));
+  $("#pauseStart").addEventListener("click", () => {
+    if (pauseTimer) {
+      clearInterval(pauseTimer); pauseTimer = null;
+      const start = $("#pauseStart"); if (start) start.textContent = "Resume";
+    } else startPauseCountdown();
+  });
+  $("#pauseClose").addEventListener("click", closePauseDialog);
   $("#cozyVoiceStart").addEventListener("click", startCozyVoice);
   $("#cozyVoiceStop").addEventListener("click", stopCozyVoice);
   $("#cozyAddForm").addEventListener("submit", (e) => {
@@ -5784,12 +5918,10 @@ function wire() {
   function skipProgramStep() {
     const p = state.settings.program30;
     if (!p || !p.loaded) return;
-    const step = currentProgramStep();
-    const gap = $("#programGap");
-    if (gap) { gap.hidden = false; gap.textContent = "Left right where it is."; }
-    const eveGap = $("#programEveGap");
-    if (eveGap) { eveGap.hidden = false; eveGap.textContent = "Left right where it is."; }
+    p.notToday = todayKey();
+    save();
     renderProgram();
+    showSnackbar("Left right where it is.");
   }
   $("#programNotToday").addEventListener("click", skipProgramStep);
   $("#programEveNotToday").addEventListener("click", skipProgramStep);
