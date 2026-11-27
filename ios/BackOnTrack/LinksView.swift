@@ -39,6 +39,21 @@ struct LinksView: View {
                     .botCard()
 
                     VStack(alignment: .leading, spacing: 10) {
+                        BotSectionHeader(title: "Share Back on Track", systemImage: "square.and.arrow.up")
+                        Text("Send the web app to someone on Android or iPhone. They can add it to their Home screen.")
+                            .font(.subheadline).foregroundStyle(BotTheme.soft)
+                        ShareLink(item: URL(string: "https://dbuatti.github.io/back-on-track/")!) {
+                            Text("Share the web app")
+                                .font(.subheadline.weight(.semibold))
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 10)
+                                .background(BotTheme.sageSoft, in: Capsule())
+                                .foregroundStyle(BotTheme.sage)
+                        }
+                    }
+                    .botCard()
+
+                    VStack(alignment: .leading, spacing: 10) {
                         BotSectionHeader(title: "Sync", systemImage: "arrow.triangle.2.circlepath")
                         if auth.isSignedIn {
                             Text(store.supabase.status)

@@ -36,6 +36,7 @@ struct HomeView: View {
                     section(title: "Morning", systemImage: "sun.max", items: store.state.settings.lists.morning, list: "morning")
                     section(title: "Daily anchors", systemImage: "leaf", items: store.state.settings.lists.anchors, list: "anchors")
                     HealthSummaryCard()
+                    CodingPauseCard()
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)

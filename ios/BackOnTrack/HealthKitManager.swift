@@ -16,7 +16,7 @@ final class HealthKitManager: ObservableObject {
     private let store = HKHealthStore()
     private let stepType = HKQuantityType(.stepCount)
     private let walkType = HKQuantityType(.distanceWalkingRunning)
-    private let mindfulType = HKQuantityType(.mindfulMinutes)
+    private let mindfulType = HKCategoryType(.mindfulSession)
 
     private init() {
         isAuthorized = [stepType, walkType, mindfulType].contains {
@@ -55,7 +55,7 @@ final class HealthKitManager: ObservableObject {
 
         async let stepValue = sum(for: stepType, unit: .count(), predicate: predicate)
         async let walkValue = sum(for: walkType, unit: .meter(), predicate: predicate)
-        async let mindfulValue = sum(for: mindfulType, unit: .minute(), predicate: predicate)
+        async let mindfulValue = mindfulMinutes(for: predicate)
 
         do {
             let (s, w, m) = try await (stepValue, walkValue, mindfulValue)
@@ -65,6 +65,22 @@ final class HealthKitManager: ObservableObject {
             isAuthorized = true
         } catch {
             errorMessage = error.localizedDescription
+        }
+    }
+
+    private func mindfulMinutes(for predicate: NSPredicate) async throws -> Double {
+        try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(sampleType: mindfulType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                let seconds = (samples ?? []).reduce(0.0) { total, sample in
+                    total + sample.endDate.timeIntervalSince(sample.startDate)
+                }
+                continuation.resume(returning: seconds / 60)
+            }
+            store.execute(query)
         }
     }
 

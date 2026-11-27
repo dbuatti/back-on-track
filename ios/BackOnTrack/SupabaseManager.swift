@@ -1,5 +1,7 @@
 import Foundation
 import Combine
+import CryptoKit
+import Security
 
 struct SupabaseSession: Codable {
     let accessToken: String
@@ -100,6 +102,144 @@ final class SupabaseManager: ObservableObject {
             status = "Couldn't create the account: \(error.localizedDescription)"
             return false
         }
+    }
+
+    func sendMagicLink(email: String) async -> Bool {
+        let address = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        guard address.contains("@") else {
+            status = "Enter a valid email address."
+            return false
+        }
+        let verifier = makePKCEVerifier()
+        let challenge = makePKCEChallenge(verifier)
+        UserDefaults.standard.set(verifier, forKey: "bot.pkceVerifier")
+
+        var request = URLRequest(url: baseURL.appendingPathComponent("auth/v1/otp"))
+        request.httpMethod = "POST"
+        request.setValue(anonKey, forHTTPHeaderField: "apikey")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        var comps = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+        comps.queryItems = [URLQueryItem(name: "redirect_to", value: "backontrack://auth-callback")]
+        request.url = comps.url
+        request.httpBody = try? JSONSerialization.data(withJSONObject: [
+            "email": address,
+            "create_user": true,
+            "code_challenge": challenge,
+            "code_challenge_method": "S256"
+        ])
+        do {
+            let (_, response) = try await URLSession.shared.data(for: request)
+            guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                status = "Couldn't send the link. Try again in a minute."
+                return false
+            }
+            status = "Link sent. Open it on this iPhone to finish signing in."
+            return true
+        } catch {
+            status = "Couldn't send the link: \(error.localizedDescription)"
+            return false
+        }
+    }
+
+    func handleAuthCallback(_ url: URL) async -> Bool {
+        var code: String?
+        var access: String?
+        var refresh: String?
+        var expires: Double?
+
+        if let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems {
+            code = query.first(where: { $0.name == "code" })?.value
+            access = query.first(where: { $0.name == "access_token" })?.value
+            refresh = query.first(where: { $0.name == "refresh_token" })?.value
+            if let value = query.first(where: { $0.name == "expires_at" })?.value {
+                expires = Double(value)
+            }
+        }
+        if let fragment = URLComponents(url: url, resolvingAgainstBaseURL: false)?.fragment {
+            let items = fragment.split(separator: "&").compactMap { part -> URLQueryItem? in
+                let bits = part.split(separator: "=", maxSplits: 1).map(String.init)
+                guard bits.count == 2 else { return nil }
+                return URLQueryItem(name: bits[0], value: bits[1].removingPercentEncoding ?? bits[1])
+            }
+            code = code ?? items.first(where: { $0.name == "code" })?.value
+            access = access ?? items.first(where: { $0.name == "access_token" })?.value
+            refresh = refresh ?? items.first(where: { $0.name == "refresh_token" })?.value
+            if expires == nil, let value = items.first(where: { $0.name == "expires_at" })?.value {
+                expires = Double(value)
+            }
+        }
+
+        do {
+            if let code {
+                guard let verifier = UserDefaults.standard.string(forKey: "bot.pkceVerifier") else {
+                    status = "That sign-in link has expired. Request a new one."
+                    return false
+                }
+                var request = URLRequest(url: baseURL.appendingPathComponent("auth/v1/token"))
+                request.httpMethod = "POST"
+                request.setValue(anonKey, forHTTPHeaderField: "apikey")
+                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                var comps = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
+                comps.queryItems = [URLQueryItem(name: "grant_type", value: "pkce")]
+                request.url = comps.url
+                request.httpBody = try JSONSerialization.data(withJSONObject: ["auth_code": code, "code_verifier": verifier])
+                let (data, response) = try await URLSession.shared.data(for: request)
+                guard let http = response as? HTTPURLResponse, (200..<300).contains(http.statusCode) else {
+                    status = "That sign-in link has expired. Request a new one."
+                    return false
+                }
+                let token = try parseSession(data)
+                session = token
+                persist()
+                UserDefaults.standard.removeObject(forKey: "bot.pkceVerifier")
+                status = "Signed in"
+                return true
+            }
+            if let access, let refresh, let expires {
+                let payload: [String: Any] = [
+                    "access_token": access,
+                    "refresh_token": refresh,
+                    "expires_at": expires,
+                    "user": ["id": decodeUserID(from: access)]
+                ]
+                let data = try JSONSerialization.data(withJSONObject: payload)
+                session = try parseSession(data)
+                persist()
+                status = "Signed in"
+                return true
+            }
+        } catch {
+            status = "Sign-in failed: \(error.localizedDescription)"
+        }
+        return false
+    }
+
+    private func makePKCEVerifier() -> String {
+        var bytes = [UInt8](repeating: 0, count: 32)
+        _ = SecRandomCopyBytes(kSecRandomDefault, bytes.count, &bytes)
+        return Data(bytes).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    private func makePKCEChallenge(_ verifier: String) -> String {
+        Data(SHA256.hash(data: Data(verifier.utf8))).base64EncodedString()
+            .replacingOccurrences(of: "+", with: "-")
+            .replacingOccurrences(of: "/", with: "_")
+            .replacingOccurrences(of: "=", with: "")
+    }
+
+    private func decodeUserID(from token: String) -> String {
+        let parts = token.split(separator: ".")
+        guard parts.count >= 2 else { return "" }
+        var base64 = String(parts[1])
+            .replacingOccurrences(of: "-", with: "+")
+            .replacingOccurrences(of: "_", with: "/")
+        while base64.count % 4 != 0 { base64 += "=" }
+        guard let data = Data(base64Encoded: base64),
+              let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else { return "" }
+        return obj["sub"] as? String ?? ""
     }
 
     func signOut() {

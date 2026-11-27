@@ -24,6 +24,11 @@ targets:
         NSCloudKitUsageDescription: "Sync your daily rhythm across your devices."
         NSHealthShareUsageDescription: "Read today's steps, walking distance and mindful minutes so you can see them beside your daily rhythm."
         NSHealthUpdateUsageDescription: "Back on Track only reads Health data. It does not write to Health."
+        CFBundleURLTypes:
+          - CFBundleURLName: "Back on Track auth"
+            CFBundleTypeRole: "Editor"
+            CFBundleURLSchemes:
+              - "backontrack"
 
     dependencies: []
     settings:

@@ -69,6 +69,30 @@ final class AuthManager: ObservableObject {
         return ok
     }
 
+    func sendMagicLink(email: String) async -> Bool {
+        isBusy = true
+        error = nil
+        defer { isBusy = false }
+        let ok = await supabase.sendMagicLink(email: email)
+        if !ok { error = supabase.status }
+        return ok
+    }
+
+    func handleAuthCallback(_ url: URL) async {
+        isBusy = true
+        error = nil
+        defer { isBusy = false }
+        let ok = await supabase.handleAuthCallback(url)
+        isSignedIn = ok
+        if ok {
+            isLocalOnly = false
+            UserDefaults.standard.set(false, forKey: "bot.localOnly")
+            displayName = "Synced account"
+        } else {
+            error = supabase.status
+        }
+    }
+
     func useLocalOnly() {
         isLocalOnly = true
         UserDefaults.standard.set(true, forKey: "bot.localOnly")

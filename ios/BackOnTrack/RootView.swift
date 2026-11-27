@@ -24,6 +24,9 @@ struct RootView: View {
             }
         }
         .preferredColorScheme(.light)
+        .onOpenURL { url in
+            Task { await auth.handleAuthCallback(url) }
+        }
         .task { await store.bootstrap(auth: auth) }
         .onChange(of: auth.isSignedIn) { _, signedIn in
             if signedIn {
@@ -39,6 +42,7 @@ struct SignInView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var syncKey = ""
+    @State private var magicLinkSent = false
     @State private var mode: Mode = .signIn
 
     enum Mode { case signIn, createAccount }
@@ -105,6 +109,24 @@ struct SignInView: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(auth.isBusy || email.isEmpty || password.count < 8)
+
+                Button {
+                    Task {
+                        magicLinkSent = await auth.sendMagicLink(email: email)
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "envelope")
+                        Text(magicLinkSent ? "Link sent — check your email" : "Email me a sign-in link")
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 46)
+                    .background(BotTheme.accentSoft, in: Capsule())
+                    .foregroundStyle(BotTheme.accentDeep)
+                }
+                .buttonStyle(.plain)
+                .disabled(auth.isBusy || !email.contains("@"))
 
                 DisclosureGroup("Connect from the web app") {
                     TextField("Paste your sync key", text: $syncKey)

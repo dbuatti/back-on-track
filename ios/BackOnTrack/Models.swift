@@ -10,9 +10,10 @@ struct DayRecord: Codable, Identifiable, Hashable {
     var wakeTime: String?
     var mood: String?
     var note: String
+    var codingNextStep: String?
 
     static func empty(_ date: String) -> DayRecord {
-        DayRecord(date: date, checks: [:], intention: "", readingMinutes: nil, bedTime: nil, wakeTime: nil, mood: nil, note: "")
+        DayRecord(date: date, checks: [:], intention: "", readingMinutes: nil, bedTime: nil, wakeTime: nil, mood: nil, note: "", codingNextStep: nil)
     }
 }
 
