@@ -32,6 +32,10 @@ The optional **quiet 60 days** lives inside Home and Wind down, not as a sixth t
 - Rounded, friendly headings with readable body text.
 - Light and dark mode must both pass WCAG AA; iPhone uses dynamic colour tokens.
 - Motion is optional and respects Reduce Motion.
+- The background shifts gently with the time of day: morning sun, daytime sage,
+  evening lavender, night terracotta.
+- A quiet **Small win** card reflects back that something is done, or that an
+  empty day is still okay.
 - Gentle haptics and a quiet one-word whisper (“good.”, “that counts.”) confirm
   real taps. They never appear for passive events or with a score.
 

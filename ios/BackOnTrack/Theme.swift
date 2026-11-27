@@ -62,11 +62,39 @@ enum BotTheme {
     static var eveningGradient: LinearGradient {
         LinearGradient(colors: [eveningSoft, evening.opacity(0.35)], startPoint: .topLeading, endPoint: .bottomTrailing)
     }
+
+    static func phaseTint(for date: Date) -> Color {
+        let hour = Calendar.current.component(.hour, from: date)
+        switch hour {
+        case 5..<12: return sun
+        case 12..<17: return sage
+        case 17..<22: return evening
+        default: return accent
+        }
+    }
+
+    static func phaseGradient(for date: Date) -> LinearGradient {
+        let tint = phaseTint(for: date)
+        return LinearGradient(
+            colors: [tint.opacity(0.16), cream, tint.opacity(0.10)],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+    }
 }
 
 struct BotCard: ViewModifier {
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var appeared = false
+
     func body(content: Content) -> some View {
         content
+            .opacity(reduceMotion ? 1 : (appeared ? 1 : 0))
+            .offset(y: reduceMotion ? 0 : (appeared ? 0 : 8))
+            .onAppear {
+                guard !reduceMotion else { return }
+                withAnimation(.easeOut(duration: 0.35)) { appeared = true }
+            }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
@@ -101,10 +129,12 @@ extension View {
     func botCard() -> some View { modifier(BotCard()) }
 
     func botBackground() -> some View {
-        ZStack {
-            BotTheme.backgroundGradient.ignoresSafeArea()
-            self
+        TimelineView(.periodic(from: .now, by: 300)) { context in
+            ZStack {
+                BotTheme.phaseGradient(for: context.date).ignoresSafeArea()
+                self
+            }
+            .tint(BotTheme.accent)
         }
-        .tint(BotTheme.accent)
     }
 }

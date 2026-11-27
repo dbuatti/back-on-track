@@ -27,6 +27,7 @@
 		86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */; };
 		8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA7826C4B7A32212B34833A /* HealthKitManager.swift */; };
 		9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04525C375C067B32E4631180 /* AuthManager.swift */; };
+		A6295597DBDAE93958301EFF /* SmallWinCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AFA8C8EC8DE8791A13B11F /* SmallWinCard.swift */; };
 		B2DA3834596A74C286D36B15 /* PersonalizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559A11358AC1D6067046DCD0 /* PersonalizationView.swift */; };
 		CA740469DBA2772CAD6874B2 /* Program30.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0219275011AE3E910A692A7D /* Program30.swift */; };
 		CFFF7DEC9D6452025C32CE86 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B178C739B3555135A692C5 /* OnboardingView.swift */; };
@@ -68,6 +69,7 @@
 		8758932B3A77286EC8A0E427 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9472C52958FE48DE519FC630 /* LinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksView.swift; sourceTree = "<group>"; };
 		9FA7826C4B7A32212B34833A /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		A1AFA8C8EC8DE8791A13B11F /* SmallWinCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallWinCard.swift; sourceTree = "<group>"; };
 		A3B178C739B3555135A692C5 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BFF35C1265F196A8853B094F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		CCAFA3A189EFC2A26C09BD92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				F721963292C663E8C87902A4 /* SeedData.swift */,
 				1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */,
 				FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */,
+				A1AFA8C8EC8DE8791A13B11F /* SmallWinCard.swift */,
 				EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */,
 				DE124CB61129605AE0815B65 /* Theme.swift */,
 				399A79C45D9ADAE207802EE2 /* Uplift.swift */,
@@ -260,6 +263,7 @@
 				4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */,
 				DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */,
 				86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */,
+				A6295597DBDAE93958301EFF /* SmallWinCard.swift in Sources */,
 				2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */,
 				85DB54B4550749E9DC982B4E /* Theme.swift in Sources */,
 				E54390EB9A6813C04AEF2CB4 /* Uplift.swift in Sources */,
