@@ -106,6 +106,34 @@ struct Program30State: Codable, Hashable {
     }
 }
 
+struct LabItem: Codable, Identifiable, Hashable {
+    var id: String
+    var text: String
+    var category: String
+    var effort: String
+    var archived: Bool
+    var createdAt: Double
+
+    init(id: String = UUID().uuidString, text: String, category: String = "Small things", effort: String = "small", archived: Bool = false, createdAt: Double = Date().timeIntervalSince1970) {
+        self.id = id
+        self.text = text
+        self.category = category
+        self.effort = effort
+        self.archived = archived
+        self.createdAt = createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decodeIfPresent(String.self, forKey: .id) ?? UUID().uuidString
+        text = try c.decodeIfPresent(String.self, forKey: .text) ?? ""
+        category = try c.decodeIfPresent(String.self, forKey: .category) ?? "Small things"
+        effort = try c.decodeIfPresent(String.self, forKey: .effort) ?? "small"
+        archived = try c.decodeIfPresent(Bool.self, forKey: .archived) ?? false
+        createdAt = try c.decodeIfPresent(Double.self, forKey: .createdAt) ?? Date().timeIntervalSince1970
+    }
+}
+
 struct CozyTimerState: Codable, Hashable {
     var dailyMinutes: Double = 30
     var bankedMinutes: Double = 30
@@ -177,6 +205,8 @@ struct AppSettings: Codable, Hashable {
     var program30: Program30State
     var personalization: Personalization?
     var cozyTimer: CozyTimerState?
+    var archivedShelfItems: [ShelfItem]?
+    var labItems: [LabItem]?
     var updatedAt: Double
     var doneForToday: String
     var lists: Lists
@@ -211,6 +241,8 @@ struct AppSettings: Codable, Hashable {
         program30 = Program30State()
         personalization = nil
         cozyTimer = CozyTimerState()
+        archivedShelfItems = []
+        labItems = []
         updatedAt = 0
         doneForToday = ""
         lists = Lists()
@@ -228,6 +260,8 @@ struct AppSettings: Codable, Hashable {
         program30 = try c.decodeIfPresent(Program30State.self, forKey: .program30) ?? Program30State()
         personalization = try c.decodeIfPresent(Personalization.self, forKey: .personalization)
         cozyTimer = try c.decodeIfPresent(CozyTimerState.self, forKey: .cozyTimer)
+        archivedShelfItems = try c.decodeIfPresent([ShelfItem].self, forKey: .archivedShelfItems)
+        labItems = try c.decodeIfPresent([LabItem].self, forKey: .labItems)
         updatedAt = try c.decodeIfPresent(Double.self, forKey: .updatedAt) ?? 0
         doneForToday = try c.decodeIfPresent(String.self, forKey: .doneForToday) ?? ""
         lists = try c.decodeIfPresent(Lists.self, forKey: .lists) ?? Lists()

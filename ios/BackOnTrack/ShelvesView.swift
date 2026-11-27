@@ -31,7 +31,8 @@ struct ShelvesView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        ZStack {
+            BotTheme.backgroundGradient.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 14) {
@@ -120,8 +121,7 @@ struct ShelvesView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
-            .botBackground()
-            .navigationBarHidden(true)
+            .scrollContentBackground(.hidden)
             .fullScreenCover(isPresented: $showingDump) {
                 VoiceDumpView()
                     .environmentObject(store)

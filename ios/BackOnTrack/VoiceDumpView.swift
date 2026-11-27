@@ -19,6 +19,8 @@ struct VoiceDumpView: View {
     @State private var isRecording = false
     @State private var status = "Tap the microphone, then just talk."
     @State private var permissionDenied = false
+    @State private var suggestions: [DumpSuggestion] = []
+    @State private var isOrganizing = false
 
     private let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
     @State private var audioEngine = AVAudioEngine()

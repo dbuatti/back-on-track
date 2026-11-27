@@ -23,6 +23,7 @@
 		4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */; };
 		7034B7F4605A85302713A261 /* RightNowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82A2A361C709C06F829F80D /* RightNowCard.swift */; };
 		70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C81E688F6C56FB06803C98 /* ProgramCard.swift */; };
+		8331825454EF9EFFA952AE01 /* BrainDumpIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97CD2E2861F17505241A0CDE /* BrainDumpIntelligence.swift */; };
 		85DB54B4550749E9DC982B4E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE124CB61129605AE0815B65 /* Theme.swift */; };
 		86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */; };
 		8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA7826C4B7A32212B34833A /* HealthKitManager.swift */; };
@@ -74,6 +75,7 @@
 		7F63E2DBF92C8073B90BD225 /* BackOnTrack.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BackOnTrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8758932B3A77286EC8A0E427 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9472C52958FE48DE519FC630 /* LinksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinksView.swift; sourceTree = "<group>"; };
+		97CD2E2861F17505241A0CDE /* BrainDumpIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrainDumpIntelligence.swift; sourceTree = "<group>"; };
 		9FA7826C4B7A32212B34833A /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
 		A1AFA8C8EC8DE8791A13B11F /* SmallWinCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallWinCard.swift; sourceTree = "<group>"; };
 		A3B178C739B3555135A692C5 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 				743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */,
 				3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */,
 				66E3BDBE3821AD47842B48B3 /* BackupCard.swift */,
+				97CD2E2861F17505241A0CDE /* BrainDumpIntelligence.swift */,
 				31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */,
 				CD337AB0B0BF21E46501E14E /* CozyTimeView.swift */,
 				C4088DAD81C9E1F605FE7527 /* DailyLine.swift */,
@@ -258,6 +261,7 @@
 				9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */,
 				1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */,
 				17195CE0A3489447C6E818D1 /* BackupCard.swift in Sources */,
+				8331825454EF9EFFA952AE01 /* BrainDumpIntelligence.swift in Sources */,
 				E11071742D6CAB45A8B0F00F /* CodingPauseView.swift in Sources */,
 				D93592A8910D4965AFD05DB6 /* CozyTimeView.swift in Sources */,
 				E14DC2E424C9789C6C205598 /* DailyLine.swift in Sources */,

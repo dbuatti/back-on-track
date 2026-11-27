@@ -30,20 +30,21 @@ struct CozyTimeView: View {
         TimelineView(.periodic(from: .now, by: 1)) { context in
             let ct = store.state.settings.cozyTimer ?? CozyTimerState()
             let remaining = store.cozyRemaining(now: context.date)
-            ScrollView {
-                VStack(spacing: 18) {
-                    hero(ct: ct, remaining: remaining, date: context.date)
-                    possibilities(ct: ct)
-                    settingsCard(ct: ct)
-                }
-                .padding(18)
-                .padding(.bottom, 110)
-            }
-            .background(
+            ZStack {
                 LinearGradient(colors: [Cozy.card, Cozy.bg], startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea()
-            )
-            .navigationBarHidden(true)
+                ScrollView {
+                    VStack(spacing: 18) {
+                        hero(ct: ct, remaining: remaining, date: context.date)
+                        possibilities(ct: ct)
+                        settingsCard(ct: ct)
+                    }
+                    .padding(18)
+                    .padding(.top, 8)
+                    .padding(.bottom, 110)
+                }
+                .scrollContentBackground(.hidden)
+            }
             .onAppear { store.creditCozy() }
             .fullScreenCover(isPresented: $showingDump) {
                 VoiceDumpView()
