@@ -1,11 +1,5 @@
 import SwiftUI
 
-private let botCream = Color(red: 0.969, green: 0.937, blue: 0.886)
-private let botCard = Color(red: 1.0, green: 0.984, blue: 0.953)
-private let botInk = Color(red: 0.227, green: 0.184, blue: 0.157)
-private let botSoft = Color(red: 0.416, green: 0.353, blue: 0.290)
-private let botAccent = Color(red: 0.788, green: 0.416, blue: 0.290)
-
 struct HomeView: View {
     @EnvironmentObject var store: AppStore
     @State private var intention: String = ""
@@ -16,7 +10,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(greeting).font(.largeTitle).bold()
-                        Text(todayString).font(.subheadline).foregroundStyle(botSoft)
+                        Text(todayString).font(.subheadline).foregroundStyle(BotTheme.soft)
                     }
                     .padding(.horizontal, 4)
 
@@ -30,11 +24,19 @@ struct HomeView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
-            .background(botCream.ignoresSafeArea())
+            .background(BotTheme.cream.ignoresSafeArea())
             .navigationTitle("Home")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button { Task { await store.syncNow() } } label: {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .accessibilityLabel("Sync now")
+                }
+            }
         }
-        .tint(botAccent)
+        .tint(BotTheme.accent)
         .onAppear { intention = store.state.days[todayKey()]?.intention ?? "" }
     }
 
@@ -48,25 +50,25 @@ struct HomeView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
-        .background(botCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     private var nickLoadCard: some View {
         HStack(spacing: 12) {
             Image(systemName: "headphones")
                 .font(.title2)
-                .foregroundStyle(botAccent)
+                .foregroundStyle(BotTheme.accent)
             VStack(alignment: .leading, spacing: 2) {
                 Text("Nick Moss daily meditation").font(.headline)
-                Text("A gentle place to begin").font(.caption).foregroundStyle(botSoft)
+                Text("A gentle place to begin").font(.caption).foregroundStyle(BotTheme.soft)
             }
             Spacer()
             Button("Load in") { store.addNickToMorning() }
                 .buttonStyle(.bordered)
-                .tint(botAccent)
+                .tint(BotTheme.accent)
         }
         .padding(16)
-        .background(botCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
     }
 
     @ViewBuilder
@@ -78,10 +80,10 @@ struct HomeView: View {
             if items.isEmpty {
                 Text("Nothing here yet.")
                     .font(.subheadline)
-                    .foregroundStyle(botSoft)
+                    .foregroundStyle(BotTheme.soft)
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(botCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                    .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             } else {
                 VStack(spacing: 0) {
                     ForEach(items) { item in
@@ -92,7 +94,7 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal, 12)
-                .background(botCard, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
         }
     }
@@ -103,26 +105,26 @@ struct HomeView: View {
             Button { toggle(item.id) } label: {
                 Image(systemName: checked ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(checked ? botAccent : botSoft)
+                    .foregroundStyle(checked ? BotTheme.accent : BotTheme.soft)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(item.text)
 
             VStack(alignment: .leading, spacing: 2) {
                 Text(item.text)
-                    .foregroundStyle(botInk)
-                    .strikethrough(checked, color: botSoft)
+                    .foregroundStyle(BotTheme.ink)
+                    .strikethrough(checked, color: BotTheme.soft)
                 if let note = item.note, !note.isEmpty {
-                    Text(note).font(.caption).foregroundStyle(botSoft)
+                    Text(note).font(.caption).foregroundStyle(BotTheme.soft)
                 }
                 DisclosureGroup("Even smaller") {
                     Text(item.small ?? "Just start with one small part.")
                         .font(.caption)
-                        .foregroundStyle(botSoft)
+                        .foregroundStyle(BotTheme.soft)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .font(.caption)
-                .foregroundStyle(botSoft)
+                .foregroundStyle(BotTheme.soft)
             }
 
             if let urlString = item.url, let url = URL(string: urlString) {
@@ -131,7 +133,7 @@ struct HomeView: View {
                         .font(.caption.weight(.semibold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 8)
-                        .background(botAccent.opacity(0.14), in: Capsule())
+                        .background(BotTheme.accent.opacity(0.14), in: Capsule())
                 }
                 .buttonStyle(.plain)
             }

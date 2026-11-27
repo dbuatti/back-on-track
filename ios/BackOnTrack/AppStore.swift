@@ -69,6 +69,18 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func borrow(shelfId: String, itemId: String, into list: String) {
+        guard let shelfIndex = state.settings.shelves.firstIndex(where: { $0.id == shelfId }),
+              let item = state.settings.shelves[shelfIndex].items.first(where: { $0.id == itemId }) else { return }
+        let loanId = "ln_\(itemId)_\(list)"
+        if state.settings.loans.contains(where: { $0.id == loanId }) { return }
+        let row = ListItem(id: loanId, text: item.text, note: item.note, small: item.small)
+        if list == "morning" { state.settings.lists.morning.append(row) }
+        else { state.settings.lists.anchors.append(row) }
+        state.settings.loans.append(Loan(id: loanId, itemId: itemId, shelfId: shelfId, list: list))
+        save()
+    }
+
     func syncNow() async {
         guard supabase.isSignedIn else { return }
         if let remote = await supabase.fetchState() {

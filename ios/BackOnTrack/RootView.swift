@@ -23,6 +23,7 @@ struct RootView: View {
                 }
             }
         }
+        .preferredColorScheme(.light)
         .task { await store.bootstrap(auth: auth) }
         .onChange(of: auth.isSignedIn) { _, signedIn in
             if signedIn {
