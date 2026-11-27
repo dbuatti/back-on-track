@@ -20,6 +20,8 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Local-only use | ✅ | ✅ | |
 | Personalised focus / support onboarding | ⬜ | ✅ | Native-first; can be ported to PWA later |
 | Dynamic “Right now” suggestion | ⬜ | ✅ | Time, mood, sleep log, program gap and focus aware |
+| Daily quiet line | ✅ | ✅ | Stable gentle wording per day |
+| Done for today | ✅ | ✅ | Hides edit controls and reverts task taps; reversible |
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |
 | HealthKit summary | ⬜ | 🍎 | Paid capability required |
 | Share web app | ✅ | 🍎 | Native share sheet |

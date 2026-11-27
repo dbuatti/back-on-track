@@ -36,6 +36,10 @@ The optional **quiet 60 days** lives inside Home and Wind down, not as a sixth t
   evening lavender, night terracotta.
 - A quiet **Small win** card reflects back that something is done, or that an
   empty day is still okay.
+- A stable **daily line** (“Begin gently.”, “Nothing to prove today.”) gives the
+  day one non-interactive thought.
+- **Done for today** hides edit controls and stops task toggling to reduce
+  tinkering. It is always reversible.
 - Gentle haptics and a quiet one-word whisper (“good.”, “that counts.”) confirm
   real taps. They never appear for passive events or with a score.
 

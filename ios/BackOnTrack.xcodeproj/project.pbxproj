@@ -31,9 +31,11 @@
 		B2DA3834596A74C286D36B15 /* PersonalizationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559A11358AC1D6067046DCD0 /* PersonalizationView.swift */; };
 		CA740469DBA2772CAD6874B2 /* Program30.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0219275011AE3E910A692A7D /* Program30.swift */; };
 		CFFF7DEC9D6452025C32CE86 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B178C739B3555135A692C5 /* OnboardingView.swift */; };
+		D823214C67C600071B20AA56 /* DoneForTodayCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F55DC4EE3CD6E927097C33F /* DoneForTodayCard.swift */; };
 		DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */; };
 		DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBDC2A1495834028D50341F /* RootView.swift */; };
 		E11071742D6CAB45A8B0F00F /* CodingPauseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */; };
+		E14DC2E424C9789C6C205598 /* DailyLine.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4088DAD81C9E1F605FE7527 /* DailyLine.swift */; };
 		E54390EB9A6813C04AEF2CB4 /* Uplift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399A79C45D9ADAE207802EE2 /* Uplift.swift */; };
 		F8E8BEF87A19FE2AB29A3445 /* WindDownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72880D31775190369EF719C4 /* WindDownView.swift */; };
 /* End PBXBuildFile section */
@@ -62,6 +64,7 @@
 		559A11358AC1D6067046DCD0 /* PersonalizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationView.swift; sourceTree = "<group>"; };
 		66E3BDBE3821AD47842B48B3 /* BackupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCard.swift; sourceTree = "<group>"; };
 		6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSummaryCard.swift; sourceTree = "<group>"; };
+		6F55DC4EE3CD6E927097C33F /* DoneForTodayCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DoneForTodayCard.swift; sourceTree = "<group>"; };
 		72880D31775190369EF719C4 /* WindDownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDownView.swift; sourceTree = "<group>"; };
 		743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "BackOnTrack-HealthKit.entitlements"; sourceTree = "<group>"; };
 		7444F1A2608F75AA12EBD74B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -72,6 +75,7 @@
 		A1AFA8C8EC8DE8791A13B11F /* SmallWinCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SmallWinCard.swift; sourceTree = "<group>"; };
 		A3B178C739B3555135A692C5 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		BFF35C1265F196A8853B094F /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		C4088DAD81C9E1F605FE7527 /* DailyLine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyLine.swift; sourceTree = "<group>"; };
 		CCAFA3A189EFC2A26C09BD92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		CF57AB8C8B0F9CB1168842C1 /* ProgramTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramTests.swift; sourceTree = "<group>"; };
 		DDBDC2A1495834028D50341F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -95,6 +99,8 @@
 				3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */,
 				66E3BDBE3821AD47842B48B3 /* BackupCard.swift */,
 				31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */,
+				C4088DAD81C9E1F605FE7527 /* DailyLine.swift */,
+				6F55DC4EE3CD6E927097C33F /* DoneForTodayCard.swift */,
 				1D8583B12F367651A9267318 /* FocusView.swift */,
 				9FA7826C4B7A32212B34833A /* HealthKitManager.swift */,
 				6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */,
@@ -247,6 +253,8 @@
 				1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */,
 				17195CE0A3489447C6E818D1 /* BackupCard.swift in Sources */,
 				E11071742D6CAB45A8B0F00F /* CodingPauseView.swift in Sources */,
+				E14DC2E424C9789C6C205598 /* DailyLine.swift in Sources */,
+				D823214C67C600071B20AA56 /* DoneForTodayCard.swift in Sources */,
 				12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */,
 				8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */,
 				282354AFB8A6F3D146811524 /* HealthSummaryCard.swift in Sources */,

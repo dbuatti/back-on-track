@@ -11,6 +11,8 @@ struct HomeView: View {
     @State private var removing: ListItem?
     @State private var removeFrom = ""
 
+    private var doneForToday: Bool { store.state.settings.doneForToday == todayKey() }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -30,8 +32,10 @@ struct HomeView: View {
                     .padding(.horizontal, 4)
                     .padding(.top, 4)
 
+                    DailyLine()
                     RightNowCard()
                     SmallWinCard()
+                    DoneForTodayCard()
                     intentionCard
                     ProgramCard()
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
@@ -57,9 +61,11 @@ struct HomeView: View {
                     }
                     .accessibilityLabel("Sync now")
                 }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(editing ? "Done" : "Edit") { editing.toggle() }
-                        .font(.subheadline)
+                if !doneForToday {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(editing ? "Done" : "Edit") { editing.toggle() }
+                            .font(.subheadline)
+                    }
                 }
             }
         }
@@ -170,7 +176,7 @@ struct HomeView: View {
                         }
                     }
                 }
-                if editing {
+                if editing && !doneForToday {
                     Divider().padding(.leading, 52)
                     Button {
                         addingTo = list
@@ -202,6 +208,8 @@ struct HomeView: View {
                     .foregroundStyle(checked ? BotTheme.accent : BotTheme.soft)
             }
             .buttonStyle(.plain)
+            .disabled(doneForToday)
+            .opacity(doneForToday ? 0.6 : 1)
             .accessibilityLabel(item.text)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -232,7 +240,7 @@ struct HomeView: View {
                 .buttonStyle(.plain)
             }
 
-            if editMode {
+            if editMode && !doneForToday {
                 Button(action: onRemove) {
                     Image(systemName: "minus.circle")
                         .foregroundStyle(BotTheme.soft)

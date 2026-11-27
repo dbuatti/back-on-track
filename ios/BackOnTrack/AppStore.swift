@@ -139,6 +139,11 @@ final class AppStore: ObservableObject {
         }
     }
 
+    func setDoneForToday(_ done: Bool) {
+        state.settings.doneForToday = done ? todayKey() : ""
+        save()
+    }
+
     func logTime(_ kind: String) {
         let today = todayKey()
         if state.days[today] == nil { state.days[today] = DayRecord.empty(today) }
