@@ -49,9 +49,12 @@ struct ShelvesView: View {
                 Text("Nothing here yet.").font(.caption).foregroundStyle(BotTheme.soft)
             } else {
                 ForEach(shelf.items) { item in
+                    let loan = store.state.settings.loans.first(where: { $0.itemId == item.id })
                     HStack(spacing: 10) {
                         VStack(alignment: .leading, spacing: 3) {
-                            Text(item.text).font(.subheadline.weight(.semibold)).foregroundStyle(BotTheme.ink)
+                            Text(item.text)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(loan == nil ? BotTheme.ink : BotTheme.soft)
                             if let note = item.note, !note.isEmpty {
                                 Text(note).font(.caption).foregroundStyle(BotTheme.soft)
                             }
@@ -61,19 +64,29 @@ struct ShelvesView: View {
                             }
                         }
                         Spacer()
-                        Menu {
-                            Button("Borrow into Morning") { store.borrow(shelfId: shelf.id, itemId: item.id, into: "morning") }
-                            Button("Borrow into Daily anchors") { store.borrow(shelfId: shelf.id, itemId: item.id, into: "anchors") }
-                        } label: {
-                            Text("Borrow")
-                                .font(.caption.weight(.semibold))
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 7)
-                                .background(tone.opacity(0.14), in: Capsule())
-                                .foregroundStyle(tone)
+                        if let loan {
+                            Text(loan.list == "morning" ? "On Home" : "In Anchors")
+                                .font(.caption2.weight(.semibold))
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 5)
+                                .background(BotTheme.soft.opacity(0.12), in: Capsule())
+                                .foregroundStyle(BotTheme.soft)
+                        } else {
+                            Menu {
+                                Button("Borrow into Morning") { store.borrow(shelfId: shelf.id, itemId: item.id, into: "morning") }
+                                Button("Borrow into Daily anchors") { store.borrow(shelfId: shelf.id, itemId: item.id, into: "anchors") }
+                            } label: {
+                                Text("Borrow")
+                                    .font(.caption.weight(.semibold))
+                                    .padding(.horizontal, 9)
+                                    .padding(.vertical, 7)
+                                    .background(tone.opacity(0.14), in: Capsule())
+                                    .foregroundStyle(tone)
+                            }
                         }
                     }
                     .padding(.vertical, 7)
+                    .opacity(loan == nil ? 1 : 0.72)
                     if item.id != shelf.items.last?.id {
                         Divider()
                     }

@@ -30,6 +30,17 @@ final class AppStore: ObservableObject {
                 await supabase.pushState(state)
             }
         }
+        if !UserDefaults.standard.bool(forKey: "bot.defaultsSeededV1") {
+            let before = try? JSONEncoder().encode(state)
+            SeedData.apply(to: &state)
+            let after = try? JSONEncoder().encode(state)
+            UserDefaults.standard.set(true, forKey: "bot.defaultsSeededV1")
+            if before != after {
+                state.settings.updatedAt = Date().timeIntervalSince1970 * 1000
+                persistLocal()
+                if auth.isSignedIn { await supabase.pushState(state) }
+            }
+        }
         isReady = true
     }
 
