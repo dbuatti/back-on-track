@@ -54,6 +54,8 @@ struct LinksView: View {
                     }
                     .botCard()
 
+                    BackupCard()
+
                     VStack(alignment: .leading, spacing: 10) {
                         BotSectionHeader(title: "Make it yours", systemImage: "slider.horizontal.3")
                         Text("Choose what pulls you in and which support cards appear. No diagnosis, no labels — just your preferences.")

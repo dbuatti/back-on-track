@@ -54,6 +54,13 @@ want, and whether to begin with a gentle starter set or an empty slate. This is
 a preference, never a diagnosis or label. It can be changed later from Links →
 Make it yours.
 
+## Dynamic suggestion
+
+Home opens with a quiet **Right now** card. It reacts to time of day, whether
+sleep was logged, mood, program gaps and the chosen focus. It suggests exactly
+one small next action — log wake, log bed, pause, set an intention or pick an
+anchor. It never adds a score or pressure.
+
 ## Self-regulation
 
 Piano improvisation and shaking on the spot are first-class, shame-free

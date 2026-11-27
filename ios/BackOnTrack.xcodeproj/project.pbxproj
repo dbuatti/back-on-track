@@ -10,6 +10,7 @@
 		12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D8583B12F367651A9267318 /* FocusView.swift */; };
 		1514B8251BADE97C438FC0FA /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7444F1A2608F75AA12EBD74B /* Assets.xcassets */; };
 		163E0BA329AD4A7A1C5D2B2F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCAFA3A189EFC2A26C09BD92 /* Models.swift */; };
+		17195CE0A3489447C6E818D1 /* BackupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E3BDBE3821AD47842B48B3 /* BackupCard.swift */; };
 		1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */; };
 		1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9472C52958FE48DE519FC630 /* LinksView.swift */; };
 		27940C1FB0C5BFA2274E7A2C /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3280F3621456DEB1A2AF389 /* AppStore.swift */; };
@@ -20,6 +21,7 @@
 		46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF35C1265F196A8853B094F /* HomeView.swift */; };
 		4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F721963292C663E8C87902A4 /* SeedData.swift */; };
 		4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */; };
+		7034B7F4605A85302713A261 /* RightNowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82A2A361C709C06F829F80D /* RightNowCard.swift */; };
 		70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C81E688F6C56FB06803C98 /* ProgramCard.swift */; };
 		85DB54B4550749E9DC982B4E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE124CB61129605AE0815B65 /* Theme.swift */; };
 		86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */; };
@@ -55,6 +57,7 @@
 		3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackOnTrackApp.swift; sourceTree = "<group>"; };
 		4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramEngine.swift; sourceTree = "<group>"; };
 		559A11358AC1D6067046DCD0 /* PersonalizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationView.swift; sourceTree = "<group>"; };
+		66E3BDBE3821AD47842B48B3 /* BackupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCard.swift; sourceTree = "<group>"; };
 		6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthSummaryCard.swift; sourceTree = "<group>"; };
 		72880D31775190369EF719C4 /* WindDownView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindDownView.swift; sourceTree = "<group>"; };
 		743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "BackOnTrack-HealthKit.entitlements"; sourceTree = "<group>"; };
@@ -70,6 +73,7 @@
 		DDBDC2A1495834028D50341F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		DE124CB61129605AE0815B65 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		E3280F3621456DEB1A2AF389 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
+		E82A2A361C709C06F829F80D /* RightNowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightNowCard.swift; sourceTree = "<group>"; };
 		EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
 		F721963292C663E8C87902A4 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
 		FC37B25D87AC935AC33AF7E8 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
@@ -85,6 +89,7 @@
 				04525C375C067B32E4631180 /* AuthManager.swift */,
 				743D2A6BE1EAAEDD8E75366A /* BackOnTrack-HealthKit.entitlements */,
 				3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */,
+				66E3BDBE3821AD47842B48B3 /* BackupCard.swift */,
 				31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */,
 				1D8583B12F367651A9267318 /* FocusView.swift */,
 				9FA7826C4B7A32212B34833A /* HealthKitManager.swift */,
@@ -98,6 +103,7 @@
 				0219275011AE3E910A692A7D /* Program30.swift */,
 				31C81E688F6C56FB06803C98 /* ProgramCard.swift */,
 				4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */,
+				E82A2A361C709C06F829F80D /* RightNowCard.swift */,
 				DDBDC2A1495834028D50341F /* RootView.swift */,
 				F721963292C663E8C87902A4 /* SeedData.swift */,
 				1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */,
@@ -233,6 +239,7 @@
 				27940C1FB0C5BFA2274E7A2C /* AppStore.swift in Sources */,
 				9118C1B03B7BBFC959FAB465 /* AuthManager.swift in Sources */,
 				1B38F2B55E365C435558A003 /* BackOnTrackApp.swift in Sources */,
+				17195CE0A3489447C6E818D1 /* BackupCard.swift in Sources */,
 				E11071742D6CAB45A8B0F00F /* CodingPauseView.swift in Sources */,
 				12D3BF244C4F1208815C5F0A /* FocusView.swift in Sources */,
 				8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */,
@@ -245,6 +252,7 @@
 				CA740469DBA2772CAD6874B2 /* Program30.swift in Sources */,
 				70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */,
 				4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */,
+				7034B7F4605A85302713A261 /* RightNowCard.swift in Sources */,
 				DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */,
 				4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */,
 				DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */,

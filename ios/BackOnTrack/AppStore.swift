@@ -90,6 +90,66 @@ final class AppStore: ObservableObject {
         Task { await supabase.pushState(state) }
     }
 
+    func exportData() -> URL {
+        let data = (try? JSONEncoder().encode(state)) ?? Data()
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("back-on-track-\(todayKey()).json")
+        try? data.write(to: url, options: .atomic)
+        return url
+    }
+
+    func importData(from url: URL) async -> Bool {
+        guard url.startAccessingSecurityScopedResource() else { return false }
+        defer { url.stopAccessingSecurityScopedResource() }
+        do {
+            let data = try Data(contentsOf: url)
+            let incoming = try JSONDecoder().decode(AppState.self, from: data)
+            mergeImported(incoming)
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func mergeImported(_ incoming: AppState) {
+        let localStamp = state.settings.updatedAt
+        let incomingStamp = incoming.settings.updatedAt
+        if incomingStamp > localStamp {
+            state = incoming
+            save()
+            return
+        }
+        // Older or equally timed backup: fill gaps, never erase local work.
+        for (key, day) in incoming.days where state.days[key] == nil {
+            state.days[key] = day
+        }
+        appendMissing(incoming.settings.lists.morning, to: &state.settings.lists.morning)
+        appendMissing(incoming.settings.lists.anchors, to: &state.settings.lists.anchors)
+        appendMissing(incoming.settings.lists.instead, to: &state.settings.lists.instead)
+        appendMissing(incoming.settings.shelves, to: &state.settings.shelves)
+        appendMissing(incoming.settings.loans, to: &state.settings.loans)
+        appendMissing(incoming.settings.myLinks, to: &state.settings.myLinks)
+        save()
+    }
+
+    private func appendMissing<T: Identifiable>(_ incoming: [T], to local: inout [T]) where T.ID: Hashable {
+        let ids = Set(local.map(\.id))
+        for item in incoming where !ids.contains(item.id) {
+            local.append(item)
+        }
+    }
+
+    func logTime(_ kind: String) {
+        let today = todayKey()
+        if state.days[today] == nil { state.days[today] = DayRecord.empty(today) }
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        let value = f.string(from: Date())
+        if kind == "bed" { state.days[today]?.bedTime = value }
+        else { state.days[today]?.wakeTime = value }
+        save()
+    }
+
     func setProgramLoaded(_ loaded: Bool) {
         state.settings.program30.loaded = loaded
         save()

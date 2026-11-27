@@ -14,11 +14,12 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Task add/remove | ✅ | ✅ | Removal moves to Keep close |
 | Quiet program | ✅ 30 days | ✅ 60 days | Native version is adaptive with phases, pace and focus substitution |
 | Sleep trend / week view | ✅ | ✅ | Soft 14-night pattern, last 7 shown; no score |
-| Import / export JSON | ✅ | ⬜ | Needed for backup and recovery |
+| Import / export JSON | ✅ | ✅ | Native share sheet + file importer; imports fill gaps only |
 | Supabase sync | ✅ | ✅ | Same table and RLS |
 | Google / Gmail sign-in | ✅ | ✅ | Native uses Google OAuth; Gmail link in Links |
 | Local-only use | ✅ | ✅ | |
 | Personalised focus / support onboarding | ⬜ | ✅ | Native-first; can be ported to PWA later |
+| Dynamic “Right now” suggestion | ⬜ | ✅ | Time, mood, sleep log, program gap and focus aware |
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |
 | HealthKit summary | ⬜ | 🍎 | Paid capability required |
 | Share web app | ✅ | 🍎 | Native share sheet |

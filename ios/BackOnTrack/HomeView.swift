@@ -29,6 +29,7 @@ struct HomeView: View {
                     .padding(.horizontal, 4)
                     .padding(.top, 4)
 
+                    RightNowCard()
                     intentionCard
                     ProgramCard()
                     if !store.state.settings.lists.morning.contains(where: { $0.id == "m_nick" }) {
