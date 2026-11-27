@@ -1819,6 +1819,7 @@
                autocorrect="off" autocapitalize="off" spellcheck="false" />
       </div>
       <div class="btn-row">
+        <button type="button" class="btn small" id="syncGoogle">Continue with Google</button>
         <button type="button" class="btn small" id="syncPair">Send sign-in link</button>
         <button type="button" class="btn small" id="syncSetup">Sign out</button>
       </div>
@@ -1956,7 +1957,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v67";
+const VERSION = "v68";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -2039,6 +2040,16 @@ const DEFAULT_SHELVES = [
       { id: "ss_email",  text: "Clear a couple of emails", note: "not the whole inbox", small: "Archive two, not the whole inbox." },
       { id: "ss_wall",   text: "Wall push-ups", note: "just a few", small: "Hands on the wall, bend your elbows, come back." },
       { id: "ss_shortwalk", text: "A short walk", note: "around the block", small: "Put on shoes and step outside." },
+    ],
+  },
+  {
+    id: "sh_selfreg",
+    name: "Ways to settle",
+    note: "Self-regulation that does not need a screen.",
+    items: [
+      { id: "sr_piano", text: "Piano improvisation", note: "a way to self-regulate", small: "Play one phrase with no goal." },
+      { id: "sr_shake", text: "Shake on the spot", note: "release, not exercise", small: "Let your hands and shoulders shake for ten seconds." },
+      { id: "sr_hum", text: "Hum one note", note: "quiet regulation", small: "One note, then stop." },
     ],
   },
 ];
@@ -2404,6 +2415,14 @@ function migrate(s) {
         });
     }
     s.settings.movementAdded = true;
+  }
+  // Piano improvisation and shaking are legitimate self-regulation, not tasks.
+  if (!s.settings.selfRegAdded) {
+    const seed = DEFAULT_SHELVES.find((sh) => sh.id === "sh_selfreg");
+    if (seed && !s.settings.shelves.some((sh) => sh.id === seed.id)) {
+      s.settings.shelves.push(JSON.parse(JSON.stringify(seed)));
+    }
+    s.settings.selfRegAdded = true;
   }
   if (typeof s.settings.walkStartMinutes !== "number" || s.settings.walkStartMinutes < 5) {
     s.settings.walkStartMinutes = 10;
@@ -4008,6 +4027,17 @@ async function exportSyncKey() {
   showSnackbar(ok ? "Sync key copied. Paste it into the iPhone app." : "Couldn't copy the sync key. Try again in Safari.");
   if (ok) haptic(8);
 }
+async function googleSignIn() {
+  syncStatus("Opening Google…");
+  const { error } = await getSupabase().auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo: location.origin + location.pathname }
+  });
+  if (error) {
+    syncStatus("Couldn't start Google sign-in: " + error.message);
+    showSnackbar("Google sign-in didn't start. Try the email link instead.");
+  }
+}
 async function syncSignOut() {
   try { await getSupabase().auth.signOut(); } catch (e) {}
   syncCfg.session = null;
@@ -5144,6 +5174,7 @@ function wire() {
     emailInput.removeAttribute("maxlength");
     emailInput.removeAttribute("pattern");
   }
+  $("#syncGoogle").addEventListener("click", googleSignIn);
   const sendBtn = $("#syncPair");
   if (sendBtn) {
     sendBtn.textContent = "Send sign-in link";
