@@ -51,7 +51,7 @@ struct ProgramCard: View {
         let phase = Program.phases[step.phase]
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Invitation \(index + 1) of \(Program.steps.count)")
+                Text("At your pace")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(BotTheme.accent)
                 Spacer()
@@ -117,7 +117,7 @@ struct ProgramCard: View {
             .foregroundStyle(BotTheme.soft)
 
             if index == Program.steps.count - 1 {
-                Text("That's the sixty. Nothing to score — one line, if you want, about what you noticed. Just for you.")
+                Text("Nothing to score — one line, if you want, about what you noticed. Just for you.")
                     .font(.caption).foregroundStyle(BotTheme.soft)
                 TextField("What did you notice? (optional)", text: $reflection, axis: .vertical)
                     .lineLimit(1...3)
@@ -152,15 +152,6 @@ struct ProgramCard: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(BotTheme.accent)
                 }
-            }
-
-            HStack(spacing: 6) {
-                ForEach(0..<Program.phases.count, id: \.self) { phaseIndex in
-                    Circle()
-                        .fill(phaseIndex <= step.phase ? BotTheme.accent : BotTheme.line)
-                        .frame(width: 7, height: 7)
-                }
-                Spacer()
             }
 
             DisclosureGroup("Sequence settings") {

@@ -213,6 +213,13 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func removeCozyPossibility(_ text: String) {
+        guard var ct = state.settings.cozyTimer else { return }
+        ct.custom.removeAll(where: { $0 == text })
+        state.settings.cozyTimer = ct
+        save()
+    }
+
     func addCozyPossibility(_ text: String) {
         let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !value.isEmpty else { return }

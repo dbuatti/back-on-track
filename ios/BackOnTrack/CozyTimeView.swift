@@ -14,6 +14,7 @@ struct CozyTimeView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
     @State private var showingDump = false
+    @State private var editingList = false
 
     private let starter = [
         "Fold clothes",
@@ -55,11 +56,10 @@ struct CozyTimeView: View {
     }
 
     private func meter(fraction: CGFloat) -> some View {
-        let colors: [Color] = fraction > 0.66
-            ? [Color(red: 0.847, green: 0.769, blue: 1.0), Color(red: 0.561, green: 0.435, blue: 0.816)]
-            : fraction > 0.33
-                ? [Color(red: 0.804, green: 0.851, blue: 1.0), Color(red: 0.435, green: 0.514, blue: 0.812)]
-                : [Color(red: 1.0, green: 0.863, blue: 0.769), Color(red: 0.843, green: 0.541, blue: 0.388)]
+        let colors: [Color] = [
+            Color(red: 0.847, green: 0.769, blue: 1.0),
+            Color(red: 0.561, green: 0.435, blue: 0.816)
+        ]
         return ZStack(alignment: .bottom) {
             RoundedRectangle(cornerRadius: 36, style: .continuous)
                 .fill(Cozy.card2)
@@ -98,7 +98,6 @@ struct CozyTimeView: View {
         let total = max(ct.dailyMinutes, ct.remainingAtStart)
         let fraction = max(0, min(1, remaining / total))
         let mins = Int(remaining)
-        let secs = Int((remaining - Double(mins)) * 60)
         return VStack(spacing: 14) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
@@ -120,8 +119,8 @@ struct CozyTimeView: View {
             HStack(alignment: .center, spacing: 26) {
                 meter(fraction: fraction)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(String(format: "%02d:%02d", mins, secs))
-                        .font(.system(size: 46, weight: .light, design: .serif))
+                    Text("\(mins)")
+                        .font(.system(size: 52, weight: .light, design: .serif))
                         .monospacedDigit()
                         .foregroundStyle(Cozy.ink)
                     Text(ct.active ? "still here" : "minutes left")
@@ -187,10 +186,26 @@ struct CozyTimeView: View {
                             .tracking(0.7)
                             .foregroundStyle(Cozy.ink)
                         Spacer()
+                        if editingList && item != starter.first && ct.custom.contains(item) {
+                            Button {
+                                store.removeCozyPossibility(item)
+                                Haptics.tap()
+                            } label: {
+                                Image(systemName: "minus.circle")
+                                    .foregroundStyle(Color(red: 0.878, green: 0.478, blue: 0.408))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Remove \(item)")
+                        }
                     }
                     .padding(.vertical, 6)
                 }
             }
+            Button(editingList ? "Done" : "Edit reminders") { editingList.toggle() }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Cozy.accent)
+                .buttonStyle(.plain)
+                .padding(.top, 8)
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -229,7 +244,7 @@ struct CozyTimeView: View {
             return "You've been here about \(Int(spent)) minutes. No need to feel anything about it."
         }
         if remaining <= 0 {
-            return "That's your time for now. The things below are still here whenever you want them."
+            return "That's your time for now. Tomorrow brings a fresh allowance. The things below are still here whenever you want them."
         }
         return "Unused time waits here for you. Nothing is lost."
     }

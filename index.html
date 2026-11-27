@@ -2121,7 +2121,7 @@
           <div class="cozy-meter-gloss" aria-hidden="true"></div>
         </div>
         <div class="cozy-meter-readout">
-          <strong id="cozyTime">30:00</strong>
+          <strong id="cozyTime">30</strong>
           <span id="cozyUnit">minutes left</span>
         </div>
       </div>
@@ -2350,7 +2350,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v75";
+const VERSION = "v76";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3342,29 +3342,24 @@ function renderCozy() {
   const fill = $("#cozyMeterFill");
   if (fill) {
     fill.style.height = Math.round(frac * 100) + "%";
-    fill.style.background = frac > 0.66
-      ? "linear-gradient(180deg,#d8c4ff 0%,#a886ef 55%,#8f6fd0 100%)"
-      : frac > 0.33
-        ? "linear-gradient(180deg,#cdd9ff 0%,#94a9ee 55%,#6f83cf 100%)"
-        : "linear-gradient(180deg,#ffdcc4 0%,#f0b18a 55%,#d78a63 100%)";
+    fill.style.background = "linear-gradient(180deg,#d8c4ff 0%,#a886ef 55%,#8f6fd0 100%)";
   }
   const mins = Math.floor(remaining);
-  const secs = Math.floor((remaining - mins) * 60);
   const timeEl = $("#cozyTime");
-  if (timeEl) timeEl.textContent = String(mins).padStart(2, "0") + ":" + String(secs).padStart(2, "0");
+  if (timeEl) timeEl.textContent = String(mins);
   const unit = $("#cozyUnit");
   if (unit) unit.textContent = ct.active ? "still here" : "minutes left";
   const start = $("#cozyStart"), pause = $("#cozyPause"), close = $("#cozyClose");
   if (start) { start.hidden = ct.active; start.textContent = ct.bankedMinutes > 0 ? "Begin gently" : "Nothing banked yet"; start.disabled = ct.bankedMinutes <= 0; }
   if (pause) pause.hidden = !ct.active;
-  if (close) close.hidden = remaining > 0;
+  if (close) close.hidden = ct.active;
   const msg = $("#cozyMessage");
   if (msg) {
     if (ct.active) {
       const spent = Math.max(0, (ct.remainingAtStart || 0) - remaining);
       msg.textContent = "You've been here about " + Math.floor(spent) + " minutes. No need to feel anything about it.";
     } else if (remaining <= 0) {
-      msg.textContent = "That's your time for now. The things below are still here whenever you want them.";
+      msg.textContent = "That's your time for now. Tomorrow brings a fresh allowance. The things below are still here whenever you want them.";
     } else {
       msg.textContent = "Unused time waits here for you. Nothing is lost.";
     }
@@ -5512,7 +5507,7 @@ function fillProgramCard(prefix, p, step, at) {
   card.hidden = !p.loaded || !step;
   if (card.hidden) return;
   const meta = q("Meta"), kind = q("Kind"), title = q("Title"), invite = q("Invite");
-  if (meta) meta.textContent = "Invitation " + at + " of " + PROGRAM30.length + " · " + (step.phaseInfo ? step.phaseInfo.title : "Quiet") + ", at your pace";
+  if (meta) meta.textContent = (step.phaseInfo ? step.phaseInfo.title : "Quiet") + " · at your pace";
   const gap = q("Gap");
   if (gap) {
     const days = daysSinceKey(p.lastDoneAt);
@@ -5554,7 +5549,7 @@ function fillProgramCard(prefix, p, step, at) {
   const close = q("Close");
   if (close) {
     close.hidden = !last;
-    if (last) close.textContent = "That's the sixty. Nothing to score — one line, if you want, about what you noticed. Just for you.";
+    if (last) close.textContent = "Nothing to score — one line, if you want, about what you noticed. Just for you.";
   }
   const reflect = q("Reflect");
   if (reflect) {
