@@ -57,8 +57,8 @@
     --tap: 46px;
     --content: 580px;
     --t-cap: 12px;
-    --t-small: 13px;
-    --t-body: 16px;
+    --t-small: 14px;
+    --t-body: 17px;
     --t-lead: 17px;
     --t-card: 16px;
     --t-title: 20px;
@@ -120,9 +120,9 @@
     background-color: var(--bg);
     background-image: radial-gradient(ellipse at top, color-mix(in srgb, var(--accent-soft) 40%, transparent), transparent 60%);
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-family: var(--font-round);
     font-size: 17px;
-    line-height: 1.4;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
 
@@ -227,7 +227,7 @@
     font-style: italic;
     font-size: 17px;
     color: var(--ink-soft);
-    line-height: 1.45;
+    line-height: 1.6;
   }
   .right-now { padding: var(--s4); }
   .right-now-head {
@@ -387,7 +387,7 @@
   /* A 30-day sequence: one invitation, no clock and no catching up. */
   .program-card[hidden] { display: none; }
   .program-meta { font-size: var(--t-cap); color: var(--ink-soft); margin: 0 0 var(--s1); }
-  .program-gap { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.45; }
+  .program-gap { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.6; }
   .program-gap[hidden] { display: none; }
   .program-home-nudge { display: block; margin: var(--s2) 0 0; }
   .program-home-nudge[hidden] { display: none; }
@@ -396,7 +396,7 @@
     font-size: 18px; font-weight: 500; line-height: 1.35;
     margin: 0 0 var(--s2);
   }
-  .program-invite { font-size: var(--t-body); line-height: 1.45; margin: 0 0 var(--s3); }
+  .program-invite { font-size: var(--t-body); line-height: 1.6; margin: 0 0 var(--s3); }
   /* A quiet "what kind of step" label, using the same focus-area words as Med Log. */
   .program-kind {
     display: inline-block;
@@ -406,7 +406,7 @@
   }
   .program-kind::before { content: "· "; }
   .program-kind[hidden], .program-smaller[hidden] { display: none; }
-  .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.45; }
+  .program-close { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s3) 0 0; line-height: 1.6; }
   .program-reflect { margin-top: var(--s2); font-size: var(--t-small); }
   .program-reflect[hidden] { display: none; }
   /* A smaller path, never a second task. */
@@ -415,7 +415,7 @@
     min-height: var(--tap); display: flex; align-items: center;
     font-size: var(--t-small); color: var(--accent-deep); cursor: pointer;
   }
-  .program-smaller p { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.45; }
+  .program-smaller p { font-size: var(--t-small); color: var(--ink-soft); margin: 0 0 var(--s2); line-height: 1.6; }
   .program-nick { display: inline-flex; margin-bottom: var(--s2); }
   .program-nick[hidden] { display: none; }
   .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
@@ -1320,7 +1320,7 @@
   body.editing .add-row { display: flex; }
   .add-row input { flex: 1; }
 
-  .hint { font-size: 13px; color: var(--ink-soft); margin: 6px 2px 0; }
+  .hint { font-size: 14px; color: var(--ink-soft); margin: 8px 2px 0; line-height: 1.55; }
   /* Only the home-screen PWA needs to know about the Safari hand-off. */
   .safari-hint { display: none; }
   body.standalone .safari-hint { display: block; margin: 0 2px 14px; }
@@ -1655,7 +1655,7 @@
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    line-height: 1.45;
+    line-height: 1.6;
   }
   .dump-mic {
     width: 124px;
@@ -2350,7 +2350,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v76";
+const VERSION = "v77";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
