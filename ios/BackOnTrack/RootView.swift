@@ -9,7 +9,11 @@ struct RootView: View {
 
     var body: some View {
         Group {
-            if !auth.isSignedIn && !auth.isLocalOnly {
+            if !store.hasBootstrapped {
+                ProgressView("Loading…")
+            } else if !store.hasCompletedOnboarding {
+                OnboardingView()
+            } else if !auth.isSignedIn && !auth.isLocalOnly {
                 SignInView()
             } else if !store.isReady {
                 ProgressView("Loading…")

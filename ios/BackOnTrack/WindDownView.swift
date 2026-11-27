@@ -66,6 +66,8 @@ struct WindDownView: View {
                         )
                     }
 
+                    SleepTrendCard()
+
                     VStack(alignment: .leading, spacing: 8) {
                         BotSectionHeader(title: "Instead of gaming", systemImage: "gamecontroller", tint: BotTheme.evening)
                         VStack(spacing: 0) {
@@ -120,8 +122,7 @@ struct WindDownView: View {
                 .padding(.bottom, 32)
             }
             .botBackground()
-            .navigationTitle("Wind down")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
         .onAppear(perform: load)
     }

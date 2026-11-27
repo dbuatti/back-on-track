@@ -13,10 +13,11 @@ Legend: ✅ shipped · 🟡 partial · ⬜ planned · 🍎 native-only
 | Shelves and borrowing | ✅ | ✅ | On-loan state shown |
 | Task add/remove | ✅ | ✅ | Removal moves to Keep close |
 | Quiet 30 days | ✅ | ✅ | Shared card on Home and Wind down; marks and reflection sync |
-| Sleep trend / week view | ✅ | ⬜ | Port after 30-day sequence |
+| Sleep trend / week view | ✅ | ✅ | Soft 14-night pattern, last 7 shown; no score |
 | Import / export JSON | ✅ | ⬜ | Needed for backup and recovery |
 | Supabase sync | ✅ | ✅ | Same table and RLS |
 | Local-only use | ✅ | ✅ | |
+| Personalised focus / support onboarding | ⬜ | ✅ | Native-first; can be ported to PWA later |
 | Coding pause | ⬜ | 🍎 | Optional native enhancement |
 | HealthKit summary | ⬜ | 🍎 | Paid capability required |
 | Share web app | ✅ | 🍎 | Native share sheet |

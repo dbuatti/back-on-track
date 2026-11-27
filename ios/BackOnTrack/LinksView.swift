@@ -5,6 +5,7 @@ struct LinksView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var auth: AuthManager
     @State private var copied: String?
+    @State private var showingPersonalization = false
 
     var body: some View {
         NavigationStack {
@@ -37,6 +38,24 @@ struct LinksView: View {
                         }
                     }
                     .botCard()
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        BotSectionHeader(title: "Make it yours", systemImage: "slider.horizontal.3")
+                        Text("Choose what pulls you in and which support cards appear. No diagnosis, no labels — just your preferences.")
+                            .font(.subheadline).foregroundStyle(BotTheme.soft)
+                        Button("Personalise") { showingPersonalization = true }
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 10)
+                            .background(BotTheme.accentGradient, in: Capsule())
+                            .buttonStyle(.plain)
+                    }
+                    .botCard()
+                    .sheet(isPresented: $showingPersonalization) {
+                        PersonalizationView()
+                            .environmentObject(store)
+                    }
 
                     VStack(alignment: .leading, spacing: 10) {
                         BotSectionHeader(title: "Share Back on Track", systemImage: "square.and.arrow.up")
@@ -91,8 +110,7 @@ struct LinksView: View {
                 .padding(.bottom, 32)
             }
             .botBackground()
-            .navigationTitle("Links")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
     }
 

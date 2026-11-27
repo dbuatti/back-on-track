@@ -5,6 +5,7 @@ import Combine
 final class AppStore: ObservableObject {
     @Published var state: AppState = AppState()
     @Published var isReady: Bool = false
+    @Published var hasBootstrapped: Bool = false
 
     let supabase = SupabaseManager.shared
     private let localKey = "bot.state"
@@ -30,7 +31,20 @@ final class AppStore: ObservableObject {
                 await supabase.pushState(state)
             }
         }
-        if !UserDefaults.standard.bool(forKey: "bot.defaultsSeededV1") {
+        // Existing installs predate onboarding. Keep their current content and
+        // mark them complete instead of interrupting an established rhythm.
+        if state.settings.personalization == nil && (hadLocal || auth.isSignedIn) {
+            state.settings.personalization = Personalization(
+                onboardingComplete: true,
+                focusArea: "coding",
+                focusLabel: "Coding",
+                customFocus: "",
+                supports: ["pause", "smallSteps", "sleep"],
+                starterSet: "gentle"
+            )
+            persistLocal()
+        }
+        if hasCompletedOnboarding && !UserDefaults.standard.bool(forKey: "bot.defaultsSeededV1") {
             let before = try? JSONEncoder().encode(state)
             SeedData.apply(to: &state)
             let after = try? JSONEncoder().encode(state)
@@ -41,6 +55,23 @@ final class AppStore: ObservableObject {
                 if auth.isSignedIn { await supabase.pushState(state) }
             }
         }
+        isReady = true
+        hasBootstrapped = true
+    }
+
+    var hasCompletedOnboarding: Bool {
+        state.settings.personalization?.onboardingComplete == true ||
+        UserDefaults.standard.bool(forKey: "bot.onboardingComplete")
+    }
+
+    func completeOnboarding(_ personalization: Personalization) {
+        state.settings.personalization = personalization
+        UserDefaults.standard.set(true, forKey: "bot.onboardingComplete")
+        if personalization.starterSet == "gentle" && !UserDefaults.standard.bool(forKey: "bot.defaultsSeededV1") {
+            SeedData.apply(to: &state)
+            UserDefaults.standard.set(true, forKey: "bot.defaultsSeededV1")
+        }
+        save()
         isReady = true
     }
 

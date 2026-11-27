@@ -46,6 +46,14 @@ should remain consistent.
 - Undo is offered for destructive or accidental actions.
 - Empty states explain the next small step, never blame the user.
 
+## Personalisation
+
+New users choose what tends to pull them in (coding, gaming, scrolling,
+shopping, food, something else, or nothing specific), which support cards they
+want, and whether to begin with a gentle starter set or an empty slate. This is
+a preference, never a diagnosis or label. It can be changed later from Links →
+Make it yours.
+
 ## Platform-specific additions
 
 These may exist only on native iPhone, but must not change the core rhythm:

@@ -11,6 +11,13 @@ struct FocusView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
+                Text("Focus")
+                    .font(BotTheme.titleFont)
+                    .foregroundStyle(BotTheme.ink)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+
                 Spacer()
 
                 Image(systemName: sections[index].icon)
@@ -83,8 +90,7 @@ struct FocusView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .botBackground()
-            .navigationTitle("Focus")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
     }
 

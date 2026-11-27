@@ -57,6 +57,15 @@ struct Program30State: Codable, Hashable {
     var notes: [String: String] = [:]
 }
 
+struct Personalization: Codable, Hashable {
+    var onboardingComplete: Bool = false
+    var focusArea: String = "none"
+    var focusLabel: String = "a gentle pause"
+    var customFocus: String = ""
+    var supports: [String] = []
+    var starterSet: String = "gentle"
+}
+
 struct AppSettings: Codable, Hashable {
     var targetBed: String = "22:30"
     var intentionIndex: Int = 0
@@ -66,6 +75,7 @@ struct AppSettings: Codable, Hashable {
     var loans: [Loan] = []
     var walkStartMinutes: Int = 10
     var program30: Program30State = Program30State()
+    var personalization: Personalization?
     var updatedAt: Double = 0
     var doneForToday: String = ""
     var lists: Lists = Lists()

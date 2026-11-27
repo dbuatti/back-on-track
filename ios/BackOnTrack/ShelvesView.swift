@@ -36,8 +36,7 @@ struct ShelvesView: View {
                 .padding(.bottom, 32)
             }
             .botBackground()
-            .navigationTitle("Shelves")
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarHidden(true)
         }
     }
 

@@ -4,6 +4,11 @@ struct CodingPauseCard: View {
     @EnvironmentObject var store: AppStore
     @State private var showingPause = false
 
+    private var cardTitle: String {
+        let label = store.state.settings.personalization?.focusLabel ?? "a gentle pause"
+        return label == "a gentle pause" ? "Need a gentle pause?" : "\(label) pulling you in?"
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "pause.circle")
@@ -12,7 +17,7 @@ struct CodingPauseCard: View {
                 .frame(width: 42, height: 42)
                 .background(BotTheme.eveningSoft, in: Circle())
             VStack(alignment: .leading, spacing: 2) {
-                Text("Coding pulling you in?")
+                Text(cardTitle)
                     .font(BotTheme.headingFont)
                     .foregroundStyle(BotTheme.ink)
                 Text("A 60-second way to stop gently.")
@@ -44,6 +49,17 @@ struct CodingPauseSheet: View {
     @State private var remaining = 60
     @State private var running = false
     @State private var nextStep = ""
+
+    private var placeholder: String {
+        switch store.state.settings.personalization?.focusArea {
+        case "gaming": return "e.g. tomorrow: stop after one match"
+        case "scrolling": return "e.g. tomorrow: phone stays outside the bedroom"
+        case "shopping": return "e.g. tomorrow: wait 24 hours before buying"
+        case "food": return "e.g. tomorrow: pause and notice hunger first"
+        case "coding": return "e.g. tomorrow: check the login error"
+        default: return "e.g. tomorrow: one small next step"
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -100,7 +116,7 @@ struct CodingPauseSheet: View {
                         Text("One next step, then stop")
                             .font(BotTheme.headingFont)
                             .foregroundStyle(BotTheme.ink)
-                        TextField("e.g. tomorrow: check the login error", text: $nextStep, axis: .vertical)
+                        TextField(placeholder, text: $nextStep, axis: .vertical)
                             .lineLimit(1...3)
                             .textFieldStyle(.roundedBorder)
                         Text("Optional. Saving this is enough — no need to act on it now.")
