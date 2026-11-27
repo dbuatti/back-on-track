@@ -3,6 +3,7 @@ import SwiftUI
 struct RootView: View {
     @EnvironmentObject var auth: AuthManager
     @EnvironmentObject var store: AppStore
+    @StateObject private var whisper = WhisperManager()
     @State private var tab: Tab = .home
 
     enum Tab { case home, windDown, focus, links, shelves }
@@ -35,6 +36,22 @@ struct RootView: View {
             if signedIn {
                 store.isReady = false
                 Task { await store.bootstrap(auth: auth) }
+            }
+        }
+        .environmentObject(whisper)
+        .overlay(alignment: .bottom) {
+            if let text = whisper.text, whisper.isShowing {
+                Text(text)
+                    .font(.system(.headline, design: .rounded).weight(.semibold))
+                    .foregroundStyle(BotTheme.ink)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().stroke(BotTheme.line.opacity(0.5), lineWidth: 1))
+                    .shadow(color: BotTheme.ink.opacity(0.08), radius: 12, x: 0, y: 5)
+                    .padding(.bottom, 96)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .allowsHitTesting(false)
             }
         }
     }

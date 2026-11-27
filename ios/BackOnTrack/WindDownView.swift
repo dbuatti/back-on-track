@@ -2,6 +2,7 @@ import SwiftUI
 
 struct WindDownView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
     @State private var bedDate = Calendar.current.date(bySettingHour: 22, minute: 30, second: 0, of: Date()) ?? Date()
     @State private var wakeDate = Date()
     @State private var mood = "okay"
@@ -194,11 +195,15 @@ struct WindDownView: View {
     private func logBedNow() {
         bedDate = Date()
         saveBedDate()
+        Haptics.gentle()
+        whisper.show("noted.")
     }
 
     private func logWakeNow() {
         wakeDate = Date()
         saveWakeDate()
+        Haptics.gentle()
+        whisper.show("noted.")
     }
 
     private func saveBedDate() {
@@ -223,8 +228,12 @@ struct WindDownView: View {
     private func toggle(_ id: String) {
         ensureDay()
         let current = store.state.days[todayKey()]?.checks[id] ?? false
-        store.state.days[todayKey()]?.checks[id] = !current
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            store.state.days[todayKey()]?.checks[id] = !current
+        }
         store.save()
+        Haptics.tap()
+        if !current { whisper.show() }
     }
 
     private func ensureDay() {

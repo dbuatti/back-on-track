@@ -12,6 +12,7 @@ private struct FocusSection: Identifiable {
 
 struct FocusView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
     @State private var index = 0
     @State private var finished = false
 
@@ -262,8 +263,12 @@ struct FocusView: View {
         let today = todayKey()
         if store.state.days[today] == nil { store.state.days[today] = DayRecord.empty(today) }
         let current = store.state.days[today]?.checks[id] ?? false
-        store.state.days[today]?.checks[id] = !current
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            store.state.days[today]?.checks[id] = !current
+        }
         store.save()
+        Haptics.tap()
+        if !current { whisper.show() }
     }
 }
 

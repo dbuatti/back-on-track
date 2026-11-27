@@ -32,6 +32,8 @@ The optional **quiet 60 days** lives inside Home and Wind down, not as a sixth t
 - Rounded, friendly headings with readable body text.
 - Light and dark mode must both pass WCAG AA; iPhone uses dynamic colour tokens.
 - Motion is optional and respects Reduce Motion.
+- Gentle haptics and a quiet one-word whisper (“good.”, “that counts.”) confirm
+  real taps. They never appear for passive events or with a score.
 
 Platform-specific polish is welcome, but colour, hierarchy, spacing and wording
 should remain consistent.

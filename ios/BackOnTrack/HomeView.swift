@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
     @State private var intention: String = ""
     @State private var editing = false
     @State private var addingTo: String?
@@ -246,8 +247,13 @@ struct HomeView: View {
     private func toggle(_ id: String) {
         let today = todayKey()
         if store.state.days[today] == nil { store.state.days[today] = DayRecord.empty(today) }
-        store.state.days[today]?.checks[id] = !(store.state.days[today]?.checks[id] ?? false)
+        let newValue = !(store.state.days[today]?.checks[id] ?? false)
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+            store.state.days[today]?.checks[id] = newValue
+        }
         store.save()
+        Haptics.tap()
+        if newValue { whisper.show() }
     }
 
     private func saveIntention() {

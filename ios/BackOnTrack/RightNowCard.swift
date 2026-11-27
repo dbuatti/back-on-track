@@ -2,6 +2,7 @@ import SwiftUI
 
 struct RightNowCard: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
     @State private var showingPause = false
 
     private struct Suggestion {
@@ -107,9 +108,17 @@ struct RightNowCard: View {
 
     private func perform(_ action: Suggestion.Action) {
         switch action {
-        case .wake: store.logTime("wake")
-        case .bed: store.logTime("bed")
-        case .pause: showingPause = true
+        case .wake:
+            store.logTime("wake")
+            Haptics.gentle()
+            whisper.show("noted.")
+        case .bed:
+            store.logTime("bed")
+            Haptics.gentle()
+            whisper.show("noted.")
+        case .pause:
+            Haptics.gentle()
+            showingPause = true
         case .intention: break
         case .anchor: break
         }

@@ -33,6 +33,7 @@
 		DC52975BDC9ED65404615DA1 /* ShelvesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F6A3B5484FBC6A64A8004AE /* ShelvesView.swift */; };
 		DF8DA178E10A0A1257C2B750 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDBDC2A1495834028D50341F /* RootView.swift */; };
 		E11071742D6CAB45A8B0F00F /* CodingPauseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */; };
+		E54390EB9A6813C04AEF2CB4 /* Uplift.swift in Sources */ = {isa = PBXBuildFile; fileRef = 399A79C45D9ADAE207802EE2 /* Uplift.swift */; };
 		F8E8BEF87A19FE2AB29A3445 /* WindDownView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72880D31775190369EF719C4 /* WindDownView.swift */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		31A4675ACCE8D0D555F3EA1B /* CodingPauseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodingPauseView.swift; sourceTree = "<group>"; };
 		31C81E688F6C56FB06803C98 /* ProgramCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramCard.swift; sourceTree = "<group>"; };
 		3311EBBDB674A89EDC0D7B89 /* BackOnTrackApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackOnTrackApp.swift; sourceTree = "<group>"; };
+		399A79C45D9ADAE207802EE2 /* Uplift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Uplift.swift; sourceTree = "<group>"; };
 		4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramEngine.swift; sourceTree = "<group>"; };
 		559A11358AC1D6067046DCD0 /* PersonalizationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersonalizationView.swift; sourceTree = "<group>"; };
 		66E3BDBE3821AD47842B48B3 /* BackupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupCard.swift; sourceTree = "<group>"; };
@@ -110,6 +112,7 @@
 				FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */,
 				EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */,
 				DE124CB61129605AE0815B65 /* Theme.swift */,
+				399A79C45D9ADAE207802EE2 /* Uplift.swift */,
 				72880D31775190369EF719C4 /* WindDownView.swift */,
 			);
 			path = BackOnTrack;
@@ -259,6 +262,7 @@
 				86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */,
 				2B21F0F5FED74CA33F63BC73 /* SupabaseManager.swift in Sources */,
 				85DB54B4550749E9DC982B4E /* Theme.swift in Sources */,
+				E54390EB9A6813C04AEF2CB4 /* Uplift.swift in Sources */,
 				F8E8BEF87A19FE2AB29A3445 /* WindDownView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

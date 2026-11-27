@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProgramCard: View {
     @EnvironmentObject var store: AppStore
+    @EnvironmentObject var whisper: WhisperManager
     @State private var undoState: Program30State?
     @State private var reflection: String = ""
 
@@ -130,6 +131,8 @@ struct ProgramCard: View {
             HStack(spacing: 10) {
                 Button {
                     undoState = store.completeProgramStep()
+                    Haptics.gentle()
+                    whisper.show("kept.")
                 } label: {
                     Text(index == Program.steps.count - 1 ? "Keep this step" : "That's enough")
                         .font(.headline)
