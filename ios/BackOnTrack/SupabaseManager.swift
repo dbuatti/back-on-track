@@ -123,10 +123,7 @@ final class SupabaseManager: NSObject, ObservableObject {
         request.setValue(anonKey, forHTTPHeaderField: "apikey")
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         var comps = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)!
-        // Supabase only allows allow-listed https redirect URLs. The web URL is
-        // registered; the app claims it through the associated-domain universal
-        // link, and falls back to the custom scheme when that isn't available.
-        comps.queryItems = [URLQueryItem(name: "redirect_to", value: "https://dbuatti.github.io/back-on-track/")]
+        comps.queryItems = [URLQueryItem(name: "redirect_to", value: "backontrack://auth-callback")]
         request.url = comps.url
         request.httpBody = try? JSONSerialization.data(withJSONObject: [
             "email": address,
@@ -261,7 +258,7 @@ final class SupabaseManager: NSObject, ObservableObject {
         // GoTrue appends `code` + `state` to redirect_to itself. Make sure the
         // allow-listed redirect on the Supabase project is the plain web URL —
         // the ASWebAuthenticationSession intercepts it before Safari opens it.
-        guard let authURL = URL(string: "\(baseURL.absoluteString)/auth/v1/authorize?provider=google&redirect_to=https%3A%2F%2Fdbuatti.github.io%2Fback-on-track%2F") else {
+        guard let authURL = URL(string: "\(baseURL.absoluteString)/auth/v1/authorize?provider=google&redirect_to=backontrack%3A%2F%2Fauth-callback") else {
             status = "Couldn't start Google sign-in."
             return false
         }
