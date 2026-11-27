@@ -5,9 +5,9 @@ enum SeedData {
 
     static func apply(to state: inout AppState) {
         let morningDefaults = [
+            ListItem(id: "m_water", text: "Drink some water", note: nil, small: "One sip is enough.", url: nil),
             ListItem(id: "m_breakfast", text: "Breakfast outside, quiet", note: nil, small: "Open the door and step outside for a moment.", url: nil),
-            ListItem(id: "m_sun", text: "Sun movements + sun salute + om", note: nil, small: "One stretch toward the light.", url: nil),
-            ListItem(id: "m_nick", text: "Nick Moss daily meditation", note: "Not feeling it", small: "Just open the page. No listening needed — that's enough.", url: nickURL)
+            ListItem(id: "m_sun", text: "One stretch toward the light", note: nil, small: "Reach up once, then let go.", url: nil)
         ]
         appendMissing(morningDefaults, to: &state.settings.lists.morning)
 
@@ -57,11 +57,11 @@ enum SeedData {
 
     static func defaultShelves() -> [Shelf] {
         let notFeeling = [
-            ShelfItem(id: "g_sangha", text: "Sangha meditation", note: "Not feeling it", small: "One breath, eyes closed."),
-            ShelfItem(id: "g_kriya", text: "Kriya meditation", note: "Never feeling it", small: "Three slow breaths, hands still."),
-            ShelfItem(id: "g_sun", text: "Sun movements", note: "Heavy mornings", small: "One stretch toward the light."),
-            ShelfItem(id: "g_nick", text: "Nick Moss daily meditation", note: "Later is fine", small: "Play it and hear the first minute."),
-            ShelfItem(id: "g_neuro", text: "Functional neuro check-in", note: "Needs a little love and care", small: "One pathway, gently checked in.")
+            ShelfItem(id: "g_pause", text: "A quiet pause", note: "Too much, or not today", small: "One slow breath, eyes open or closed."),
+            ShelfItem(id: "g_stretch", text: "One gentle stretch", note: "Heavy mornings", small: "Reach up once, then let go."),
+            ShelfItem(id: "g_outside", text: "Step outside", note: "No phone needed", small: "Open the door and take one step."),
+            ShelfItem(id: "g_music", text: "Listen to one calming track", note: "Sound can help", small: "Hear the first ten seconds."),
+            ShelfItem(id: "g_checkin", text: "A kind check-in", note: "Needs a little care", small: "Notice how you feel, without fixing it.")
         ]
         let movement = [
             ShelfItem(id: "mv_push", text: "Push-ups", note: "however feels right", small: "Wall push-ups, or one on the floor."),
@@ -70,13 +70,13 @@ enum SeedData {
             ShelfItem(id: "mv_stretch", text: "A long stretch", note: "no effort", small: "Reach up once, then let go.")
         ]
         let smallStarts = [
-            ShelfItem(id: "ss_piano", text: "Five minutes of piano", note: "for fun", small: "Play one phrase, then stop if you like."),
-            ShelfItem(id: "ss_read", text: "Read a few pages", note: "whatever's on the table", small: "Read one page."),
-            ShelfItem(id: "ss_master", text: "Tick one thing off the master list", note: "just one", small: "Pick the smallest thing on it."),
-            ShelfItem(id: "ss_beeper", text: "Reply to a couple of messages on Beeper", note: "briefly", small: "Open Beeper and answer one."),
-            ShelfItem(id: "ss_email", text: "Clear a couple of emails", note: "not the whole inbox", small: "Archive two, not the whole inbox."),
-            ShelfItem(id: "ss_wall", text: "Wall push-ups", note: "just a few", small: "Hands on the wall, bend your elbows, come back."),
-            ShelfItem(id: "ss_shortwalk", text: "A short walk", note: "around the block", small: "Put on shoes and step outside.")
+            ShelfItem(id: "ss_music", text: "Play one phrase", note: "for fun", small: "One note is enough."),
+            ShelfItem(id: "ss_read", text: "Read one page", note: "whatever is nearby", small: "Read one paragraph."),
+            ShelfItem(id: "ss_message", text: "Reply to one message", note: "briefly", small: "A short reply is enough."),
+            ShelfItem(id: "ss_email", text: "Archive one email", note: "not the whole inbox", small: "One message, then stop."),
+            ShelfItem(id: "ss_wall", text: "Wall push-ups", note: "just one", small: "One slow wall push-up."),
+            ShelfItem(id: "ss_shortwalk", text: "A short walk", note: "around the block", small: "Put on shoes and step outside."),
+            ShelfItem(id: "ss_water", text: "Drink a glass of water", note: "no rush", small: "One sip, if that is all.")
         ]
         return [
             Shelf(id: "sh_notfeeling", name: "Not feeling it", note: "Too much, or not today.", items: notFeeling, tone: "clay"),
