@@ -22,9 +22,9 @@ struct BackOnTrackApp: App {
     }
 
     private func configureAppearance() {
+        // Transparent navigation bars: a hidden bar leaves no visible strip.
         let nav = UINavigationBarAppearance()
-        nav.configureWithOpaqueBackground()
-        nav.backgroundColor = UIColor(BotTheme.cream)
+        nav.configureWithTransparentBackground()
         nav.titleTextAttributes = [
             .foregroundColor: UIColor(BotTheme.ink),
             .font: UIFont.preferredFont(forTextStyle: .headline)
@@ -35,9 +35,8 @@ struct BackOnTrackApp: App {
         UINavigationBar.appearance().scrollEdgeAppearance = nav
 
         let tab = UITabBarAppearance()
-        tab.configureWithOpaqueBackground()
-        tab.backgroundColor = UIColor(BotTheme.card)
-        tab.shadowColor = UIColor(BotTheme.line.opacity(0.45))
+        tab.configureWithTransparentBackground()
+        tab.shadowColor = .clear
         tab.stackedLayoutAppearance.selected.iconColor = UIColor(BotTheme.accent)
         tab.stackedLayoutAppearance.selected.titleTextAttributes = [
             .foregroundColor: UIColor(BotTheme.accent),

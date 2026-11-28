@@ -8,7 +8,8 @@ struct LinksView: View {
     @State private var showingPersonalization = false
 
     var body: some View {
-        NavigationStack {
+        ZStack {
+            BotTheme.backgroundGradient.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     HStack(spacing: 14) {
@@ -69,10 +70,6 @@ struct LinksView: View {
                             .buttonStyle(.plain)
                     }
                     .botCard()
-                    .sheet(isPresented: $showingPersonalization) {
-                        PersonalizationView()
-                            .environmentObject(store)
-                    }
 
                     VStack(alignment: .leading, spacing: 10) {
                         BotSectionHeader(title: "Share Back on Track", systemImage: "square.and.arrow.up")
@@ -126,8 +123,11 @@ struct LinksView: View {
                 .padding(.horizontal, 16)
                 .padding(.bottom, 32)
             }
-            .botBackground()
-            .navigationBarHidden(true)
+            .scrollContentBackground(.hidden)
+            .sheet(isPresented: $showingPersonalization) {
+                PersonalizationView()
+                    .environmentObject(store)
+            }
         }
     }
 
