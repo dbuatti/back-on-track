@@ -54,7 +54,9 @@ struct HomeView: View {
                     }
                     section(title: "Morning", systemImage: "sun.max", items: store.state.settings.lists.morning, list: "morning")
                     section(title: "Daily anchors", systemImage: "leaf", items: store.state.settings.lists.anchors, list: "anchors")
-                    HealthSummaryCard()
+                    if HealthKitConfig.enabled {
+                        HealthSummaryCard()
+                    }
                     if store.state.settings.personalization?.supports.contains("pause") ?? true {
                         CodingPauseCard()
                     }
@@ -109,6 +111,9 @@ struct HomeView: View {
             Text("It will wait on the Keep close shelf. You can borrow it back later.")
         }
         .onAppear { intention = store.state.days[todayKey()]?.intention ?? "" }
+        .onChange(of: store.state.settings.doneForToday) { _, _ in
+            intention = store.state.days[todayKey()]?.intention ?? ""
+        }
     }
 
     private var intentionCard: some View {
