@@ -643,14 +643,14 @@
   .my-link-row:last-child { border-bottom: 0; }
   /* ---------- Control hub items: calm, scannable rows ---------- */
   .lab-empty {
-    margin: var(--s3) 0 0;
-    padding: var(--s4);
-    border: 1px dashed var(--line);
-    border-radius: var(--radius-sm);
+    margin: var(--s4) 0 0;
+    padding: 26px 20px;
+    border-radius: 22px;
     text-align: center;
     color: var(--ink-soft);
-    font-size: var(--t-small);
-    line-height: 1.55;
+    background: color-mix(in srgb, var(--accent-soft) 45%, var(--card));
+    font-size: var(--t-body);
+    line-height: 1.6;
   }
   .lab-group { margin-top: var(--s3); }
   .lab-group:first-child { margin-top: var(--s2); }
@@ -2257,7 +2257,7 @@
         <label class="cozy-kicker" for="cozyAddInput">Your words — edit freely</label>
         <textarea id="cozyAddInput" rows="3" placeholder="Whatever you just said, or type it yourself…"
                   class="dump-textarea"></textarea>
-        <button type="submit" class="cozy-btn primary" style="margin-top:12px">Add to reminders</button>
+        <button type="submit" class="cozy-btn primary" style="margin-top:12px">Add to control hub</button>
       </form>
       <button type="button" class="cozy-btn ghost" data-go="lab" style="margin-top:18px">Go to control hub</button>
     </section>
@@ -2437,7 +2437,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v81";
+const VERSION = "v82";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -6074,8 +6074,9 @@ function wire() {
     state.settings.labItems = state.settings.labItems || [];
     state.settings.labItems.unshift({ id: "lab_" + Date.now().toString(36), text: text, category: "Small things", effort: "small", archived: false });
     input.value = "";
-    save(); renderCozy(); renderLab();
-    showSnackbar("Added to your control hub.");
+    save(); renderLab();
+    showSnackbar("Added to your control hub.", () => showTab("lab"));
+    setTimeout(() => showTab("lab"), 900);
   });
   setInterval(() => {
     if (state.settings.cozyTimer && state.settings.cozyTimer.active) renderCozy();
