@@ -235,6 +235,31 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    func addLabItem(_ text: String) {
+        let value = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else { return }
+        if state.settings.labItems == nil { state.settings.labItems = [] }
+        state.settings.labItems?.append(LabItem(text: value))
+        save()
+    }
+
+    func setLabEffort(_ id: String, effort: String) {
+        guard let idx = state.settings.labItems?.firstIndex(where: { $0.id == id }) else { return }
+        state.settings.labItems?[idx].effort = effort
+        save()
+    }
+
+    func setLabArchived(_ id: String, archived: Bool) {
+        guard let idx = state.settings.labItems?.firstIndex(where: { $0.id == id }) else { return }
+        state.settings.labItems?[idx].archived = archived
+        save()
+    }
+
+    func deleteLabItem(_ id: String) {
+        state.settings.labItems?.removeAll(where: { $0.id == id })
+        save()
+    }
+
     func setDoneForToday(_ done: Bool) {
         state.settings.doneForToday = done ? todayKey() : ""
         save()

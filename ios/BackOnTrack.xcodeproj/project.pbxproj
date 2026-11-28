@@ -21,8 +21,10 @@
 		46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BFF35C1265F196A8853B094F /* HomeView.swift */; };
 		4998B41A388BB641FC0522A5 /* SeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = F721963292C663E8C87902A4 /* SeedData.swift */; };
 		4EAA6639C6B0FA9A5DE4DB19 /* ProgramEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6C9F462A3F97D00BB94833 /* ProgramEngine.swift */; };
+		5CCB16E55997A7A9BEE598A7 /* LaboratoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8CD33E8B530542FF9EB63B9 /* LaboratoryView.swift */; };
 		7034B7F4605A85302713A261 /* RightNowCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E82A2A361C709C06F829F80D /* RightNowCard.swift */; };
 		70E877D131A54FFEFC5D9AC2 /* ProgramCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31C81E688F6C56FB06803C98 /* ProgramCard.swift */; };
+		7959ACD11394088450861378 /* InlineDumpComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B1DCC01E9DD5BE5A5B615B /* InlineDumpComposer.swift */; };
 		8331825454EF9EFFA952AE01 /* BrainDumpIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97CD2E2861F17505241A0CDE /* BrainDumpIntelligence.swift */; };
 		85DB54B4550749E9DC982B4E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE124CB61129605AE0815B65 /* Theme.swift */; };
 		86F140A705B2CAFA37C9694F /* SleepTrendCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */; };
@@ -88,11 +90,13 @@
 		CCAFA3A189EFC2A26C09BD92 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		CD337AB0B0BF21E46501E14E /* CozyTimeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CozyTimeView.swift; sourceTree = "<group>"; };
 		CF57AB8C8B0F9CB1168842C1 /* ProgramTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgramTests.swift; sourceTree = "<group>"; };
+		D8CD33E8B530542FF9EB63B9 /* LaboratoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaboratoryView.swift; sourceTree = "<group>"; };
 		DDBDC2A1495834028D50341F /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		DE124CB61129605AE0815B65 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		E3280F3621456DEB1A2AF389 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppStore.swift; sourceTree = "<group>"; };
 		E82A2A361C709C06F829F80D /* RightNowCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RightNowCard.swift; sourceTree = "<group>"; };
 		EDB9DF4C394D135EEC66E7CD /* SupabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseManager.swift; sourceTree = "<group>"; };
+		F2B1DCC01E9DD5BE5A5B615B /* InlineDumpComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineDumpComposer.swift; sourceTree = "<group>"; };
 		F721963292C663E8C87902A4 /* SeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeedData.swift; sourceTree = "<group>"; };
 		FC37B25D87AC935AC33AF7E8 /* ModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelTests.swift; sourceTree = "<group>"; };
 		FD5667A588EB014718AE3ACD /* SleepTrendCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepTrendCard.swift; sourceTree = "<group>"; };
@@ -118,6 +122,8 @@
 				6841C130C2EF7D4AE20754CA /* HealthSummaryCard.swift */,
 				BFF35C1265F196A8853B094F /* HomeView.swift */,
 				8758932B3A77286EC8A0E427 /* Info.plist */,
+				F2B1DCC01E9DD5BE5A5B615B /* InlineDumpComposer.swift */,
+				D8CD33E8B530542FF9EB63B9 /* LaboratoryView.swift */,
 				9472C52958FE48DE519FC630 /* LinksView.swift */,
 				CCAFA3A189EFC2A26C09BD92 /* Models.swift */,
 				A3B178C739B3555135A692C5 /* OnboardingView.swift */,
@@ -276,6 +282,8 @@
 				8DE02553C442C15344C24720 /* HealthKitManager.swift in Sources */,
 				282354AFB8A6F3D146811524 /* HealthSummaryCard.swift in Sources */,
 				46FEA8CC91AEBB5C1F416C5F /* HomeView.swift in Sources */,
+				7959ACD11394088450861378 /* InlineDumpComposer.swift in Sources */,
+				5CCB16E55997A7A9BEE598A7 /* LaboratoryView.swift in Sources */,
 				1E8F902567E9F3D66E13FDAB /* LinksView.swift in Sources */,
 				163E0BA329AD4A7A1C5D2B2F /* Models.swift in Sources */,
 				CFFF7DEC9D6452025C32CE86 /* OnboardingView.swift in Sources */,

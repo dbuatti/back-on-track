@@ -4,6 +4,7 @@ struct ShelvesView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
     @State private var showingDump = false
+    @State private var showingLab = false
     @State private var activeShelfId: String = ""
 
     private var shelves: [Shelf] { store.state.settings.shelves }
@@ -49,6 +50,32 @@ struct ShelvesView: View {
                     }
                     .padding(.horizontal, 4)
                     .padding(.top, 4)
+
+                    Button { showingLab = true } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: "flask")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(
+                                    LinearGradient(colors: [
+                                        Color(red: 0.561, green: 0.435, blue: 0.816),
+                                        Color(red: 0.310, green: 0.239, blue: 0.529)
+                                    ], startPoint: .topLeading, endPoint: .bottomTrailing),
+                                    in: RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                )
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Laboratory").font(BotTheme.headingFont).foregroundStyle(BotTheme.ink)
+                                Text("One place for everything on your mind.").font(.caption).foregroundStyle(BotTheme.soft)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.right").foregroundStyle(BotTheme.soft)
+                        }
+                        .padding(16)
+                        .background(BotTheme.card, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(BotTheme.line.opacity(0.4), lineWidth: 1))
+                    }
+                    .buttonStyle(.plain)
 
                     VStack(alignment: .leading, spacing: 8) {
                         BotSectionHeader(title: "Brain dump", systemImage: "mic", tint: Color(red: 0.784, green: 0.353, blue: 0.314))
@@ -122,6 +149,11 @@ struct ShelvesView: View {
                 .padding(.bottom, 32)
             }
             .scrollContentBackground(.hidden)
+            .sheet(isPresented: $showingLab) {
+                LaboratoryView()
+                    .environmentObject(store)
+                    .environmentObject(whisper)
+            }
             .fullScreenCover(isPresented: $showingDump) {
                 VoiceDumpView()
                     .environmentObject(store)
