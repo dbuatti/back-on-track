@@ -20,11 +20,17 @@ final class AppStore: ObservableObject {
                 let remoteStamp = remote.settings.updatedAt
                 // First launch on a device must take the cloud copy even when
                 // both timestamps are zero (older web exports can be zero).
-                if !hadLocal || remoteStamp >= localStamp {
+                if !hadLocal {
                     state = remote
                     persistLocal()
-                } else if hasMeaningfulData {
-                    await supabase.pushState(state)
+                } else {
+                    // Always union, even when the remote is newer: a mark made
+                    // offline just before opening must survive the pull.
+                    state = StateMerge.merge(local: state, remote: remote)
+                    persistLocal()
+                    if hasMeaningfulData && localStamp > remoteStamp {
+                        await supabase.pushState(state)
+                    }
                 }
             } else if hasMeaningfulData {
                 // Never turn a failed pull or an empty fresh install into a push.
