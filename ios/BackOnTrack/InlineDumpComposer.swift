@@ -18,24 +18,13 @@ struct InlineDumpComposer: View {
     @State private var task: SFSpeechRecognitionTask?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 14) {
-                Button { expanded.toggle() } label: {
-                    Image(systemName: "mic.fill")
-                        .font(.title2)
-                        .foregroundStyle(.white)
-                        .frame(width: 48, height: 48)
-                        .background(
-                            LinearGradient(colors: [
-                                Color(red: 0.878, green: 0.478, blue: 0.408),
-                                Color(red: 0.624, green: 0.247, blue: 0.235)
-                            ], startPoint: .topLeading, endPoint: .bottomTrailing),
-                            in: Circle()
-                        )
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(expanded ? "Close brain dump" : "Open brain dump")
-
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(spacing: 12) {
+                Image(systemName: "mic.fill")
+                    .font(.subheadline)
+                    .foregroundStyle(.white)
+                    .frame(width: 34, height: 34)
+                    .background(Lab.micGradient, in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Brain dump").font(.headline).foregroundStyle(Lab.ink)
                     Text("Just talk. We'll write it down here.")
@@ -44,31 +33,67 @@ struct InlineDumpComposer: View {
                 Spacer()
                 if expanded {
                     Button("Close") { stop(); expanded = false }
-                        .font(.caption).foregroundStyle(Lab.accent)
+                        .font(.caption.weight(.semibold)).foregroundStyle(Lab.accent)
                 }
             }
 
-            if expanded {
+            if !expanded {
+                Button { expanded = true } label: {
+                    HStack(spacing: 10) {
+                        Image(systemName: "mic.circle.fill")
+                            .font(.title2)
+                        Text("Start a brain dump")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(Lab.micGradient, in: Capsule())
+                }
+                .buttonStyle(.plain)
+            } else {
                 Divider().background(Lab.line)
+
+                // The big, obvious microphone.
+                VStack(spacing: 10) {
+                    Button { recording ? stop() : start() } label: {
+                        ZStack {
+                            Circle().fill(Lab.micGradient)
+                                .frame(width: 104, height: 104)
+                            if recording {
+                                RoundedRectangle(cornerRadius: 8)
+                                    .fill(Color.white)
+                                    .frame(width: 30, height: 30)
+                            } else {
+                                Image(systemName: "mic.fill")
+                                    .font(.system(size: 38, weight: .light))
+                                    .foregroundStyle(.white)
+                            }
+                        }
+                        .overlay(Circle().stroke(recording ? Lab.accent : Color.white.opacity(0.25), lineWidth: recording ? 4 : 1))
+                        .shadow(color: Lab.micShadow, radius: 18, x: 0, y: 9)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(permissionDenied)
+                    .accessibilityLabel(recording ? "Stop recording" : "Start recording")
+                    .accessibilityHint(permissionDenied ? "Voice is off. You can type instead." : "Tap to speak your thought")
+
+                    Text(recording ? "Listening… tap to stop" : "Tap to speak")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(recording ? Lab.accent : Lab.soft)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 6)
+
                 TextField("Or type it yourself…", text: $text, axis: .vertical)
                     .lineLimit(3...6)
                     .foregroundStyle(Lab.ink)
                     .padding(12)
                     .background(Lab.bg, in: RoundedRectangle(cornerRadius: 14))
+                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Lab.line, lineWidth: 1))
                     .keyboardDoneButton()
 
                 HStack(spacing: 10) {
-                    Button(recording ? "Stop" : "Speak") { recording ? stop() : start() }
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(recording ? .white : Lab.accent)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 9)
-                        .background(recording ? Color(red: 0.624, green: 0.247, blue: 0.235) : Color.clear, in: Capsule())
-                        .overlay(Capsule().stroke(Lab.line, lineWidth: 1))
-                        .disabled(permissionDenied)
-
-                    Spacer()
-
                     Button("Add to list") {
                         store.addLabItem(text)
                         text = ""
@@ -76,11 +101,11 @@ struct InlineDumpComposer: View {
                         Haptics.gentle()
                         whisper.show("noted.")
                     }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 9)
-                    .background(Lab.accent.opacity(0.85), in: Capsule())
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Lab.bg)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 46)
+                    .background(Lab.accent, in: Capsule())
                     .disabled(text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
 

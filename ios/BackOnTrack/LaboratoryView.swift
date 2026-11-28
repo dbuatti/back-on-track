@@ -8,6 +8,11 @@ enum Lab {
     static let soft = Color(red: 0.894, green: 0.854, blue: 0.976)
     static let accent = Color(red: 0.855, green: 0.776, blue: 1.0)
     static let line = Color(red: 0.353, green: 0.294, blue: 0.529)
+    static let micGradient = LinearGradient(
+        colors: [Color(red: 0.925, green: 0.494, blue: 0.435), Color(red: 0.706, green: 0.259, blue: 0.251)],
+        startPoint: .topLeading, endPoint: .bottomTrailing
+    )
+    static let micShadow = Color(red: 0.706, green: 0.259, blue: 0.251).opacity(0.45)
 }
 
 struct LaboratoryView: View {

@@ -3,7 +3,6 @@ import SwiftUI
 struct ShelvesView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
-    @State private var showingDump = false
     @State private var showingLab = false
     @State private var activeShelfId: String = ""
 
@@ -77,20 +76,6 @@ struct ShelvesView: View {
                     }
                     .buttonStyle(.plain)
 
-                    VStack(alignment: .leading, spacing: 8) {
-                        BotSectionHeader(title: "Brain dump", systemImage: "mic", tint: Color(red: 0.784, green: 0.353, blue: 0.314))
-                        Text("Say the small things out loud. They become reminders, never tasks.")
-                            .font(.subheadline).foregroundStyle(BotTheme.soft)
-                        Button("Open brain dump") { showingDump = true }
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(Color(red: 0.784, green: 0.353, blue: 0.314), in: Capsule())
-                            .buttonStyle(.plain)
-                    }
-                    .botCard()
-
                     if !closeAtHand.isEmpty {
                         VStack(alignment: .leading, spacing: 6) {
                             BotSectionHeader(title: "Close at hand", systemImage: "hand.raised", tint: BotTheme.accent)
@@ -151,11 +136,6 @@ struct ShelvesView: View {
             .scrollContentBackground(.hidden)
             .sheet(isPresented: $showingLab) {
                 LaboratoryView()
-                    .environmentObject(store)
-                    .environmentObject(whisper)
-            }
-            .fullScreenCover(isPresented: $showingDump) {
-                VoiceDumpView()
                     .environmentObject(store)
                     .environmentObject(whisper)
             }

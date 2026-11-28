@@ -13,7 +13,6 @@ private enum Cozy {
 struct CozyTimeView: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
-    @State private var showingDump = false
     @State private var editingList = false
 
     private let starter = [
@@ -47,11 +46,6 @@ struct CozyTimeView: View {
                 .scrollContentBackground(.hidden)
             }
             .onAppear { store.creditCozy() }
-            .fullScreenCover(isPresented: $showingDump) {
-                VoiceDumpView()
-                    .environmentObject(store)
-                    .environmentObject(whisper)
-            }
         }
     }
 
