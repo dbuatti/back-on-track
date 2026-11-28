@@ -43,8 +43,6 @@ struct WindDownView: View {
                     .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).stroke(BotTheme.evening.opacity(0.12), lineWidth: 1))
                     .shadow(color: BotTheme.evening.opacity(0.08), radius: 16, x: 0, y: 8)
 
-                    ProgramCard()
-
                     if let rec = store.state.days[todayKey()], rec.bedTime != nil || rec.wakeTime != nil {
                         lastNightCard(rec)
                     }

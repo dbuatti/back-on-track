@@ -260,6 +260,7 @@ struct FocusView: View {
     }
 
     private func toggle(_ id: String) {
+        if store.state.settings.doneForToday == todayKey() { return }
         let today = todayKey()
         if store.state.days[today] == nil { store.state.days[today] = DayRecord.empty(today) }
         let current = store.state.days[today]?.checks[id] ?? false

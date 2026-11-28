@@ -3,6 +3,7 @@ import SwiftUI
 struct RightNowCard: View {
     @EnvironmentObject var store: AppStore
     @EnvironmentObject var whisper: WhisperManager
+    var disabled: Bool = false
     var onIntention: () -> Void = {}
     var onAnchor: () -> Void = {}
     @State private var showingPause = false
@@ -48,9 +49,11 @@ struct RightNowCard: View {
                     }
                     Spacer()
                 }
-                Button(actionLabel(suggestion.action)) {
+                Button(disabled ? "Done for today" : actionLabel(suggestion.action)) {
                     perform(suggestion.action)
                 }
+                .disabled(disabled)
+                .opacity(disabled ? 0.5 : 1)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.white)
                 .padding(.horizontal, 12)
@@ -109,6 +112,7 @@ struct RightNowCard: View {
     }
 
     private func perform(_ action: Suggestion.Action) {
+        if disabled { return }
         switch action {
         case .wake:
             store.logTime("wake")

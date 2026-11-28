@@ -36,6 +36,7 @@ struct HomeView: View {
 
                     DailyLine()
                     RightNowCard(
+                        disabled: doneForToday,
                         onIntention: { intentionFocused = true },
                         onAnchor: {
                             withAnimation {
@@ -122,6 +123,7 @@ struct HomeView: View {
             TextField("A word, a feeling, a direction…", text: $intention, axis: .vertical)
                 .lineLimit(1...3)
                 .foregroundStyle(BotTheme.ink)
+                .disabled(doneForToday)
                 .onSubmit { saveIntention() }
                 .focused($intentionFocused)
                 .keyboardDoneButton()
