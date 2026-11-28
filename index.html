@@ -369,7 +369,7 @@
     font-family: Georgia, "Times New Roman", serif;
     font-style: italic;
     font-size: 17px;
-    line-height: 1.4;
+    line-height: 1.6;
     margin: var(--s1) 0;
   }
   .so-body small {
@@ -392,8 +392,8 @@
   .program-home-nudge { display: block; margin: var(--s2) 0 0; }
   .program-home-nudge[hidden] { display: none; }
   .program-title {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 18px; font-weight: 500; line-height: 1.35;
+    font-family: var(--font-round);
+    font-size: 21px; font-weight: 600; line-height: 1.35;
     margin: 0 0 var(--s2);
   }
   .program-invite { font-size: var(--t-body); line-height: 1.6; margin: 0 0 var(--s3); }
@@ -420,7 +420,8 @@
   .program-nick[hidden] { display: none; }
   .program-optional { font-size: var(--t-small); color: var(--ink-soft); margin: var(--s2) 0 0; }
   .program-optional[hidden] { display: none; }
-  .program-card .btn-row { grid-template-columns: minmax(0, 1fr); }
+  .program-card .btn-row { display: flex; flex-direction: row; align-items: stretch; }
+  .program-card .btn-row > .btn { flex: 1 1 0; text-align: center; }
 
   /* ---------- Named shelves + borrowed items ----------
      A shelf is a library, not a to-do list. Items can be borrowed into the
@@ -546,7 +547,7 @@
     border-left: 3px solid var(--evening);
     color: var(--ink);
     font-size: 14px;
-    line-height: 1.35;
+    line-height: 1.55;
   }
   .sleep-banner[hidden] { display: none; }
   .sleep-banner .sb-moon { font-size: 18px; line-height: 1; }
@@ -636,6 +637,53 @@
     border-bottom: 1px solid var(--line);
   }
   .my-link-row:last-child { border-bottom: 0; }
+  /* ---------- Control hub items: calm, scannable rows ---------- */
+  .lab-empty {
+    margin: var(--s3) 0 0;
+    padding: var(--s4);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-sm);
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: var(--t-small);
+    line-height: 1.55;
+  }
+  .lab-group { margin-top: var(--s3); }
+  .lab-group:first-child { margin-top: var(--s2); }
+  .lab-group-title {
+    font-size: var(--t-cap);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 var(--s2);
+  }
+  .lab-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s3);
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .lab-item:last-child { border-bottom: 0; }
+  .lab-item-body { min-width: 0; display: grid; gap: 2px; }
+  .lab-item-text {
+    color: var(--ink);
+    font-size: var(--t-body);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .lab-item-pill {
+    display: inline-block;
+    font-size: var(--t-cap);
+    color: var(--accent-deep);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 2px 10px;
+    width: fit-content;
+  }
+  .lab-item .btn.small { padding: 8px 14px; white-space: nowrap; }
   .link-chip {
     display: flex;
     align-items: center;
@@ -1039,9 +1087,10 @@
     background: var(--field);
     border: 1px solid var(--control-line);
     border-radius: var(--radius-sm);
-    padding: var(--s3);
+    padding: 12px 14px;
     width: 100%;
-    min-height: var(--tap);
+    min-height: 48px;
+    line-height: 1.5;
   }
   input:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
   textarea { resize: vertical; min-height: 44px; }
@@ -1098,7 +1147,8 @@
   .btn.ghost { background: transparent; }
   .btn.small { min-height: var(--tap); padding: var(--s2) var(--s3); font-size: var(--t-small); }
 
-  .btn-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+  .btn-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2); }
+  .btn-row > .btn { flex: 0 1 auto; }
 
   /* ---------- Instead of gaming ---------- */
   .instead-card { background: var(--card); }
@@ -1135,7 +1185,8 @@
   }
   #syncCard .field { margin-top: 10px; }
   #syncCard .field[hidden], #syncSetup[hidden] { display: none; }
-  #syncCard .btn-row { margin-top: 12px; }
+  #syncCard .btn-row { margin-top: 14px; }
+  #syncCard .btn-row > .btn { flex: 1 1 auto; text-align: center; }
   #gentleAddBtn { margin-top: 12px; }
   .windnote {
     font-size: 13px;
@@ -1266,7 +1317,7 @@
     margin: 6px 0 0;
     padding-left: 18px;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.55;
     color: var(--ink-soft);
   }
   .waking-note li + li { margin-top: 6px; }
@@ -1407,7 +1458,7 @@
   }
 
   /* ---------- Daily line: quiet, stable for the day, not tappable ---------- */
-  .rot-intention { line-height: 1.4; }
+  .rot-intention { line-height: 1.6; }
 
   /* ---------- "Small win" whisper ---------- */
   #whisper {
@@ -1490,7 +1541,7 @@
     box-shadow: var(--shadow);
     padding: 26px 16px 22px;
     margin-bottom: 14px;
-    line-height: 1.5;
+    line-height: 1.55;
   }
   .sunday-note .btn { margin-top: 16px; }
   body[data-sunday="true"] .sunday-note { display: block; }
@@ -1647,6 +1698,18 @@
   .cozy-btn.ghost { background: transparent; color: var(--cozy-ink); border-color: var(--cozy-line); }
   .cozy-btn:focus-visible { outline: 3px solid var(--cozy-ink); outline-offset: 3px; }
   .cozy-message { text-align: center; color: var(--cozy-soft); margin-top: var(--s3); min-height: 1.4em; }
+  .dump-textarea {
+    width: 100%;
+    min-height: 110px;
+    margin-top: var(--s2);
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid var(--cozy-line);
+    background: var(--cozy-card);
+    color: var(--cozy-ink);
+    font: inherit;
+    resize: vertical;
+  }
   .cozy-plain { margin-bottom: var(--s6); }
   .cozy-list { list-style: none; padding: 0; margin: 0; }
   .cozy-list li {
@@ -2185,7 +2248,7 @@
       <form id="cozyAddForm" style="text-align:left;max-width:520px;margin:0 auto">
         <label class="cozy-kicker" for="cozyAddInput">Your words — edit freely</label>
         <textarea id="cozyAddInput" rows="3" placeholder="Whatever you just said, or type it yourself…"
-                  style="width:100%;min-height:110px;margin-top:8px;padding:14px;border-radius:16px;border:1px solid var(--cozy-line);background:var(--cozy-card);color:var(--cozy-ink);font:inherit;resize:vertical"></textarea>
+                  class="dump-textarea"></textarea>
         <button type="submit" class="cozy-btn primary" style="margin-top:12px">Add to reminders</button>
       </form>
       <button type="button" class="cozy-btn ghost" data-go="lab" style="margin-top:18px">Go to control hub</button>
@@ -2366,7 +2429,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v78";
+const VERSION = "v79";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3477,38 +3540,65 @@ function renderLab() {
   if (!box) return;
   const items = (state.settings.labItems || []).filter((it) => !it.archived);
   box.innerHTML = "";
+  if (items.length) {
+    const count = document.createElement("p");
+    count.className = "hint";
+    count.textContent = items.length === 1 ? "One small thing, held here." : items.length + " small things, held here.";
+    box.appendChild(count);
+  }
   if (!items.length) {
-    const p = document.createElement("p");
-    p.className = "hint";
-    p.textContent = "Nothing here yet. Brain dump a thought whenever you like.";
-    box.appendChild(p);
+    const empty = document.createElement("div");
+    empty.className = "lab-empty";
+    empty.textContent = "Nothing here yet. Brain dump a thought whenever you like — it will wait here for you.";
+    box.appendChild(empty);
     return;
   }
+  // Group by category so a long list stays scannable.
+  const groups = new Map();
   items.forEach((item) => {
-    const row = document.createElement("div");
-    row.className = "my-link-row";
-    const label = document.createElement("span");
-    label.textContent = item.text;
-    label.style.flex = "1";
-    row.appendChild(label);
-    const cat = document.createElement("span");
-    cat.className = "hint";
-    cat.textContent = item.category || "Small things";
-    row.appendChild(cat);
-    const del = document.createElement("button");
-    del.type = "button";
-    del.className = "btn small";
-    del.textContent = "Put away";
-    del.setAttribute("aria-label", "Put away " + item.text);
-    del.addEventListener("click", () => {
-      item.archived = true;
-      save(); renderLab();
-      showSnackbar("Put away. It isn't lost.", () => {
-        item.archived = false; save(); renderLab();
+    const key = item.category || "Small things";
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(item);
+  });
+  groups.forEach((groupItems, category) => {
+    const group = document.createElement("div");
+    group.className = "lab-group";
+    if (groups.size > 1) {
+      const title = document.createElement("p");
+      title.className = "lab-group-title";
+      title.textContent = category;
+      group.appendChild(title);
+    }
+    groupItems.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "lab-item";
+      const body = document.createElement("div");
+      body.className = "lab-item-body";
+      const text = document.createElement("span");
+      text.className = "lab-item-text";
+      text.textContent = item.text;
+      body.appendChild(text);
+      const pill = document.createElement("span");
+      pill.className = "lab-item-pill";
+      pill.textContent = item.category || "Small things";
+      body.appendChild(pill);
+      row.appendChild(body);
+      const del = document.createElement("button");
+      del.type = "button";
+      del.className = "btn small";
+      del.textContent = "Put away";
+      del.setAttribute("aria-label", "Put away " + item.text);
+      del.addEventListener("click", () => {
+        item.archived = true;
+        save(); renderLab();
+        showSnackbar("Put away. It isn't lost.", () => {
+          item.archived = false; save(); renderLab();
+        });
       });
+      row.appendChild(del);
+      group.appendChild(row);
     });
-    row.appendChild(del);
-    box.appendChild(row);
+    box.appendChild(group);
   });
 }
 
@@ -5936,7 +6026,11 @@ function wire() {
     if (!ct.active) { ct.remaining = ct.bankedMinutes; ct.remainingAtStart = ct.remaining; }
     save(); renderCozy();
   });
-  $$("[data-go]").forEach((b) => b.addEventListener("click", () => showTab(b.dataset.go)));
+  // Delegated so buttons rendered later (hub, brain dump, dynamic rows) work.
+  document.addEventListener("click", (e) => {
+    const go = e.target.closest && e.target.closest("[data-go]");
+    if (go) showTab(go.dataset.go);
+  });
   $("#pauseStart").addEventListener("click", () => {
     if (pauseTimer) {
       clearInterval(pauseTimer); pauseTimer = null;
