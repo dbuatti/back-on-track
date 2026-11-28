@@ -13,6 +13,8 @@ struct ProgramCard: View {
 
         if !p.loaded {
             nudgeCard
+        } else if store.programDoneToday() {
+            doneCard(p: p)
         } else {
             loadedCard(p: p, step: step, index: index)
         }
@@ -29,7 +31,7 @@ struct ProgramCard: View {
                 Text("A quiet 60 days")
                     .font(BotTheme.headingFont)
                     .foregroundStyle(BotTheme.ink)
-                Text("Sixty small invitations that adapt to your pace. Nothing to catch up on.")
+                Text("One small invitation a day, at your pace. Nothing to catch up on.")
                     .font(.caption).foregroundStyle(BotTheme.soft)
             }
             Spacer()
@@ -47,11 +49,53 @@ struct ProgramCard: View {
         .shadow(color: BotTheme.accent.opacity(0.06), radius: 14, x: 0, y: 7)
     }
 
+    /// A soft green resting card. It replaces the invitation for the rest of
+    /// the day — no further clicking, no way to rush ahead.
+    private func doneCard(p: Program30State) -> some View {
+        let dayNumber = p.done.values.filter { !$0.isEmpty }.count
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 10) {
+                Image(systemName: "checkmark.seal.fill")
+                    .font(.title2)
+                    .foregroundStyle(BotTheme.sage)
+                    .frame(width: 40, height: 40)
+                    .background(BotTheme.sageSoft, in: Circle())
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Today's invitation is complete.")
+                        .font(BotTheme.headingFont)
+                        .foregroundStyle(BotTheme.ink)
+                    Text("You've kept \(dayNumber) \(dayNumber == 1 ? "day" : "days") — small steps, slowly. Come back tomorrow for the next one. Nothing to catch up on.")
+                        .font(.subheadline)
+                        .foregroundStyle(BotTheme.soft)
+                }
+                Spacer()
+            }
+            if let undoState {
+                Button("Undo today's mark") {
+                    store.undoProgramStep(undoState)
+                    self.undoState = nil
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(BotTheme.sage)
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
+        }
+        .padding(18)
+        .background(
+            LinearGradient(colors: [BotTheme.sageSoft, BotTheme.card], startPoint: .topLeading, endPoint: .bottomTrailing),
+            in: RoundedRectangle(cornerRadius: 26, style: .continuous)
+        )
+        .overlay(RoundedRectangle(cornerRadius: 26, style: .continuous).stroke(BotTheme.sage.opacity(0.22), lineWidth: 1))
+        .shadow(color: BotTheme.sage.opacity(0.10), radius: 16, x: 0, y: 8)
+        .onAppear { undoState = nil }
+    }
+
     private func loadedCard(p: Program30State, step: ProgramInvitation, index: Int) -> some View {
         let phase = Program.phases[step.phase]
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("At your pace")
+                Text("One invitation for today")
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(BotTheme.accent)
                 Spacer()
@@ -62,13 +106,17 @@ struct ProgramCard: View {
                     .background(BotTheme.accentSoft, in: Capsule())
                     .foregroundStyle(BotTheme.accentDeep)
             }
-            VStack(alignment: .leading, spacing: 2) {
+            HStack(spacing: 6) {
+                Image(systemName: "leaf")
+                    .font(.caption2)
+                    .foregroundStyle(BotTheme.accent)
                 Text(phase.title)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(BotTheme.ink)
+                    .font(.caption)
+                    .foregroundStyle(BotTheme.soft)
                 Text(phase.subtitle)
                     .font(.caption2)
                     .foregroundStyle(BotTheme.soft)
+                    .lineLimit(1)
             }
 
             if gapDays >= 2 {
@@ -86,11 +134,13 @@ struct ProgramCard: View {
             Text(step.invitation)
                 .font(.body)
                 .foregroundStyle(BotTheme.ink)
+                .fixedSize(horizontal: false, vertical: true)
 
             if let optional = step.optional {
                 Text(optional)
                     .font(.caption)
                     .foregroundStyle(BotTheme.soft)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             if let nick = step.nick, let url = URL(string: Program.nickURL) {
@@ -129,30 +179,20 @@ struct ProgramCard: View {
                     }
             }
 
-            HStack(spacing: 10) {
-                Button {
-                    undoState = store.completeProgramStep()
-                    Haptics.gentle()
-                    whisper.show("kept.")
-                } label: {
-                    Text(index == Program.steps.count - 1 ? "Keep this step" : "That's enough")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 48)
-                        .background(BotTheme.accentGradient, in: Capsule())
-                }
-                .buttonStyle(.plain)
-
-                if let undoState {
-                    Button("Undo") {
-                        store.undoProgramStep(undoState)
-                        self.undoState = nil
-                    }
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(BotTheme.accent)
-                }
+            Button {
+                undoState = store.completeProgramStep()
+                Haptics.gentle()
+                whisper.show("kept.")
+            } label: {
+                Text("That's enough for today")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 50)
+                    .background(BotTheme.accentGradient, in: Capsule())
             }
+            .buttonStyle(.plain)
+            .disabled(store.programDoneToday())
 
             DisclosureGroup("Sequence settings") {
                 VStack(alignment: .leading, spacing: 10) {

@@ -255,8 +255,15 @@ final class AppStore: ObservableObject {
         save()
     }
 
+    /// One invitation per day. Marks are kept for sync, but the card hides
+    /// until the next day so there is nothing to click through.
+    func programDoneToday() -> Bool {
+        state.settings.program30.lastDoneAt == todayKey()
+    }
+
     @discardableResult
     func completeProgramStep() -> Program30State? {
+        if programDoneToday() { return nil }
         let p = state.settings.program30
         let before = p
         let index = min(max(p.step, 0), Program.steps.count - 1)
