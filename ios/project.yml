@@ -17,7 +17,7 @@ targets:
       properties:
         CFBundleDisplayName: Back on Track
         CFBundleShortVersionString: "1.0"
-        CFBundleVersion: "67"
+        CFBundleVersion: "83"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait

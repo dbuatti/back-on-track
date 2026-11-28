@@ -129,8 +129,9 @@
   .wrap {
     max-width: var(--content);
     margin: 0 auto;
-    padding: var(--s4) var(--s4) calc(92px + env(safe-area-inset-bottom));
+    padding: calc(var(--s4) + env(safe-area-inset-top)) var(--s4) calc(100px + env(safe-area-inset-bottom));
   }
+  h1, h2, h3 { text-wrap: balance; }
 
   /* ---------- Screens + bottom menu ----------
      The long single scroll is split into a few calm screens. Only one is
@@ -2437,7 +2438,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v82";
+const VERSION = "v83";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
