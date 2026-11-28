@@ -2256,7 +2256,7 @@
   </div>
 
   <!-- ============ MORE (fifth bottom tab) ============ -->
-  <div class="screen" id="screen-gentle" hidden>
+  <div class="screen" id="screen-more" hidden>
     <section class="card" id="brainDumpCard">
       <h2><span class="dot"></span>Brain dump</h2>
       <p class="hint">Say the small things out loud, or type them. Then sort them in the control hub.</p>
@@ -2370,7 +2370,7 @@
     Time
   </button>
   <button type="button" class="nav-btn" data-tab="more">
-    Shelves
+    More
   </button>
 </nav>
 
@@ -2429,7 +2429,7 @@ const SYNC_ENDPOINT = "https://back-on-track-sync.vercel.app/api/sync";
 
 /* App version — shown in the footer so you can tell which build is loaded.
    Bump this (and CACHE_VERSION in sw.js) on every change. */
-const VERSION = "v79";
+const VERSION = "v80";
 
 /* One Nick Moss item, living on a shelf and borrowed into morning. Older builds
    had two copies with different ids, so ticks need careful consolidation. */
@@ -3681,6 +3681,7 @@ let focusIdx = 0;
 let focusReturnEl = null;
 
 /* ---------- Bottom menu: fewer things on each screen ---------- */
+const TAB_ORDER = ["home", "winddown", "focus", "links", "time", "more"];
 const TAB_SCREENS = {
   home: "screen-home",
   winddown: "screen-winddown",
@@ -3688,17 +3689,28 @@ const TAB_SCREENS = {
   time: "screen-time",
   lab: "screen-lab",
   dump: "screen-dump",
-  more: "screen-gentle",
+  more: "screen-more",
+};
+const TAB_LABELS = {
+  home: "Home",
+  winddown: "Wind down",
+  focus: "Focus",
+  links: "Links",
+  time: "Time",
+  more: "More",
 };
 let activeTab = "home";
 
 function updateNav() {
+  const visibleTab = TAB_ORDER.includes(activeTab) ? activeTab : "home";
   $$(".nav-btn").forEach((b) => {
     const t = b.dataset.tab;
-    const on = (t === "focus") ? focusOn : (!focusOn && t === activeTab);
+    const on = (t === "focus") ? focusOn : (!focusOn && t === visibleTab);
     b.classList.toggle("active", on);
     if (on) b.setAttribute("aria-current", "page");
     else b.removeAttribute("aria-current");
+    const label = TAB_LABELS[t];
+    if (label) b.textContent = label;
   });
 }
 
